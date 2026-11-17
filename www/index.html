@@ -161,7 +161,6 @@
       padding-bottom: env(safe-area-inset-bottom);
     }
   </style>
-  <link rel="icon" type="image/png" href="assets/sunshine-r-app-icon.png">
 </head>
 <body class="min-h-screen flex flex-col bg-daw-bg text-slate-200">
 
@@ -179,11 +178,15 @@
 
       <!-- Left: App Title & Transport Controls -->
       <div class="flex flex-wrap items-center gap-2.5">
-        <div class="flex items-center gap-2 pr-2 border-r border-daw-border min-w-0">
-          <img src="assets/sunshine-r-daw-studio-logo.png" alt="Sunshine@R DAW Studio" class="h-12 w-auto max-w-[190px] object-contain shrink-0" />
-          <div class="min-w-0">
+        <div class="flex items-center gap-2 pr-2 border-r border-daw-border">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-sky-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+          </div>
+          <div>
             <div class="flex items-center gap-1.5">
-              <span class="text-xs font-extrabold tracking-tight text-white">Stem Studio</span>
+              <span class="text-sm font-extrabold tracking-tight text-white">Sunshine@R Stem DAW Studio</span>
               <span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">PRO</span>
             </div>
             <div id="status-subtitle" class="text-[10px] text-slate-400 truncate max-w-[170px]">Bereit – ZIP, Audio oder MIDI laden</div>
@@ -243,6 +246,10 @@
         </button>
 
         <button id="btn-auto-trim" type="button" hidden aria-hidden="true" tabindex="-1" style="display:none"></button>
+
+        <button id="btn-project-save" title="Sunshine@R-Projekt speichern" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 text-xs font-semibold">💾 Projekt</button>
+        <button id="btn-project-open" title="Sunshine@R-Projekt öffnen" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-200 border border-cyan-500/40 text-xs font-semibold">📂 Öffnen</button>
+        <input id="srdaw-project-input" type="file" accept=".srdaw,application/json" hidden />
 
         <button id="btn-export-midi" title="MIDI-Spur 07 als .mid Datei herunterladen" class="px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-semibold transition">
           🎹 .MID Export
@@ -917,7 +924,9 @@
         vocalCleanup: opts.vocalCleanup !== undefined ? opts.vocalCleanup : tpl.vocalCleanup,
         badge: opts.badge || tpl.badge,
         editTab: opts.editTab || tpl.editTab,
-        sectionClips: { intro: true, verse: true, drop: true, break: true, outro: true }
+        sectionClips: { intro: true, verse: true, drop: true, break: true, outro: true },
+        plugins: [],
+        instrumentPreset: tpl.type === 'midi' ? dawState.synthPreset : null
       };
 
       if (tpl.type === 'midi') {
@@ -1151,7 +1160,33 @@
         input.connect(lowCut);
         postFilter.connect(scGain);
         scGain.connect(sectionGate);
-        sectionGate.connect(panner);
+        // Per-track Web Audio plugin chain (native, Android/WebView compatible)
+        let fxTail = sectionGate;
+        const pluginNodes = [];
+        (track.plugins || []).filter(fx => fx && fx.enabled !== false).forEach(fx => {
+          let node = null;
+          if (fx.type === 'eq') {
+            node = ctx.createBiquadFilter(); node.type = 'peaking';
+            node.frequency.value = Number(fx.frequency || 1200); node.Q.value = Number(fx.q || 1); node.gain.value = Number(fx.gain || 0);
+          } else if (fx.type === 'compressor') {
+            node = ctx.createDynamicsCompressor(); node.threshold.value = Number(fx.threshold ?? -24);
+            node.ratio.value = Number(fx.ratio || 3); node.attack.value = 0.01; node.release.value = 0.18;
+          } else if (fx.type === 'filter') {
+            node = ctx.createBiquadFilter(); node.type = fx.mode || 'lowpass'; node.frequency.value = Number(fx.frequency || 8000); node.Q.value = Number(fx.q || 0.7);
+          } else if (fx.type === 'delay') {
+            node = ctx.createDelay(2); node.delayTime.value = Math.max(0.01, Math.min(1.5, Number(fx.time || 0.28)));
+            const wet = ctx.createGain(); wet.gain.value = Math.max(0, Math.min(0.8, Number(fx.mix || 0.22)));
+            const dry = ctx.createGain(); dry.gain.value = 1;
+            const sum = ctx.createGain(); fxTail.connect(dry); fxTail.connect(node); node.connect(wet); dry.connect(sum); wet.connect(sum);
+            fxTail = sum; pluginNodes.push(node, wet, dry, sum); return;
+          } else if (fx.type === 'distortion') {
+            node = ctx.createWaveShaper(); const amount = Math.max(1, Math.min(100, Number(fx.amount || 18)));
+            const curve = new Float32Array(44100); for (let i=0;i<curve.length;i++){ const x=i*2/curve.length-1; curve[i]=(1+amount/18)*x/(1+(amount/18)*Math.abs(x)); }
+            node.curve = curve; node.oversample = '2x';
+          }
+          if (node) { fxTail.connect(node); fxTail = node; pluginNodes.push(node); }
+        });
+        fxTail.connect(panner);
         panner.connect(fader);
         fader.connect(analyser);
         analyser.connect(this.masterGain);
@@ -1164,7 +1199,7 @@
         }
 
         this.channelNodes[track.id] = {
-          input, lowCut, scGain, sectionGate, panner, fader, analyser, vocalChain, revSend
+          input, lowCut, scGain, sectionGate, panner, fader, analyser, vocalChain, revSend, pluginNodes
         };
       }
 
@@ -2343,7 +2378,7 @@
                 midiNote: clampedNote,
                 durationSec: 0.35,
                 velocity: velocity / 127,
-                preset: dawState.synthPreset,
+                preset: (activeMidi && activeMidi.instrumentPreset) || dawState.synthPreset,
                 cutoff: dawState.synthCutoff,
                 res: dawState.synthRes,
                 detune: dawState.synthDetune,
@@ -2823,7 +2858,7 @@
               const vel = (vels[step32] || note.vel || 105) / 127;
               synthMidiVoice(offCtx, offNodes[midiTr.id].input, t, {
                 midiNote: note.pitch, durationSec: Math.max(0.06, note.dur * secPer16th * 0.95),
-                velocity: vel, preset: dawState.synthPreset, cutoff: dawState.synthCutoff,
+                velocity: vel, preset: midiTr.instrumentPreset || dawState.synthPreset, cutoff: dawState.synthCutoff,
                 res: dawState.synthRes, detune: dawState.synthDetune,
                 attackMs: dawState.synthAttackMs, releaseMs: dawState.synthReleaseMs
               });
@@ -3092,6 +3127,25 @@
             ${quickActionHtml}
           </div>
         `;
+
+        const controlArea = headerDiv.querySelector('.tr-edit-btn')?.parentElement;
+        if (controlArea) {
+          const rackBtn = document.createElement('button');
+          rackBtn.className = 'px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-200 border border-amber-500/35 text-[9px] font-bold';
+          rackBtn.textContent = `FX ${Array.isArray(tr.plugins) ? tr.plugins.length : 0}`;
+          rackBtn.title = 'Spur-Plugins und Effekte verwalten';
+          rackBtn.addEventListener('click', () => openTrackPluginRack(tr.id));
+          controlArea.insertBefore(rackBtn, controlArea.querySelector('.tr-del-btn'));
+          if (tr.type === 'midi') {
+            const instrument = document.createElement('select');
+            instrument.className = 'max-w-[92px] bg-daw-surface text-[9px] text-purple-200 border border-purple-500/40 rounded px-1 py-0.5';
+            instrument.title = 'Instrument dieser MIDI-Spur';
+            [['supersaw','Supersaw'],['pluck','Pluck'],['acid303','Acid 303'],['rapBell','Bell'],['subBass','Sub Bass']].forEach(([v,l]) => { const o=document.createElement('option'); o.value=v; o.textContent=l; instrument.appendChild(o); });
+            instrument.value = tr.instrumentPreset || dawState.synthPreset;
+            instrument.addEventListener('change', () => { tr.instrumentPreset=instrument.value; toast(`Instrument für „${tr.name}“ geändert.`, 'success'); });
+            controlArea.insertBefore(instrument, rackBtn);
+          }
+        }
 
         const laneDiv = document.createElement('div');
         laneDiv.className = 'col-span-12 lg:col-span-8 xl:col-span-9 relative h-14 bg-daw-bg/90 overflow-hidden flex items-stretch';
@@ -4922,5 +4976,81 @@
   };
 })();
 </script>
+<script>
+/* Sunshine@R DAW: Projektformat, Autosave und Spur-Plugin-Racks */
+(() => {
+  const $ = id => document.getElementById(id);
+  const PRESETS = ['supersaw','pluck','acid303','rapBell','subBass'];
+  const clone = value => JSON.parse(JSON.stringify(value));
+  function encodeWav(buffer) {
+    const channels=buffer.numberOfChannels, frames=buffer.length, rate=buffer.sampleRate;
+    const bytes=44+frames*channels*2, ab=new ArrayBuffer(bytes), v=new DataView(ab);
+    const str=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
+    str(0,'RIFF'); v.setUint32(4,bytes-8,true); str(8,'WAVE'); str(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,channels,true); v.setUint32(24,rate,true); v.setUint32(28,rate*channels*2,true); v.setUint16(32,channels*2,true); v.setUint16(34,16,true); str(36,'data'); v.setUint32(40,frames*channels*2,true);
+    const data=Array.from({length:channels},(_,c)=>buffer.getChannelData(c)); let off=44;
+    for(let i=0;i<frames;i++) for(let c=0;c<channels;c++){let x=Math.max(-1,Math.min(1,data[c][i]));v.setInt16(off,x<0?x*32768:x*32767,true);off+=2;}
+    return new Blob([ab],{type:'audio/wav'});
+  }
+  const blobToData = blob => new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(blob);});
+  async function saveProject() {
+    try {
+      if (dawState.isPlaying) audioEngine.stop(true);
+      const state={};
+      Object.keys(dawState).forEach(k=>{if(!['buffers','isPlaying','lastDuckTime','lastDuckDb'].includes(k)){try{state[k]=clone(dawState[k]);}catch(_){}}});
+      const audio={};
+      for(const [id,buf] of Object.entries(dawState.buffers||{})) if(buf) audio[id]=await blobToData(encodeWav(buf));
+      const project={format:'SunshineR-DAW',version:1,savedAt:new Date().toISOString(),state,audio};
+      const blob=new Blob([JSON.stringify(project)],{type:'application/x-srdaw'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='SunshineR-Projekt.srdaw'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+      toast('Projekt inklusive Audio und Spur-Einstellungen gespeichert.','success');
+    } catch(err){console.error(err);toast('Projekt konnte nicht gespeichert werden: '+err.message,'error');}
+  }
+  async function openProject(file) {
+    try {
+      const project=JSON.parse(await file.text());
+      if(project.format!=='SunshineR-DAW' || !project.state) throw new Error('Keine gültige Sunshine@R-Projektdatei');
+      if(dawState.isPlaying) audioEngine.stop(true);
+      const s=project.state;
+      Object.keys(s).forEach(k=>{if(k in dawState && k!=='buffers') dawState[k]=s[k];});
+      dawState.isPlaying=false; dawState.buffers={};
+      await audioEngine.ensureCtx();
+      for(const [id,data] of Object.entries(project.audio||{})){
+        const response=await fetch(data); const raw=await response.arrayBuffer();
+        dawState.buffers[id]=await audioEngine.ctx.decodeAudioData(raw.slice(0));
+      }
+      if(audioEngine.channelNodes) Object.values(audioEngine.channelNodes).forEach(n=>{try{n.input.disconnect();}catch(_){} try{n.fader.disconnect();}catch(_){}});
+      audioEngine.channelNodes={};
+      dawState.tracks.forEach(t=>audioEngine.ensureTrackNode(t));
+      audioEngine.syncAudioParams();
+      dawState.activeMidiTrackId=dawState.activeMidiTrackId || (dawState.tracks.find(t=>t.type==='midi')||{}).id || null;
+      const active=dawState.tracks.find(t=>t.id===dawState.activeMidiTrackId);
+      if(active){dawState.midiNotes=clone(active.midiNotes||[]);dawState.stepVelocities=clone(active.stepVelocities||new Array(32).fill(108));}
+      renumberTracks(); renderMultiTrackLanes(); renderVerticalMixer(); updateAudioToMidiDropdown(); drawPianoRoll(); drawVelocityLane();
+      toast('Projekt geöffnet. Spuren, Instrumente und Audio wurden geladen.','success');
+    } catch(err){console.error(err);toast('Projekt konnte nicht geöffnet werden: '+err.message,'error');}
+  }
+  function openTrackPluginRack(trackId){
+    const tr=dawState.tracks.find(t=>t.id===trackId); if(!tr)return;
+    const choices=[['eq','Parametrischer EQ'],['compressor','Compressor'],['filter','Filter'],['delay','Delay'],['distortion','Distortion']];
+    const choice=prompt('Plugin hinzufügen:\n1 = EQ\n2 = Compressor\n3 = Filter\n4 = Delay\n5 = Distortion\n\nAktuell: '+(tr.plugins||[]).map(x=>x.label).join(', '));
+    if(choice===null)return;
+    const item=choices[Number(choice)-1]; if(!item){toast('Ungültige Auswahl.','warn');return;}
+    tr.plugins=tr.plugins||[]; tr.plugins.push({id:'fx_'+Date.now(),type:item[0],label:item[1],enabled:true});
+    rebuildTrack(tr); renderMultiTrackLanes(); toast(item[1]+' zu „'+tr.name+'“ hinzugefügt.','success');
+  }
+  function rebuildTrack(tr){
+    const old=audioEngine.channelNodes[tr.id]; if(old){try{old.input.disconnect();}catch(_){} try{old.fader.disconnect();}catch(_){} delete audioEngine.channelNodes[tr.id];}
+    if(audioEngine.ctx){audioEngine.ensureTrackNode(tr);audioEngine.syncAudioParams();}
+  }
+  // Public hooks for the UI and later plugin-browser expansion.
+  window.openTrackPluginRack=openTrackPluginRack;
+  $('btn-project-save')?.addEventListener('click',saveProject);
+  $('btn-project-open')?.addEventListener('click',()=>$('srdaw-project-input').click());
+  $('srdaw-project-input')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)openProject(f);e.target.value='';});
+  // Save project structure periodically to IndexedDB as recovery metadata (audio remains in explicit .srdaw export).
+  setInterval(()=>{try{const minimal={savedAt:Date.now(),bpm:dawState.bpm,tracks:dawState.tracks.map(t=>({...t,midiNotes:clone(t.midiNotes||[])})),sections:clone(dawState.sections),midiNotes:clone(dawState.midiNotes),stepVelocities:clone(dawState.stepVelocities)}; localStorage.setItem('sunshineR_autosave_v1',JSON.stringify(minimal));}catch(e){console.warn('Autosave übersprungen',e);}},20000);
+})();
+</script>
+
 </body>
 </html>
