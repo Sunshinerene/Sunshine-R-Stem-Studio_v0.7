@@ -221,9 +221,9 @@
             <div id="lcd-position" class="text-xs sm:text-sm font-bold text-cyan-400">01 : 1 : 01</div>
           </div>
           <div class="h-6 w-px bg-slate-800"></div>
-          <div class="hidden sm:block">
-            <div class="text-[9px] text-slate-500 uppercase">Zeit</div>
-            <div id="lcd-time" class="text-xs sm:text-sm font-bold text-slate-200">00:00.0</div>
+          <div>
+            <div class="text-[9px] text-slate-500 uppercase">Zeit / Länge</div>
+            <div class="text-xs sm:text-sm font-bold text-slate-200 whitespace-nowrap"><span id="lcd-time">00:00.0</span><span class="text-slate-500"> / </span><span id="lcd-total" class="text-slate-400">00:00.0</span></div>
           </div>
           <div class="h-6 w-px bg-slate-800"></div>
           <div class="flex items-center gap-1.5">
@@ -1212,19 +1212,44 @@
         });
       }
 
-      getTotalArrangementBars() {
+      // Summe der Arrangement-Abschnitte (Intro, Verse, ...) in Takten
+      getSectionBarsSum() {
         return dawState.sections.reduce((acc, s) => acc + s.bars, 0);
+      }
+
+      // Länge der längsten geladenen Audiodatei in Sekunden (abzüglich Trim)
+      getContentDurationSec() {
+        const trimSec = dawState.startOffsetMs / 1000;
+        let longest = 0;
+        dawState.tracks.forEach(tr => {
+          const buf = dawState.buffers[tr.id];
+          if (buf) longest = Math.max(longest, buf.duration - trimSec);
+        });
+        return Math.max(0, longest);
+      }
+
+      // Gesamtlänge der Zeitleiste in Takten: mindestens das Arrangement,
+      // bei längeren Audiodateien automatisch so viele Takte, dass alles hineinpasst.
+      getTotalArrangementBars() {
+        const base = this.getSectionBarsSum();
+        const barSec = 4 * (60 / dawState.bpm);
+        const needed = Math.ceil(this.getContentDurationSec() / barSec - 0.001);
+        return Math.max(base, needed);
       }
 
       getSectionAtBar(barIdx) {
         const total = this.getTotalArrangementBars();
+        const extra = total - this.getSectionBarsSum(); // Verlängerung gehört zum letzten Abschnitt
+        const lastIdx = dawState.sections.length - 1;
         const wrappedBar = ((barIdx % total) + total) % total;
         let cursor = 0;
-        for (const sec of dawState.sections) {
-          if (wrappedBar >= cursor && wrappedBar < cursor + sec.bars) {
+        for (let i = 0; i < dawState.sections.length; i++) {
+          const sec = dawState.sections[i];
+          const span = sec.bars + (i === lastIdx ? extra : 0);
+          if (wrappedBar >= cursor && wrappedBar < cursor + span) {
             return { section: sec, barInSection: wrappedBar - cursor };
           }
-          cursor += sec.bars;
+          cursor += span;
         }
         return { section: dawState.sections[0], barInSection: 0 };
       }
@@ -1280,37 +1305,58 @@
 
       startAudioStemSources(ctxStart, offsetTimelineSec) {
         this.stopAudioStemSources();
+        this.lastStemBoundary = null;
+        const totalArrSec = this.getTotalArrangementBars() * 4 * (60 / dawState.bpm);
+        const offset = dawState.isLooping ? (offsetTimelineSec % totalArrSec) : offsetTimelineSec;
+        const stopAt = dawState.isLooping ? ctxStart + (totalArrSec - offset) : null;
+        this.scheduleStemPass(ctxStart, offset, stopAt);
+      }
+
+      // Startet alle Audiospuren zum Zeitpunkt `when` ab Zeitleisten-Position `offsetSec`.
+      scheduleStemPass(when, offsetSec, stopAt) {
         const trimSec = dawState.startOffsetMs / 1000;
-        const totalBars = this.getTotalArrangementBars();
-        const totalArrSec = totalBars * 4 * (60 / dawState.bpm);
+        const barSec = 4 * (60 / dawState.bpm);
+        const totalArrSec = this.getTotalArrangementBars() * barSec;
 
         dawState.tracks.forEach(tr => {
           const buf = dawState.buffers[tr.id];
           const node = this.channelNodes[tr.id];
           if (!buf || !node) return;
 
+          const usable = Math.max(0.1, buf.duration - trimSec);
+          // Nur deutlich kürzere Samples (> 1 Takt kürzer als die Zeitleiste) wiederholen sich selbst
+          const loopInside = dawState.isLooping && usable < totalArrSec - barSec;
+
+          let posInBuf;
+          if (loopInside) {
+            posInBuf = trimSec + (offsetSec % usable);
+          } else {
+            if (offsetSec >= usable) return;
+            posInBuf = trimSec + offsetSec;
+          }
+          if (posInBuf >= buf.duration) return;
+
           const src = this.ctx.createBufferSource();
           src.buffer = buf;
-          src.connect(node.input); // FIX: Quelle in die Kanalkette (Filter → Fader → Master) einspeisen
-
-          if (dawState.isLooping) {
+          src.connect(node.input); // Quelle in die Kanalkette (Filter → Fader → Master) einspeisen
+          if (loopInside) {
             src.loop = true;
-            src.loopStart = Math.min(trimSec, Math.max(0, buf.duration - 0.1));
-            src.loopEnd = Math.min(trimSec + totalArrSec, buf.duration);
+            src.loopStart = trimSec;
+            src.loopEnd = buf.duration;
           }
-
-          const usableDur = Math.max(0.1, (src.loopEnd || buf.duration) - (src.loopStart || trimSec));
-          const posInBuf = trimSec + (offsetTimelineSec % usableDur);
-          if (posInBuf < buf.duration) {
-            src.start(ctxStart, posInBuf);
-            this.activeStemSources.push(src);
-          }
+          src.onended = () => {
+            this.activeStemSources = this.activeStemSources.filter(x => x !== src);
+            try { src.disconnect(); } catch (e) {}
+          };
+          src.start(when, posInBuf);
+          if (stopAt != null) src.stop(stopAt);
+          this.activeStemSources.push(src);
         });
       }
 
       stopAudioStemSources() {
         this.activeStemSources.forEach(src => {
-          try { src.stop(); src.disconnect(); } catch (e) {}
+          try { src.onended = null; src.stop(); src.disconnect(); } catch (e) {}
         });
         this.activeStemSources = [];
       }
@@ -1327,11 +1373,21 @@
         let currentTimeline = this.playStartOffsetSec + elapsed;
 
         if (dawState.isLooping && currentTimeline >= totalArrSec) {
-          this.playStartCtxTime += totalArrSec;
+          const loops = Math.floor(currentTimeline / totalArrSec);
+          this.playStartCtxTime += loops * totalArrSec - this.playStartOffsetSec;
           this.playStartOffsetSec = 0;
           currentTimeline = currentTimeline % totalArrSec;
         }
         dawState.playheadSec = currentTimeline;
+
+        // Audio-Spuren für die nächste Loop-Runde sample-genau vorplanen
+        if (dawState.isLooping) {
+          const boundary = this.playStartCtxTime + (totalArrSec - this.playStartOffsetSec);
+          if (boundary - this.ctx.currentTime < lookaheadSec + 0.1 && this.lastStemBoundary !== boundary) {
+            this.lastStemBoundary = boundary;
+            this.scheduleStemPass(boundary, 0, boundary + totalArrSec);
+          }
+        }
 
         while (this.nextStepTime < this.ctx.currentTime + lookaheadSec) {
           const step32 = this.stepCounter32 % 32;
@@ -2684,6 +2740,7 @@
           const buf = dawState.buffers[tr.id];
           if (!buf) return;
           const usable = Math.max(0.2, buf.duration - trimSec);
+          const fillLoop = usable < totalSec - 4 * (60 / dawState.bpm); // nur deutlich kürzere Spuren wiederholen
           let cursor = 0;
           while (cursor < totalSec) {
             const src = offCtx.createBufferSource();
@@ -2691,6 +2748,7 @@
             src.connect(offNodes[tr.id].input);
             src.start(cursor, trimSec, Math.min(usable, totalSec - cursor));
             cursor += usable;
+            if (!fillLoop) break;
           }
         });
 
@@ -2849,12 +2907,13 @@
       const bar = document.getElementById('arrangement-header-bar');
       bar.innerHTML = '';
       const totalBars = audioEngine.getTotalArrangementBars();
+      const extraBars = totalBars - audioEngine.getSectionBarsSum();
       let cursorBar = 0;
 
       dawState.sections.forEach((sec, idx) => {
         const startBar = cursorBar;
         cursorBar += sec.bars;
-        const pct = (sec.bars / totalBars) * 100;
+        const pct = ((sec.bars + (idx === dawState.sections.length - 1 ? extraBars : 0)) / totalBars) * 100;
 
         const cell = document.createElement('div');
         cell.style.width = `${pct}%`;
@@ -3010,6 +3069,7 @@
             <div class="flex items-center gap-1.5 min-w-0">
               <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-extrabold text-slate-950 shrink-0" style="background:${tr.color}">${tr.num}</span>
               <span class="text-xs font-bold text-white truncate ${tr.mute ? 'line-through opacity-50' : ''}" title="${tr.name}">${tr.name}</span>
+              ${((tr.type === 'audio' || tr.type === 'stem' || tr.type === 'mic') && dawState.buffers[tr.id]) ? `<span class="text-[9px] font-mono text-sky-300 shrink-0" title="Länge dieser Spur">${formatTimeStr(Math.max(0, dawState.buffers[tr.id].duration - dawState.startOffsetMs / 1000))}</span>` : ''}
             </div>
             <div class="flex items-center gap-1 shrink-0">
               <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-daw-bg text-slate-400 border border-daw-border hidden sm:inline">${tr.badge}</span>
@@ -3041,8 +3101,8 @@
 
         const clipsOverlay = document.createElement('div');
         clipsOverlay.className = 'absolute inset-0 flex items-stretch z-10 pointer-events-none';
-        dawState.sections.forEach(sec => {
-          const pct = (sec.bars / totalBars) * 100;
+        dawState.sections.forEach((sec, sIdx) => {
+          const pct = ((sec.bars + (sIdx === dawState.sections.length - 1 ? (totalBars - audioEngine.getSectionBarsSum()) : 0)) / totalBars) * 100;
           const isClipOn = tr.sectionClips[sec.id] !== false;
           const clipBox = document.createElement('div');
           clipBox.style.width = `${pct}%`;
@@ -3193,6 +3253,7 @@
       });
 
       renderAllTrackCanvases();
+      updateClockLCD();
     }
 
     function renderAllTrackCanvases() {
@@ -3221,7 +3282,9 @@
         ctx.scale(dpr, dpr);
         ctx.clearRect(0, 0, w, h);
 
-        for (let b = 1; b < totalBars; b++) {
+        const barPx = w / totalBars;
+        const gridStride = barPx >= 6 ? 1 : (barPx * 4 >= 6 ? 4 : 16);
+        for (let b = gridStride; b < totalBars; b += gridStride) {
           const x = (b / totalBars) * w;
           ctx.strokeStyle = b % 4 === 0 ? 'rgba(148,163,184,0.22)' : 'rgba(148,163,184,0.08)';
           ctx.lineWidth = 1;
@@ -3968,6 +4031,14 @@
       document.getElementById('lcd-position').textContent =
         `${String(bar).padStart(2, '0')} : ${beat} : ${String(step).padStart(2, '0')}`;
       document.getElementById('lcd-time').textContent = formatTimeStr(dawState.playheadSec);
+
+      // Gesamtlänge: längste Audiodatei, sonst Länge des Arrangements
+      const totalEl = document.getElementById('lcd-total');
+      if (totalEl) {
+        const contentSec = audioEngine.getContentDurationSec();
+        const arrSec = audioEngine.getTotalArrangementBars() * 4 * (60 / dawState.bpm);
+        totalEl.textContent = formatTimeStr(contentSec > 0 ? contentSec : arrSec);
+      }
     }
 
     function updatePlayButtonUI() {
@@ -4079,7 +4150,8 @@
       document.getElementById('input-bpm').addEventListener('change', (e) => {
         dawState.bpm = Math.max(60, Math.min(180, parseInt(e.target.value, 10) || 120));
         e.target.value = dawState.bpm;
-        renderAllTrackCanvases();
+        renderMultiTrackLanes();
+        updateClockLCD();
         if (dawState.isPlaying) audioEngine.seek(dawState.playheadSec);
       });
 
