@@ -238,20 +238,6 @@
         </div>
       </div>
 
-      <!-- Center: 1-Click Genre Presets -->
-      <div class="flex items-center bg-daw-bg p-1 rounded-xl border border-daw-border gap-1">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-1.5 hidden xl:inline">Genre:</span>
-        <button data-preset="techno" class="genre-preset-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">
-          Techno / Hard Trance
-        </button>
-        <button data-preset="rap" class="genre-preset-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:bg-daw-surface transition">
-          Rap / Hip-Hop
-        </button>
-        <button data-preset="hybrid" class="genre-preset-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:bg-daw-surface transition">
-          Hybrid Crossover
-        </button>
-      </div>
-
       <!-- Right: Demo Stems, ZIP/Audio/MIDI Import, Auto-Trim, MIDI Export, WAV Export -->
       <div class="flex flex-wrap items-center gap-1.5">
 
@@ -802,7 +788,6 @@
       metronomeOn: false,
       playheadSec: 0,
       startOffsetMs: 0,
-      activePreset: 'techno',
       activeTab: 'midi',
       masterGainVal: 0.95,
 
@@ -1306,6 +1291,7 @@
 
           const src = this.ctx.createBufferSource();
           src.buffer = buf;
+          src.connect(node.input); // FIX: Quelle in die Kanalkette (Filter → Fader → Master) einspeisen
 
           if (dawState.isLooping) {
             src.loop = true;
@@ -2809,7 +2795,7 @@
 
         const rendered = await offCtx.startRendering();
         const blob = encodeWav16Bit(rendered);
-        const filename = `Sunshine-R_Stem_DAW_Pro_${dawState.activePreset.toUpperCase()}_${dawState.bpm}BPM.wav`;
+        const filename = `Sunshine-R_Stem_DAW_Pro_${dawState.bpm}BPM.wav`;
         const status = await saveOrShareBlob(blob, filename);
         if (status === 'saved-documents') {
           toast(`Master WAV gespeichert unter Dokumente/SunshineDAW/${filename}`, 'success');
@@ -3856,77 +3842,6 @@
 
     /**
      * ============================================================================
-     * GENRE 1-CLICK PRESETS
-     * ============================================================================
-     */
-    function applyGenrePreset(key) {
-      dawState.activePreset = key;
-
-      document.querySelectorAll('.genre-preset-btn').forEach(b => {
-        const on = b.dataset.preset === key;
-        b.className = on
-          ? 'genre-preset-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition'
-          : 'genre-preset-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:bg-daw-surface transition';
-      });
-
-      if (key === 'techno') {
-        dawState.bpm = 144;
-        dawState.scDepth = 65;
-        dawState.synthScAmount = 65;
-        dawState.synthPreset = 'supersaw';
-        dawState.synthCutoff = 3600;
-        dawState.midiScale = 'phrygian';
-        dawState.seqKick = [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0];
-        dawState.seqBass = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0];
-        dawState.bassMode = 'rolling';
-        dawState.seqHat =  [0,0,1,0, 1,0,1,0, 0,0,1,0, 1,0,1,0];
-        applyArpGenerator('tranceUp');
-        toast('Genre-Preset „Techno / Hard Trance“ (144 BPM, 65% Sidechain, Supersaw Arp) geladen.', 'info');
-      } else if (key === 'rap') {
-        dawState.bpm = 94;
-        dawState.scDepth = 15;
-        dawState.synthScAmount = 15;
-        dawState.synthPreset = 'rapBell';
-        dawState.synthCutoff = 2600;
-        dawState.midiScale = 'minor';
-        dawState.seqKick = [1,0,0,0, 0,0,0,1, 0,0,1,0, 0,0,0,0];
-        dawState.seqBass = [1,0,0,0, 0,0,0,1, 0,0,1,0, 0,0,1,0];
-        dawState.bassMode = '808';
-        dawState.seqHat =  [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,1,1,0];
-        dawState.vocalPresenceDb = 4.5;
-        applyArpGenerator('rapBells');
-        toast('Genre-Preset „Rap / Hip-Hop“ (94 BPM, 808-Sub, Rap-Bells, Vocal-Präsenz) geladen.', 'info');
-      } else if (key === 'hybrid') {
-        dawState.bpm = 136;
-        dawState.scDepth = 45;
-        dawState.synthScAmount = 45;
-        dawState.synthPreset = 'pluck';
-        dawState.synthCutoff = 3200;
-        dawState.midiScale = 'minor';
-        dawState.seqKick = [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,0];
-        dawState.seqBass = [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0];
-        dawState.bassMode = '808';
-        dawState.seqHat =  [0,0,1,0, 1,0,1,0, 0,0,1,0, 1,0,1,1];
-        applyArpGenerator('offbeatStab');
-        toast('Genre-Preset „Hybrid Crossover“ (136 BPM, Rap-Verse & Rave-Drop) geladen.', 'info');
-      }
-
-      document.getElementById('input-bpm').value = dawState.bpm;
-      document.getElementById('select-synth-preset').value = dawState.synthPreset;
-      document.getElementById('select-midi-scale').value = dawState.midiScale;
-      document.getElementById('sl-sc-depth').value = dawState.scDepth;
-      document.getElementById('lbl-sc-depth').textContent = `${dawState.scDepth}%`;
-      document.getElementById('sl-m-sc').value = dawState.synthScAmount;
-      document.getElementById('lbl-m-sc').textContent = `${dawState.synthScAmount}%`;
-
-      audioEngine.syncAudioParams();
-      renderDrumSequencerGrids();
-      renderMultiTrackLanes();
-      if (dawState.isPlaying) audioEngine.seek(dawState.playheadSec);
-    }
-
-    /**
-     * ============================================================================
      * REAL-TIME ANIMATION LOOP (PLAYHEAD, CLOCK, METERS, FFT SPECTRUM)
      * ============================================================================
      */
@@ -4182,11 +4097,6 @@
           document.getElementById('input-bpm').value = tappedBpm;
           renderAllTrackCanvases();
         }
-      });
-
-      // Genre Presets
-      document.querySelectorAll('.genre-preset-btn').forEach(btn => {
-        btn.addEventListener('click', () => applyGenrePreset(btn.dataset.preset));
       });
 
       // Top File & Quick Action Buttons
@@ -4521,7 +4431,7 @@
     refreshAll();
     toast('Letzter Schritt rückgängig gemacht.', 'success');
   }
-  ['autoTrimSilence', 'applyGenrePreset', 'applyArpGenerator', 'extractMidiFromStem'].forEach(n => {
+  ['autoTrimSilence', 'applyArpGenerator', 'extractMidiFromStem'].forEach(n => {
     const orig = window[n];
     if (typeof orig === 'function') window[n] = function (...a) { pushUndo(); return orig.apply(this, a); };
   });
