@@ -161,6 +161,7 @@
       padding-bottom: env(safe-area-inset-bottom);
     }
   </style>
+  <link rel="icon" type="image/png" href="assets/sunshine-r-app-icon.png">
 </head>
 <body class="min-h-screen flex flex-col bg-daw-bg text-slate-200">
 
@@ -178,15 +179,11 @@
 
       <!-- Left: App Title & Transport Controls -->
       <div class="flex flex-wrap items-center gap-2.5">
-        <div class="flex items-center gap-2 pr-2 border-r border-daw-border">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-sky-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-            </svg>
-          </div>
-          <div>
+        <div class="flex items-center gap-2 pr-2 border-r border-daw-border min-w-0">
+          <img src="assets/sunshine-r-daw-studio-logo.png" alt="Sunshine@R DAW Studio" class="h-12 w-auto max-w-[190px] object-contain shrink-0" />
+          <div class="min-w-0">
             <div class="flex items-center gap-1.5">
-              <span class="text-sm font-extrabold tracking-tight text-white">Sunshine@R Stem DAW Studio</span>
+              <span class="text-xs font-extrabold tracking-tight text-white">Stem Studio</span>
               <span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">PRO</span>
             </div>
             <div id="status-subtitle" class="text-[10px] text-slate-400 truncate max-w-[170px]">Bereit – ZIP, Audio oder MIDI laden</div>
