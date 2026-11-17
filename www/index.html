@@ -179,20 +179,9 @@
       <!-- Left: App Title & Transport Controls -->
       <div class="flex flex-wrap items-center gap-2.5">
         <div class="flex items-center gap-2 pr-2 border-r border-daw-border">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-sky-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-            </svg>
-          </div>
-          <div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-sm font-extrabold tracking-tight text-white">Sunshine@R Stem DAW Studio</span>
-              <span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">PRO</span>
-            </div>
-            <div id="status-subtitle" class="text-[10px] text-slate-400 truncate max-w-[170px]">Bereit – ZIP, Audio oder MIDI laden</div>
-          </div>
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-sky-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">♫</div>
+          <div><div class="flex items-center gap-1.5"><span class="text-sm font-extrabold tracking-tight text-white">Sunshine@R Stem DAW Studio</span><span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">PRO</span></div><div id="status-subtitle" class="text-[10px] text-slate-400 truncate max-w-[170px]">Bereit – ZIP, Audio oder MIDI laden</div></div>
         </div>
-
         <!-- Play / Stop / Loop / Metronome -->
         <div class="flex items-center gap-1.5 bg-daw-bg p-1 rounded-xl border border-daw-border">
           <button id="btn-play" title="Play / Pause (Leertaste)" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 transition shadow-md shadow-emerald-500/20">
@@ -238,7 +227,12 @@
         </div>
       </div>
 
-      <!-- Right: Demo Stems, ZIP/Audio/MIDI Import, Auto-Trim, MIDI Export, WAV Export -->
+      <!-- Brand mark: bewusst groß, rechts im freien Headerbereich -->
+      <div class="hidden md:flex flex-1 justify-end items-center min-w-[150px] max-w-[340px] px-2 pointer-events-none">
+        <img src="assets/sunshine-r-daw-studio-logo.png" alt="Sunshine@R DAW Studio" class="w-full max-h-[82px] object-contain opacity-95 drop-shadow-[0_0_14px_rgba(245,158,11,0.22)]" />
+      </div>
+
+      <!-- Right: ZIP/Audio/MIDI Import, Project and Export -->
       <div class="flex flex-wrap items-center gap-1.5">
 
         <button id="btn-import-files" class="px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition flex items-center gap-1">
@@ -1534,6 +1528,7 @@
           if (!node || mtr.sectionClips[section.id] === false) return;
           const notes = mtr.id === dawState.activeMidiTrackId ? dawState.midiNotes : (mtr.midiNotes || []);
           const vels = mtr.id === dawState.activeMidiTrackId ? dawState.stepVelocities : (mtr.stepVelocities || dawState.stepVelocities);
+          if (mtr.type === 'midi' && mtr.instrumentPreset === 'none') return;
           notes.filter(n => n.start === step32).forEach(note => {
             const vel = (vels[step32] || note.vel || 105) / 127;
             const durSec = Math.max(0.06, note.dur * secPer16th * 0.95);
@@ -1541,7 +1536,7 @@
               midiNote: note.pitch,
               durationSec: durSec,
               velocity: vel,
-              preset: dawState.synthPreset,
+              preset: mtr.instrumentPreset || dawState.synthPreset,
               cutoff: dawState.synthCutoff,
               res: dawState.synthRes,
               detune: dawState.synthDetune,
@@ -2851,7 +2846,7 @@
           });
 
           dawState.tracks.filter(tr => tr.type === 'midi' || tr.id === 'midiSynth').forEach(midiTr => {
-            if (midiTr.sectionClips[section.id] === false) return;
+            if (midiTr.sectionClips[section.id] === false || midiTr.instrumentPreset === 'none') return;
             const notes = midiTr.id === dawState.activeMidiTrackId ? dawState.midiNotes : (midiTr.midiNotes || []);
             const vels = midiTr.id === dawState.activeMidiTrackId ? dawState.stepVelocities : (midiTr.stepVelocities || dawState.stepVelocities);
             notes.filter(n => n.start === step32).forEach(note => {
@@ -3140,9 +3135,9 @@
             const instrument = document.createElement('select');
             instrument.className = 'max-w-[92px] bg-daw-surface text-[9px] text-purple-200 border border-purple-500/40 rounded px-1 py-0.5';
             instrument.title = 'Instrument dieser MIDI-Spur';
-            [['supersaw','Supersaw'],['pluck','Pluck'],['acid303','Acid 303'],['rapBell','Bell'],['subBass','Sub Bass']].forEach(([v,l]) => { const o=document.createElement('option'); o.value=v; o.textContent=l; instrument.appendChild(o); });
+            [['none','— Kein Instrument —'],['supersaw','Supersaw'],['pluck','Pluck'],['acid303','Acid 303'],['rapBell','Bell'],['subBass','Sub Bass']].forEach(([v,l]) => { const o=document.createElement('option'); o.value=v; o.textContent=l; instrument.appendChild(o); });
             instrument.value = tr.instrumentPreset || dawState.synthPreset;
-            instrument.addEventListener('change', () => { tr.instrumentPreset=instrument.value; toast(`Instrument für „${tr.name}“ geändert.`, 'success'); });
+            instrument.addEventListener('change', () => { tr.instrumentPreset=instrument.value; toast(instrument.value==='none' ? `Instrument auf „${tr.name}“ entfernt.` : `Instrument für „${tr.name}“ geändert.`, 'success'); });
             controlArea.insertBefore(instrument, rackBtn);
           }
         }
@@ -3313,13 +3308,16 @@
       const trimSec = dawState.startOffsetMs / 1000;
       const playRatio = totalSec > 0 ? ((dawState.playheadSec % totalSec) / totalSec) : 0;
 
+      const trackById = new Map(dawState.tracks.map(t => [t.id, t]));
       document.querySelectorAll('.track-lane-canvas').forEach(canvas => {
         const trId = canvas.dataset.trackId;
-        const tr = dawState.tracks.find(t => t.id === trId);
+        const tr = trackById.get(trId);
         if (!tr) return;
 
         const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
+        // Skip lanes outside the viewport; they are painted when scrolled into view.
+        if (rect.bottom < 0 || rect.top > window.innerHeight || rect.width <= 0) return;
+        const dpr = Math.min(1.5, window.devicePixelRatio || 1);
         const w = Math.max(100, Math.floor(rect.width));
         const h = Math.max(40, Math.floor(rect.height));
 
@@ -3959,8 +3957,12 @@
      * REAL-TIME ANIMATION LOOP (PLAYHEAD, CLOCK, METERS, FFT SPECTRUM)
      * ============================================================================
      */
-    function uiAnimationTick() {
-      if (dawState.isPlaying) {
+    let lastHeavyUiPaint = 0;
+    function uiAnimationTick(now = 0) {
+      // Mobile/WebView: keep the animation loop light as track count grows.
+      // The transport clock and arrangement canvases need not be redrawn 60 times/sec.
+      if (dawState.isPlaying && now - lastHeavyUiPaint >= 90) {
+        lastHeavyUiPaint = now;
         updateClockLCD();
         renderAllTrackCanvases();
         if (dawState.activeTab === 'midi') drawPianoRoll();
@@ -5032,10 +5034,14 @@
   function openTrackPluginRack(trackId){
     const tr=dawState.tracks.find(t=>t.id===trackId); if(!tr)return;
     const choices=[['eq','Parametrischer EQ'],['compressor','Compressor'],['filter','Filter'],['delay','Delay'],['distortion','Distortion']];
-    const choice=prompt('Plugin hinzufügen:\n1 = EQ\n2 = Compressor\n3 = Filter\n4 = Delay\n5 = Distortion\n\nAktuell: '+(tr.plugins||[]).map(x=>x.label).join(', '));
+    tr.plugins=tr.plugins||[];
+    const current=tr.plugins.map((x,i)=>`${i+1} = ${x.label}`).join('\n');
+    const choice=prompt('PLUGIN-RACK – '+tr.name+'\n\nHinzufügen:\n1 = EQ\n2 = Compressor\n3 = Filter\n4 = Delay\n5 = Distortion\n\nVorhandene Plugins entfernen (R + Nummer):\n'+(current||'Noch keine Plugins')+'\n\nBeispiel: R2 entfernt Plugin 2.');
     if(choice===null)return;
+    const remove=choice.trim().match(/^r\s*(\d+)$/i);
+    if(remove){const idx=Number(remove[1])-1;if(idx<0||idx>=tr.plugins.length){toast('Plugin-Nummer nicht gefunden.','warn');return;}const gone=tr.plugins.splice(idx,1)[0];rebuildTrack(tr);renderMultiTrackLanes();toast(gone.label+' von „'+tr.name+'“ entfernt.','success');return;}
     const item=choices[Number(choice)-1]; if(!item){toast('Ungültige Auswahl.','warn');return;}
-    tr.plugins=tr.plugins||[]; tr.plugins.push({id:'fx_'+Date.now(),type:item[0],label:item[1],enabled:true});
+    tr.plugins.push({id:'fx_'+Date.now(),type:item[0],label:item[1],enabled:true});
     rebuildTrack(tr); renderMultiTrackLanes(); toast(item[1]+' zu „'+tr.name+'“ hinzugefügt.','success');
   }
   function rebuildTrack(tr){
