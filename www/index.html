@@ -3,7 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090c12" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sunshine@R DAW" />
+  <link rel="icon" type="image/png" href="assets/sunshine-r-daw-studio-logo.png" />
+  <link rel="shortcut icon" type="image/png" href="assets/sunshine-r-daw-studio-logo.png" />
+  <link rel="apple-touch-icon" href="assets/sunshine-r-daw-studio-logo.png" />
   <title>Sunshine@R Stem DAW Studio – Multi-Track &amp; MIDI Browser DAW</title>
+
+  <script>
+    // Dynamisches Web-App-Manifest für Android Homescreen-Verknüpfungen (http/https)
+    (function setupDynamicManifest() {
+      try {
+        if (!window.location.protocol.startsWith('http')) return;
+        const iconUrl = new URL('assets/sunshine-r-daw-studio-logo.png', window.location.href).href;
+        const manifest = {
+          name: 'Sunshine@R Stem DAW Studio',
+          short_name: 'Sunshine@R DAW',
+          start_url: window.location.href,
+          display: 'standalone',
+          background_color: '#090c12',
+          theme_color: '#090c12',
+          icons: [
+            { src: iconUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+          ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <!-- JSZip für ZIP-Stem-Import -->
@@ -165,7 +201,7 @@
 <body class="min-h-screen flex flex-col bg-daw-bg text-slate-200">
 
   <!-- Non-blocking Toast Notification Stack -->
-  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[120] flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
   <!-- Hidden Universal File Input (ZIP, Audio, MIDI) -->
   <input id="universal-file-input" type="file" accept=".zip,.wav,.mp3,.ogg,.flac,.m4a,.aac,.mid,.midi,application/zip,application/x-zip-compressed,audio/*,audio/midi,audio/x-midi" multiple class="hidden" />
@@ -174,14 +210,21 @@
        BEREICH 1 (OBEN): FIXIERTE TRANSPORT-, PRESET- & DATEI-STEUERUNGSLEISTE
        ========================================================================= -->
   <header class="sticky top-0 z-40 bg-daw-panel/95 backdrop-blur-md border-b border-daw-border px-3 py-2 shadow-2xl">
-    <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
+    <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-2">
 
       <!-- Left: App Title & Transport Controls -->
-      <div class="flex flex-wrap items-center gap-2.5">
+      <div class="flex flex-wrap items-center gap-2">
         <div class="flex items-center gap-2 pr-2 border-r border-daw-border">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-sky-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">♫</div>
-          <div><div class="flex items-center gap-1.5"><span class="text-sm font-extrabold tracking-tight text-white">Sunshine@R Stem DAW Studio</span><span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">PRO</span></div><div id="status-subtitle" class="text-[10px] text-slate-400 truncate max-w-[170px]">Bereit – ZIP, Audio oder MIDI laden</div></div>
+          <img src="assets/sunshine-r-daw-studio-logo.png" alt="Logo" class="w-8 h-8 rounded-lg object-cover bg-daw-bg border border-cyan-500/40 shadow-lg shadow-cyan-500/20 shrink-0" />
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs sm:text-sm font-extrabold tracking-tight text-white">Sunshine@R Stem DAW</span>
+              <span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">PRO</span>
+            </div>
+            <div id="status-subtitle" class="text-[10px] text-slate-400 truncate max-w-[185px]">Bereit – ZIP, Audio oder MIDI laden</div>
+          </div>
         </div>
+
         <!-- Play / Stop / Loop / Metronome -->
         <div class="flex items-center gap-1.5 bg-daw-bg p-1 rounded-xl border border-daw-border">
           <button id="btn-play" title="Play / Pause (Leertaste)" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 transition shadow-md shadow-emerald-500/20">
@@ -204,7 +247,7 @@
         </div>
 
         <!-- Digital LCD: Bar:Beat:Step | Time | BPM + Tap Tempo -->
-        <div class="flex items-center gap-2.5 bg-black/70 px-3 py-1 rounded-xl border border-slate-800 font-mono">
+        <div class="flex items-center gap-2 bg-black/70 px-2.5 py-1 rounded-xl border border-slate-800 font-mono">
           <div>
             <div class="text-[9px] text-slate-500 uppercase">Bar : Beat : Step</div>
             <div id="lcd-position" class="text-xs sm:text-sm font-bold text-cyan-400">01 : 1 : 01</div>
@@ -217,8 +260,8 @@
           <div class="h-6 w-px bg-slate-800"></div>
           <div class="flex items-center gap-1.5">
             <div>
-              <label for="input-bpm" class="block text-[9px] text-slate-500 uppercase">BPM (60–180)</label>
-              <input id="input-bpm" type="number" min="60" max="180" value="144" class="w-12 bg-transparent text-xs sm:text-sm font-bold text-amber-400 focus:outline-none" />
+              <label for="input-bpm" class="block text-[9px] text-slate-500 uppercase">BPM</label>
+              <input id="input-bpm" type="number" min="60" max="180" value="144" class="w-11 bg-transparent text-xs sm:text-sm font-bold text-amber-400 focus:outline-none" />
             </div>
             <button id="btn-tap-tempo" title="Mehrfach klicken für Tap-Tempo" class="px-2 py-1 rounded bg-daw-surface hover:bg-daw-elevated border border-daw-border text-[10px] font-bold text-amber-300 active:scale-95 transition">
               TAP
@@ -227,9 +270,9 @@
         </div>
       </div>
 
-      <!-- Brand mark: bewusst groß, rechts im freien Headerbereich -->
-      <div class="hidden md:flex flex-1 justify-end items-center min-w-[150px] max-w-[340px] px-2 pointer-events-none">
-        <img src="assets/sunshine-r-daw-studio-logo.png" alt="Sunshine@R DAW Studio" class="w-full max-h-[82px] object-contain opacity-95 drop-shadow-[0_0_14px_rgba(245,158,11,0.22)]" />
+      <!-- Brand mark: im Hoch- UND Querformat sichtbar, responsiv skaliert -->
+      <div class="flex flex-1 justify-center sm:justify-end items-center min-w-[110px] max-w-[200px] sm:max-w-[270px] md:max-w-[340px] px-1 pointer-events-none">
+        <img src="assets/sunshine-r-daw-studio-logo.png" alt="Sunshine@R DAW Studio" class="w-full max-h-[42px] sm:max-h-[60px] md:max-h-[82px] object-contain opacity-95 drop-shadow-[0_0_14px_rgba(245,158,11,0.22)]" />
       </div>
 
       <!-- Right: ZIP/Audio/MIDI Import, Project and Export -->
@@ -241,11 +284,11 @@
 
         <button id="btn-auto-trim" type="button" hidden aria-hidden="true" tabindex="-1" style="display:none"></button>
 
-        <button id="btn-project-save" title="Sunshine@R-Projekt speichern" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 text-xs font-semibold">💾 Projekt</button>
-        <button id="btn-project-open" title="Sunshine@R-Projekt öffnen" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-200 border border-cyan-500/40 text-xs font-semibold">📂 Öffnen</button>
+        <button id="btn-project-save" title="Projekt unter eigenem Namen speichern" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 text-xs font-semibold transition">💾 Speichern</button>
+        <button id="btn-project-open" title="Gespeicherte Projekte verwalten oder .srdaw öffnen" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/40 text-xs font-semibold transition">📂 Projekte</button>
         <input id="srdaw-project-input" type="file" accept=".srdaw,application/json" hidden />
 
-        <button id="btn-export-midi" title="MIDI-Spur 07 als .mid Datei herunterladen" class="px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-semibold transition">
+        <button id="btn-export-midi" title="MIDI-Spur als .mid Datei herunterladen" class="px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-semibold transition">
           🎹 .MID Export
         </button>
 
@@ -265,14 +308,15 @@
     <div class="bg-daw-panel rounded-t-xl border border-daw-border overflow-hidden shadow-lg">
       <div class="grid grid-cols-12 items-stretch border-b border-daw-border bg-daw-surface/90">
         <!-- Left Header Info -->
-        <div class="col-span-12 lg:col-span-4 xl:col-span-3 px-3 py-2 border-b lg:border-b-0 lg:border-r border-daw-border flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
+        <div class="col-span-12 lg:col-span-4 xl:col-span-3 px-3 py-2 border-b lg:border-b-0 lg:border-r border-daw-border flex items-center justify-between gap-1.5">
+          <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-xs font-extrabold uppercase tracking-wider text-white">Multi-Track</span>
             <span id="track-count-pill" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-daw-bg text-cyan-300 border border-daw-border">0 Spuren</span>
             <button id="btn-add-track" class="px-2 py-0.5 rounded-md bg-emerald-500/20 hover:bg-emerald-500/35 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition">+ Neue Spur</button>
+            <button id="btn-collapse-all" title="Alle Spuren ein- oder ausklappen" class="px-2 py-0.5 rounded-md bg-daw-bg hover:bg-daw-elevated text-slate-300 border border-daw-border text-[10px] font-mono font-bold transition">▾ Einklappen</button>
             <input id="single-track-audio-input" type="file" accept=".wav,.mp3,.ogg,.flac,.m4a,.aac,audio/*" class="hidden" />
           </div>
-          <div class="flex items-center gap-1.5 text-[10px] font-mono">
+          <div class="flex items-center gap-1 text-[10px] font-mono shrink-0">
             <span class="text-slate-400">Offset:</span>
             <span id="lbl-trim-offset" class="text-emerald-300 font-bold">0 ms</span>
           </div>
@@ -286,7 +330,7 @@
 
       <!-- Individual Track Rows Container (ALL tracks individually visible!) -->
       <div id="multitrack-lanes" class="divide-y divide-daw-border/80 max-h-[430px] overflow-y-auto bg-daw-bg/80">
-        <!-- Rendered dynamically via JS: 01..04 + dynamic stems + 05..09 -->
+        <!-- Rendered dynamically via JS -->
       </div>
     </div>
   </section>
@@ -401,9 +445,7 @@
 
             <div class="flex items-center gap-1.5 flex-1 sm:flex-initial justify-end">
               <select id="select-a2m-source" class="bg-daw-surface border border-daw-border rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none">
-                <option value="music">03 | Suno Music</option>
-                <option value="bass">02 | Suno Bass</option>
-                <option value="vocals">04 | Suno Vocals</option>
+                <option value="">Keine Audio-Spur vorhanden</option>
               </select>
               <button id="btn-extract-midi" class="px-3 py-1.5 rounded-lg bg-purple-500 hover:bg-purple-400 text-slate-950 font-bold text-xs shadow-md shadow-purple-500/20 transition whitespace-nowrap">
                 Melodie extrahieren
@@ -441,7 +483,7 @@
           <div class="lg:col-span-3 bg-daw-bg rounded-xl border border-daw-border p-3 flex flex-col justify-between gap-2.5">
             <div>
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-300">07 | MIDI Synth Engine</span>
+                <span id="lbl-midi-synth-title" class="text-xs font-extrabold uppercase tracking-wider text-cyan-300">MIDI Synth Engine</span>
                 <button id="btn-midi-rec-arm" title="Live USB-MIDI Aufnahme in Piano Roll" class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-bold">
                   ● MIDI Rec
                 </button>
@@ -516,7 +558,7 @@
           <!-- Row 1: Own Kick -->
           <div class="flex items-center gap-2.5">
             <div class="w-32 shrink-0">
-              <div class="text-xs font-bold text-sky-400">05 | Own Kick</div>
+              <div class="text-xs font-bold text-sky-400">Own Kick</div>
               <div class="text-[10px] text-slate-500">SC-Trigger Master</div>
             </div>
             <div id="grid-seq-kick" class="grid gap-1 flex-1" style="grid-template-columns: repeat(16, minmax(0, 1fr));"></div>
@@ -525,7 +567,7 @@
           <!-- Row 2: Own Bass / 808 + Per-Step Pitch Offset -->
           <div class="flex items-center gap-2.5">
             <div class="w-32 shrink-0">
-              <div class="text-xs font-bold text-emerald-400">06 | Bass / 808</div>
+              <div class="text-xs font-bold text-emerald-400">Bass / 808</div>
               <div class="text-[10px] text-slate-500">Klick: Note · Rechtsklick: Ton</div>
             </div>
             <div id="grid-seq-bass" class="grid gap-1 flex-1" style="grid-template-columns: repeat(16, minmax(0, 1fr));"></div>
@@ -540,10 +582,10 @@
             <div id="grid-seq-hat" class="grid gap-1 flex-1" style="grid-template-columns: repeat(16, minmax(0, 1fr));"></div>
           </div>
 
-          <!-- Row 4: 09 | FX & Transitions -->
+          <!-- Row 4: FX & Transitions -->
           <div class="flex items-center gap-2.5">
             <div class="w-32 shrink-0">
-              <div class="text-xs font-bold text-purple-400">09 | FX Trigger</div>
+              <div class="text-xs font-bold text-purple-400">FX Trigger</div>
               <div class="text-[10px] text-slate-500">Riser / Impact / Rev</div>
             </div>
             <div id="grid-seq-fx" class="grid gap-1 flex-1" style="grid-template-columns: repeat(16, minmax(0, 1fr));"></div>
@@ -596,7 +638,7 @@
           <!-- Manual FX & Transition Triggers -->
           <div class="bg-daw-bg rounded-xl border border-daw-border p-3 flex flex-col justify-between gap-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-purple-400 uppercase">09 | FX &amp; Transitions</span>
+              <span class="text-xs font-bold text-purple-400 uppercase">FX &amp; Transitions</span>
               <button id="btn-auto-drop-fx" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">Auto-Drop FX: AN</button>
             </div>
             <div class="grid grid-cols-3 gap-1.5">
@@ -617,7 +659,7 @@
         <div class="lg:col-span-7 bg-daw-bg rounded-xl border border-daw-border p-3.5 flex flex-col justify-between gap-3">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-300">Vocal-Cleanup &amp; KI-Artefakt-Rack (04 | Suno Vocals &amp; 08 | Own Mic)</h3>
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-300">Vocal-Cleanup &amp; KI-Artefakt-Rack (Vocal- &amp; Mic-Spuren)</h3>
               <p class="text-[11px] text-slate-400">Entfernt Rumpeln, zähmt metallische KI-Höhen (3–7 kHz) und holt Rap-Silben nach vorne</p>
             </div>
             <button id="btn-v-bypass" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold">
@@ -658,18 +700,18 @@
           </div>
         </div>
 
-        <!-- Right: Live Microphone Recorder -> Track 08 (5 cols) -->
+        <!-- Right: Live Microphone Recorder (5 cols) -->
         <div class="lg:col-span-5 bg-gradient-to-br from-rose-950/35 to-daw-bg rounded-xl border border-rose-500/40 p-3.5 flex flex-col justify-between gap-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span id="mic-rec-dot" class="w-3 h-3 rounded-full bg-slate-600"></span>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-rose-300">08 | Own Mic / Vocal Recorder</h3>
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-rose-300">Own Mic / Vocal Recorder</h3>
             </div>
             <span id="mic-rec-clock" class="font-mono text-xs text-slate-300">00:00.0</span>
           </div>
 
           <p class="text-[11px] text-slate-400">
-            Nimmt deine eigenen Rap-Parts oder Adlibs direkt über das Mikrofon auf und legt die Wellenform synchron auf Spur <strong class="text-white">08 | Own Mic / Vocal Rec</strong>.
+            Nimmt deine eigenen Rap-Parts oder Adlibs direkt über das Mikrofon auf und legt die Wellenform synchron auf deine aktive <strong class="text-white">Mic / Vocal Rec</strong>-Spur.
           </p>
 
           <div class="flex flex-wrap items-center gap-2">
@@ -703,7 +745,7 @@
         <!-- Left: Vertical Channel Strips for ALL Tracks (9 cols) -->
         <div class="xl:col-span-9 bg-daw-bg rounded-xl border border-daw-border p-3 overflow-x-auto">
           <div id="vertical-mixer-strips" class="flex items-stretch gap-2 min-w-max">
-            <!-- Rendered dynamically for all tracks 01..09 + extra stems -->
+            <!-- Rendered dynamically -->
           </div>
         </div>
 
@@ -718,7 +760,7 @@
             <!-- Sidechain Gain Reduction Meter -->
             <div class="bg-daw-surface p-2 rounded-lg border border-daw-border mb-2">
               <div class="flex justify-between text-[10px] font-mono mb-1">
-                <span class="text-purple-300">SUNO MUSIC BUS (SC GR)</span>
+                <span class="text-purple-300">SIDECHAIN BUS (GR)</span>
                 <span id="mixer-sc-gr-db" class="text-purple-300 font-bold">-0.0 dB</span>
               </div>
               <div class="h-2 bg-daw-bg rounded-full overflow-hidden border border-daw-border">
@@ -753,7 +795,7 @@
   <script>
     /**
      * ============================================================================
-     * SUNO STEM STUDIO PRO – COMPLETE MULTI-TRACK & MIDI BROWSER DAW ENGINE
+     * SUNSHINE@R STEM DAW STUDIO – COMPLETE MULTI-TRACK & MIDI BROWSER DAW ENGINE
      * ============================================================================
      */
 
@@ -766,7 +808,6 @@
       pentatonic:    [0, 3, 5, 7, 10]
     };
 
-    // Dynamische Spur-Vorlagen (werden NUR auf ausdrücklichen Wunsch des Nutzers erstellt)
     const TRACK_TEMPLATES = {
       audio: { defaultName: 'Audio Spur',       type: 'audio', color: '#f59e0b', vol: 0.92, lowCut: false, vocalCleanup: false, badge: 'Audio',      editTab: 'mixer'  },
       midi:  { defaultName: 'MIDI Synth',       type: 'midi',  color: '#c084fc', vol: 0.80, lowCut: false, vocalCleanup: false, badge: 'Piano Roll', editTab: 'midi'   },
@@ -778,8 +819,9 @@
 
     const EXTRA_COLORS = ['#f59e0b', '#38bdf8', '#34d399', '#a855f7', '#fb7185', '#22d3ee', '#818cf8', '#f97316'];
 
-    // Central DAW Application State (startet komplett leer ohne vordefinierte Spuren)
+    // Central DAW Application State
     const dawState = {
+      projectName: 'Mein Track',
       bpm: 144,
       isPlaying: false,
       isLooping: true,
@@ -789,7 +831,6 @@
       activeTab: 'midi',
       masterGainVal: 0.95,
 
-      // Arrangement Sections (Total = 24 Bars)
       sections: [
         { id: 'intro',   name: 'Intro',           bars: 4, color: '#64748b' },
         { id: 'verse',   name: 'Verse / Build-Up',bars: 4, color: '#f59e0b' },
@@ -798,7 +839,6 @@
         { id: 'outro',   name: 'Outro',           bars: 4, color: '#38bdf8' }
       ],
 
-      // Dynamic Track List & AudioBuffers
       tracks: [],
       buffers: {},
       activeMidiTrackId: null,
@@ -818,7 +858,7 @@
       lastDuckTime: 0,
       lastDuckDb: 0,
 
-      // 16-Step Sequencer Patterns (starten leer)
+      // 16-Step Sequencer Patterns
       seqKick: new Array(16).fill(0),
       seqBass: new Array(16).fill(0),
       seqBassPitch: new Array(16).fill(0),
@@ -841,7 +881,7 @@
       micCountIn: true,
       micRecStartTime: 0,
 
-      // MIDI Editor & Synth State (startet leer)
+      // MIDI Editor & Synth State
       midiGridStep: 2,
       midiRoot: 5,
       midiScale: 'minor',
@@ -879,6 +919,7 @@
       if (tr) {
         tr.midiNotes = JSON.parse(JSON.stringify(dawState.midiNotes));
         tr.stepVelocities = [...dawState.stepVelocities];
+        tr.instrumentPreset = dawState.synthPreset;
       }
     }
 
@@ -891,6 +932,13 @@
       dawState.stepVelocities = Array.isArray(tr.stepVelocities) && tr.stepVelocities.length === 32
         ? [...tr.stepVelocities]
         : new Array(32).fill(108);
+      if (tr.instrumentPreset && tr.instrumentPreset !== 'none') {
+        dawState.synthPreset = tr.instrumentPreset;
+        const presetSel = document.getElementById('select-synth-preset');
+        if (presetSel) presetSel.value = tr.instrumentPreset;
+      }
+      const titleEl = document.getElementById('lbl-midi-synth-title');
+      if (titleEl) titleEl.textContent = `${tr.num} | ${tr.name}`;
       drawPianoRoll();
       drawVelocityLane();
       renderMultiTrackLanes();
@@ -914,6 +962,7 @@
         pan: 0,
         mute: false,
         solo: false,
+        collapsed: false,
         lowCut: opts.lowCut !== undefined ? opts.lowCut : tpl.lowCut,
         vocalCleanup: opts.vocalCleanup !== undefined ? opts.vocalCleanup : tpl.vocalCleanup,
         badge: opts.badge || tpl.badge,
@@ -941,6 +990,8 @@
         dawState.activeMidiTrackId = tr.id;
         dawState.midiNotes = JSON.parse(JSON.stringify(tr.midiNotes));
         dawState.stepVelocities = [...tr.stepVelocities];
+        const titleEl = document.getElementById('lbl-midi-synth-title');
+        if (titleEl) titleEl.textContent = `${tr.num} | ${tr.name}`;
       }
 
       return tr;
@@ -969,6 +1020,8 @@
         dawState.activeMidiTrackId = nextMidi ? nextMidi.id : null;
         dawState.midiNotes = nextMidi ? JSON.parse(JSON.stringify(nextMidi.midiNotes || [])) : [];
         dawState.stepVelocities = (nextMidi && nextMidi.stepVelocities) ? [...nextMidi.stepVelocities] : new Array(32).fill(108);
+        const titleEl = document.getElementById('lbl-midi-synth-title');
+        if (titleEl) titleEl.textContent = nextMidi ? `${nextMidi.num} | ${nextMidi.name}` : 'MIDI Synth Engine';
       }
 
       renumberTracks();
@@ -979,7 +1032,7 @@
       drawPianoRoll();
       drawVelocityLane();
       document.getElementById('status-subtitle').textContent = dawState.tracks.length
-        ? `${dawState.tracks.length} Spur(en) aktiv`
+        ? `${dawState.projectName} · ${dawState.tracks.length} Spur(en)`
         : 'Leeres Projekt – Spur erstellen oder Datei laden';
       toast(`Spur „${removed.name}“ gelöscht.`, 'info');
     }
@@ -1013,6 +1066,131 @@
      * WEB AUDIO API DSP & REAL-TIME LOOKAHEAD SCHEDULER ENGINE
      * ============================================================================
      */
+    function attachPluginsToChain(ctx, startNode, plugins) {
+      let fxTail = startNode;
+      const pluginNodes = [];
+
+      (plugins || []).forEach(fx => {
+        if (!fx || fx.enabled === false) return;
+
+        if (fx.type === 'eq') {
+          const node = ctx.createBiquadFilter();
+          node.type = 'peaking';
+          node.frequency.value = Number(fx.frequency ?? 1200);
+          node.Q.value = Number(fx.q ?? 1.2);
+          node.gain.value = Number(fx.gain ?? 3);
+          fx._updateNode = () => {
+            if (!ctx || ctx.state === 'closed') return;
+            const t = ctx.currentTime;
+            node.frequency.setTargetAtTime(Number(fx.frequency ?? 1200), t, 0.015);
+            node.Q.setTargetAtTime(Number(fx.q ?? 1.2), t, 0.015);
+            node.gain.setTargetAtTime(Number(fx.gain ?? 0), t, 0.015);
+          };
+          fxTail.connect(node);
+          fxTail = node;
+          pluginNodes.push(node);
+        } else if (fx.type === 'compressor') {
+          const node = ctx.createDynamicsCompressor();
+          node.threshold.value = Number(fx.threshold ?? -24);
+          node.ratio.value = Number(fx.ratio ?? 4);
+          node.attack.value = Math.max(0.001, Number(fx.attack ?? 10) / 1000);
+          node.release.value = Math.max(0.01, Number(fx.release ?? 180) / 1000);
+          node.knee.value = 6;
+          fx._updateNode = () => {
+            if (!ctx || ctx.state === 'closed') return;
+            const t = ctx.currentTime;
+            node.threshold.setTargetAtTime(Number(fx.threshold ?? -24), t, 0.015);
+            node.ratio.setTargetAtTime(Number(fx.ratio ?? 4), t, 0.015);
+            node.attack.setTargetAtTime(Math.max(0.001, Number(fx.attack ?? 10) / 1000), t, 0.015);
+            node.release.setTargetAtTime(Math.max(0.01, Number(fx.release ?? 180) / 1000), t, 0.015);
+          };
+          fxTail.connect(node);
+          fxTail = node;
+          pluginNodes.push(node);
+        } else if (fx.type === 'filter') {
+          const node = ctx.createBiquadFilter();
+          node.type = fx.mode || 'lowpass';
+          node.frequency.value = Number(fx.frequency ?? 4500);
+          node.Q.value = Number(fx.q ?? 1.0);
+          fx._updateNode = () => {
+            if (!ctx || ctx.state === 'closed') return;
+            const t = ctx.currentTime;
+            node.type = fx.mode || 'lowpass';
+            node.frequency.setTargetAtTime(Number(fx.frequency ?? 4500), t, 0.015);
+            node.Q.setTargetAtTime(Number(fx.q ?? 1.0), t, 0.015);
+          };
+          fxTail.connect(node);
+          fxTail = node;
+          pluginNodes.push(node);
+        } else if (fx.type === 'delay') {
+          const rawTime = Number(fx.time ?? 280);
+          const delaySec = rawTime <= 2 ? rawTime : rawTime / 1000;
+          const delay = ctx.createDelay(2.0);
+          delay.delayTime.value = Math.max(0.01, Math.min(1.5, delaySec));
+
+          const fb = ctx.createGain();
+          fb.gain.value = Math.max(0, Math.min(0.82, Number(fx.feedback ?? 30) / 100));
+
+          const wet = ctx.createGain();
+          wet.gain.value = Math.max(0, Math.min(0.9, Number(fx.mix ?? 25) / 100));
+
+          const dry = ctx.createGain();
+          dry.gain.value = 1;
+
+          const sum = ctx.createGain();
+          fxTail.connect(dry);
+          fxTail.connect(delay);
+          delay.connect(fb);
+          fb.connect(delay);
+          delay.connect(wet);
+          dry.connect(sum);
+          wet.connect(sum);
+
+          fx._updateNode = () => {
+            if (!ctx || ctx.state === 'closed') return;
+            const t = ctx.currentTime;
+            const rTime = Number(fx.time ?? 280);
+            const dSec = rTime <= 2 ? rTime : rTime / 1000;
+            delay.delayTime.setTargetAtTime(Math.max(0.01, Math.min(1.5, dSec)), t, 0.02);
+            fb.gain.setTargetAtTime(Math.max(0, Math.min(0.82, Number(fx.feedback ?? 30) / 100)), t, 0.02);
+            wet.gain.setTargetAtTime(Math.max(0, Math.min(0.9, Number(fx.mix ?? 25) / 100)), t, 0.02);
+          };
+
+          fxTail = sum;
+          pluginNodes.push(delay, fb, wet, dry, sum);
+        } else if (fx.type === 'distortion') {
+          const shaper = ctx.createWaveShaper();
+          const outGain = ctx.createGain();
+          const applyCurve = (amtVal) => {
+            const amount = Math.max(1, Math.min(100, Number(amtVal ?? 25)));
+            const curve = new Float32Array(16384);
+            const k = amount * 2.2;
+            for (let i = 0; i < curve.length; i++) {
+              const x = (i * 2) / curve.length - 1;
+              curve[i] = ((3 + k) * x * 20 * (Math.PI / 180)) / (Math.PI + k * Math.abs(x));
+            }
+            shaper.curve = curve;
+          };
+          applyCurve(fx.amount ?? 25);
+          shaper.oversample = '2x';
+          outGain.gain.value = Math.max(0.1, Math.min(1.5, Number(fx.output ?? 85) / 100));
+
+          fx._updateNode = () => {
+            if (!ctx || ctx.state === 'closed') return;
+            applyCurve(fx.amount ?? 25);
+            outGain.gain.setTargetAtTime(Math.max(0.1, Math.min(1.5, Number(fx.output ?? 85) / 100)), ctx.currentTime, 0.015);
+          };
+
+          fxTail.connect(shaper);
+          shaper.connect(outGain);
+          fxTail = outGain;
+          pluginNodes.push(shaper, outGain);
+        }
+      });
+
+      return { tail: fxTail, pluginNodes };
+    }
+
     class ProDawAudioEngine {
       constructor() {
         this.ctx = null;
@@ -1154,32 +1332,9 @@
         input.connect(lowCut);
         postFilter.connect(scGain);
         scGain.connect(sectionGate);
-        // Per-track Web Audio plugin chain (native, Android/WebView compatible)
-        let fxTail = sectionGate;
-        const pluginNodes = [];
-        (track.plugins || []).filter(fx => fx && fx.enabled !== false).forEach(fx => {
-          let node = null;
-          if (fx.type === 'eq') {
-            node = ctx.createBiquadFilter(); node.type = 'peaking';
-            node.frequency.value = Number(fx.frequency || 1200); node.Q.value = Number(fx.q || 1); node.gain.value = Number(fx.gain || 0);
-          } else if (fx.type === 'compressor') {
-            node = ctx.createDynamicsCompressor(); node.threshold.value = Number(fx.threshold ?? -24);
-            node.ratio.value = Number(fx.ratio || 3); node.attack.value = 0.01; node.release.value = 0.18;
-          } else if (fx.type === 'filter') {
-            node = ctx.createBiquadFilter(); node.type = fx.mode || 'lowpass'; node.frequency.value = Number(fx.frequency || 8000); node.Q.value = Number(fx.q || 0.7);
-          } else if (fx.type === 'delay') {
-            node = ctx.createDelay(2); node.delayTime.value = Math.max(0.01, Math.min(1.5, Number(fx.time || 0.28)));
-            const wet = ctx.createGain(); wet.gain.value = Math.max(0, Math.min(0.8, Number(fx.mix || 0.22)));
-            const dry = ctx.createGain(); dry.gain.value = 1;
-            const sum = ctx.createGain(); fxTail.connect(dry); fxTail.connect(node); node.connect(wet); dry.connect(sum); wet.connect(sum);
-            fxTail = sum; pluginNodes.push(node, wet, dry, sum); return;
-          } else if (fx.type === 'distortion') {
-            node = ctx.createWaveShaper(); const amount = Math.max(1, Math.min(100, Number(fx.amount || 18)));
-            const curve = new Float32Array(44100); for (let i=0;i<curve.length;i++){ const x=i*2/curve.length-1; curve[i]=(1+amount/18)*x/(1+(amount/18)*Math.abs(x)); }
-            node.curve = curve; node.oversample = '2x';
-          }
-          if (node) { fxTail.connect(node); fxTail = node; pluginNodes.push(node); }
-        });
+
+        const { tail: fxTail, pluginNodes } = attachPluginsToChain(ctx, sectionGate, track.plugins);
+
         fxTail.connect(panner);
         panner.connect(fader);
         fader.connect(analyser);
@@ -1238,12 +1393,10 @@
         });
       }
 
-      // Summe der Arrangement-Abschnitte (Intro, Verse, ...) in Takten
       getSectionBarsSum() {
         return dawState.sections.reduce((acc, s) => acc + s.bars, 0);
       }
 
-      // Länge der längsten geladenen Audiodatei in Sekunden (abzüglich Trim)
       getContentDurationSec() {
         const trimSec = dawState.startOffsetMs / 1000;
         let longest = 0;
@@ -1254,8 +1407,6 @@
         return Math.max(0, longest);
       }
 
-      // Gesamtlänge der Zeitleiste in Takten: mindestens das Arrangement,
-      // bei längeren Audiodateien automatisch so viele Takte, dass alles hineinpasst.
       getTotalArrangementBars() {
         const base = this.getSectionBarsSum();
         const barSec = 4 * (60 / dawState.bpm);
@@ -1265,7 +1416,7 @@
 
       getSectionAtBar(barIdx) {
         const total = this.getTotalArrangementBars();
-        const extra = total - this.getSectionBarsSum(); // Verlängerung gehört zum letzten Abschnitt
+        const extra = total - this.getSectionBarsSum();
         const lastIdx = dawState.sections.length - 1;
         const wrappedBar = ((barIdx % total) + total) % total;
         let cursor = 0;
@@ -1338,7 +1489,6 @@
         this.scheduleStemPass(ctxStart, offset, stopAt);
       }
 
-      // Startet alle Audiospuren zum Zeitpunkt `when` ab Zeitleisten-Position `offsetSec`.
       scheduleStemPass(when, offsetSec, stopAt) {
         const trimSec = dawState.startOffsetMs / 1000;
         const barSec = 4 * (60 / dawState.bpm);
@@ -1350,7 +1500,6 @@
           if (!buf || !node) return;
 
           const usable = Math.max(0.1, buf.duration - trimSec);
-          // Nur deutlich kürzere Samples (> 1 Takt kürzer als die Zeitleiste) wiederholen sich selbst
           const loopInside = dawState.isLooping && usable < totalArrSec - barSec;
 
           let posInBuf;
@@ -1364,7 +1513,7 @@
 
           const src = this.ctx.createBufferSource();
           src.buffer = buf;
-          src.connect(node.input); // Quelle in die Kanalkette (Filter → Fader → Master) einspeisen
+          src.connect(node.input);
           if (loopInside) {
             src.loop = true;
             src.loopStart = trimSec;
@@ -1406,7 +1555,6 @@
         }
         dawState.playheadSec = currentTimeline;
 
-        // Audio-Spuren für die nächste Loop-Runde sample-genau vorplanen
         if (dawState.isLooping) {
           const boundary = this.playStartCtxTime + (totalArrSec - this.playStartOffsetSec);
           if (boundary - this.ctx.currentTime < lookaheadSec + 0.1 && this.lastStemBoundary !== boundary) {
@@ -1438,7 +1586,6 @@
       scheduleStep(time, step32, step16, barIdx, secPer16th) {
         const { section, barInSection } = this.getSectionAtBar(barIdx);
 
-        // Apply Section Clip Gating per Track
         dawState.tracks.forEach(tr => {
           const node = this.channelNodes[tr.id];
           if (node) {
@@ -1447,12 +1594,10 @@
           }
         });
 
-        // 1. Metronome
         if (dawState.metronomeOn && step16 % 4 === 0) {
           synthMetronome(this.ctx, this.masterGain, time, step16 === 0);
         }
 
-        // 2. Kick / Perc Tracks + Sidechain Ducking
         const kickTracks = dawState.tracks.filter(t => t.type === 'kick' || t.id === 'ownKick');
         let anyKickFired = false;
         kickTracks.forEach(ktr => {
@@ -1506,7 +1651,6 @@
           }
         }
 
-        // 3. Bass / 808 Tracks
         dawState.tracks.filter(t => t.type === 'bass' || t.id === 'ownBass').forEach(btr => {
           const node = this.channelNodes[btr.id];
           if (node && btr.sectionClips[section.id] !== false && dawState.seqBass[step16]) {
@@ -1522,7 +1666,6 @@
           }
         });
 
-        // 4. MIDI Synth Tracks
         dawState.tracks.filter(t => t.type === 'midi' || t.id === 'midiSynth').forEach(mtr => {
           const node = this.channelNodes[mtr.id];
           if (!node || mtr.sectionClips[section.id] === false) return;
@@ -1546,7 +1689,6 @@
           });
         });
 
-        // 5. FX & Transitions Tracks
         dawState.tracks.filter(t => t.type === 'fx' || t.id === 'fxTrack').forEach(ftr => {
           const node = this.channelNodes[ftr.id];
           if (!node || ftr.sectionClips[section.id] === false) return;
@@ -1566,9 +1708,6 @@
         });
       }
 
-      /**
-       * Live Microphone Recording for Track 08
-       */
       async toggleMicRecording(targetTrackId = null) {
         await this.ensureCtx();
         if (dawState.isRecordingMic) {
@@ -1817,7 +1956,6 @@
       src.stop(time + 0.18);
     }
 
-    // Polyphonic Multi-Preset MIDI Voice Synthesizer
     function synthMidiVoice(ctx, dest, time, opts) {
       const freq = midiToFreq(opts.midiNote);
       const attSec = Math.max(0.003, (opts.attackMs || 10) / 1000);
@@ -1872,7 +2010,6 @@
           { type: 'sine',     detune: -6, mult: 3 }
         ];
       } else {
-        // subBass
         oscConfigs = [
           { type: 'sine',     detune: 0, mult: 0.5 },
           { type: 'triangle', detune: 4, mult: 1 }
@@ -1979,7 +2116,7 @@
     function extractMidiFromStem(stemId) {
       const buf = dawState.buffers[stemId];
       if (!buf) {
-        toast('Dieser Stem ist noch leer – bitte zuerst Demo-Stems oder eine Datei laden.', 'warn');
+        toast('Diese Spur hat noch keine Audiodaten – bitte zuerst eine Datei laden.', 'warn');
         return;
       }
 
@@ -1997,7 +2134,6 @@
         const startIdx = trimSamples + s * stepSamples;
         if (startIdx + stepSamples >= data.length) break;
 
-        // 1. Compute RMS Energy for onset/gate
         let rms = 0;
         for (let i = 0; i < stepSamples; i++) {
           const v = data[startIdx + i];
@@ -2009,7 +2145,6 @@
           continue;
         }
 
-        // 2. Autocorrelation Pitch Detection (65 Hz .. 900 Hz)
         const minLag = Math.floor(sr / 900);
         const maxLag = Math.min(Math.floor(sr / 65), Math.floor(stepSamples * 0.8));
         let bestLag = -1;
@@ -2037,7 +2172,6 @@
         if (bestLag > 0 && bestCorr > 0.35) {
           const detectedFreq = sr / bestLag;
           let midi = Math.round(69 + 12 * Math.log2(detectedFreq / 440));
-          // Fold into Piano Roll Range C2 (36) .. B4 (71)
           while (midi < 36) midi += 12;
           while (midi > 71) midi -= 12;
 
@@ -2045,7 +2179,6 @@
           const vel = Math.min(127, Math.max(65, Math.round(rms * 380)));
 
           if (midi === prevMidi && extracted.length > 0 && extracted[extracted.length - 1].start + extracted[extracted.length - 1].dur === s) {
-            // Extend sustained note
             extracted[extracted.length - 1].dur += 1;
           } else {
             extracted.push({ id: idCounter++, pitch: midi, start: s, dur: 1, vel });
@@ -2056,7 +2189,7 @@
       }
 
       if (extracted.length === 0) {
-        toast('Keine eindeutige Melodie erkannt – versuche einen anderen Stem.', 'warn');
+        toast('Keine eindeutige Melodie erkannt – versuche eine andere Spur.', 'warn');
         return;
       }
 
@@ -2067,7 +2200,8 @@
       drawPianoRoll();
       drawVelocityLane();
       renderMultiTrackLanes();
-      toast(`${extracted.length} MIDI-Noten aus „${stemId.toUpperCase()}“ extrahiert!`, 'success');
+      const srcTr = dawState.tracks.find(t => t.id === stemId);
+      toast(`${extracted.length} MIDI-Noten aus „${srcTr ? srcTr.name : stemId}“ extrahiert!`, 'success');
     }
 
     function quantizeMidiNoteToScale(midi, root, scaleKey) {
@@ -2210,7 +2344,8 @@
 
         const fullFile = new Uint8Array([...header, ...trkHeader, ...trackBytes]);
         const blob = new Blob([fullFile], { type: 'audio/midi' });
-        const filename = `Sunshine-R_Stem_DAW_MIDI_${dawState.bpm}BPM.mid`;
+        const safeProj = (dawState.projectName || 'Sunshine-R').replace(/[^a-z0-9_-]+/gi, '_');
+        const filename = `${safeProj}_MIDI_${dawState.bpm}BPM.mid`;
         const status = await saveOrShareBlob(blob, filename);
 
         if (status === 'saved-documents') {
@@ -2249,7 +2384,6 @@
           let runningStatus = 0;
 
           while (pos < endPos) {
-            // Read VLQ delta
             let delta = 0;
             while (pos < endPos) {
               const b = view.getUint8(pos++);
@@ -2366,14 +2500,13 @@
               while (clampedNote < 36) clampedNote += 12;
               while (clampedNote > 71) clampedNote -= 12;
 
-              // Live audition
               const activeMidi = getActiveMidiTrack();
               const dest = (activeMidi && audioEngine.channelNodes[activeMidi.id]?.input) || audioEngine.masterGain;
               synthMidiVoice(audioEngine.ctx, dest, audioEngine.ctx.currentTime, {
                 midiNote: clampedNote,
                 durationSec: 0.35,
                 velocity: velocity / 127,
-                preset: (activeMidi && activeMidi.instrumentPreset) || dawState.synthPreset,
+                preset: (activeMidi && activeMidi.instrumentPreset && activeMidi.instrumentPreset !== 'none') ? activeMidi.instrumentPreset : dawState.synthPreset,
                 cutoff: dawState.synthCutoff,
                 res: dawState.synthRes,
                 detune: dawState.synthDetune,
@@ -2381,7 +2514,6 @@
                 releaseMs: dawState.synthReleaseMs
               });
 
-              // Record into Piano Roll if armed
               if (dawState.midiRecArmed && activeMidi) {
                 const secPer16th = (60 / dawState.bpm) / 4;
                 const step32 = Math.floor(dawState.playheadSec / secPer16th) % 32;
@@ -2411,244 +2543,8 @@
       }
     }
 
-    /**
-     * ============================================================================
-     * DEMO STEMS GENERATOR & UNIVERSAL FILE IMPORTER (ZIP / AUDIO / MIDI)
-     * ============================================================================
-     */
-    async function generateDemoStems() {
-      await audioEngine.ensureCtx();
-      document.getElementById('status-subtitle').textContent = 'Generiere 4 Demo-Stems...';
-
-      const sr = 44100;
-      const bpm = dawState.bpm;
-      const bars = 24;
-      const preSilenceSec = 0.18; // 180ms deliberate silence to test Auto-Trim!
-      const totalSec = preSilenceSec + bars * 4 * (60 / bpm);
-      const len = Math.ceil(totalSec * sr);
-      const noiseBuf = createWhiteNoiseBuffer(audioEngine.ctx, 1.0);
-
-      async function renderOfflineStem(fn) {
-        const off = new OfflineAudioContext(2, len, sr);
-        fn(off, preSilenceSec, bpm, bars);
-        return await off.startRendering();
-      }
-
-      // 01 Suno Drums
-      const drumsBuf = await renderOfflineStem((ctx, off, b, nBars) => {
-        const s16 = (60 / b) / 4;
-        for (let s = 0; s < nBars * 16; s++) {
-          const t = off + s * s16;
-          const st = s % 16;
-          if (st % 4 === 0) {
-            const osc = ctx.createOscillator();
-            const g = ctx.createGain();
-            osc.frequency.setValueAtTime(125, t);
-            osc.frequency.exponentialRampToValueAtTime(55, t + 0.08);
-            g.gain.setValueAtTime(0.55, t);
-            g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
-            osc.connect(g); g.connect(ctx.destination);
-            osc.start(t); osc.stop(t + 0.14);
-          }
-          if (st % 4 === 2) {
-            const src = ctx.createBufferSource(); src.buffer = noiseBuf;
-            const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 6500;
-            const g = ctx.createGain();
-            g.gain.setValueAtTime(0.28, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
-            src.connect(hp); hp.connect(g); g.connect(ctx.destination);
-            src.start(t); src.stop(t + 0.12);
-          }
-          if (st === 4 || st === 12) {
-            const src = ctx.createBufferSource(); src.buffer = noiseBuf;
-            const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1850;
-            const g = ctx.createGain();
-            g.gain.setValueAtTime(0.45, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-            src.connect(bp); bp.connect(g); g.connect(ctx.destination);
-            src.start(t); src.stop(t + 0.16);
-          }
-        }
-      });
-
-      // 02 Suno Bass (Muddy sustained bass)
-      const bassBuf = await renderOfflineStem((ctx, off, b, nBars) => {
-        const barSec = 4 * (60 / b);
-        const notes = [41.2, 41.2, 36.7, 38.9];
-        for (let bar = 0; bar < nBars; bar++) {
-          const t = off + bar * barSec;
-          const osc = ctx.createOscillator();
-          const lp = ctx.createBiquadFilter();
-          const g = ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(notes[bar % 4], t);
-          lp.type = 'lowpass'; lp.frequency.value = 240;
-          g.gain.setValueAtTime(0.48, t);
-          g.gain.exponentialRampToValueAtTime(0.001, t + barSec * 0.98);
-          osc.connect(lp); lp.connect(g); g.connect(ctx.destination);
-          osc.start(t); osc.stop(t + barSec);
-        }
-      });
-
-      // 03 Suno Music (Arp melody + 4.8kHz metallic AI peak)
-      const musicBuf = await renderOfflineStem((ctx, off, b, nBars) => {
-        const s16 = (60 / b) / 4;
-        const seq = [65, 68, 72, 75, 72, 68, 65, 63, 65, 72, 75, 77, 75, 72, 68, 65];
-        const peak = ctx.createBiquadFilter();
-        peak.type = 'peaking'; peak.frequency.value = 4800; peak.Q.value = 3.0; peak.gain.value = 8.0;
-        peak.connect(ctx.destination);
-
-        for (let s = 0; s < nBars * 16; s++) {
-          const t = off + s * s16;
-          const osc = ctx.createOscillator();
-          const g = ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(midiToFreq(seq[s % 16]), t);
-          g.gain.setValueAtTime(0.24, t);
-          g.gain.exponentialRampToValueAtTime(0.001, t + s16 * 0.85);
-          osc.connect(g); g.connect(peak);
-          osc.start(t); osc.stop(t + s16 * 0.9);
-        }
-      });
-
-      // 04 Suno Vocals (Rhythmic Rap/Vocal phrase)
-      const vocalsBuf = await renderOfflineStem((ctx, off, b, nBars) => {
-        const s16 = (60 / b) / 4;
-        const steps = [0, 2, 3, 6, 8, 10, 12, 14];
-        const formants = [680, 960, 1340, 820, 1120, 1480, 740, 1260];
-        for (let bar = 0; bar < nBars; bar++) {
-          steps.forEach((st, i) => {
-            const t = off + (bar * 16 + st) * s16;
-            const osc = ctx.createOscillator();
-            const bp = ctx.createBiquadFilter();
-            const g = ctx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(148 + (i % 3) * 16, t);
-            bp.type = 'bandpass'; bp.frequency.value = formants[i]; bp.Q.value = 4.0;
-            g.gain.setValueAtTime(0.001, t);
-            g.gain.linearRampToValueAtTime(0.55, t + 0.014);
-            g.gain.exponentialRampToValueAtTime(0.001, t + s16 * 1.25);
-            osc.connect(bp); bp.connect(g); g.connect(ctx.destination);
-            osc.start(t); osc.stop(t + s16 * 1.3);
-          });
-        }
-      });
-
-      dawState.buffers.drums = drumsBuf;
-      dawState.buffers.bass = bassBuf;
-      dawState.buffers.music = musicBuf;
-      dawState.buffers.vocals = vocalsBuf;
-
-      dawState.startOffsetMs = 0;
-      document.getElementById('lbl-trim-offset').textContent = '0 ms';
-      document.getElementById('status-subtitle').textContent = `Demo-Stems aktiv (${bpm} BPM)`;
-
-      renderMultiTrackLanes();
-      toast('Demo-Stems geladen! Klicke „✂️ Auto-Trim“ um die 180 ms Vorlauf-Stille abzuschneiden.', 'success');
-    }
-
-    async function handleUniversalFileImport(fileList) {
-      if (!fileList || fileList.length === 0) return;
-      await audioEngine.ensureCtx();
-
-      const files = Array.from(fileList);
-      const audioItems = [];
-
-      for (const file of files) {
-        const lower = file.name.toLowerCase();
-        if (lower.endsWith('.mid') || lower.endsWith('.midi')) {
-          const buf = await file.arrayBuffer();
-          importMidiArrayBuffer(buf);
-        } else if (lower.endsWith('.zip')) {
-          try {
-            const zip = await JSZip.loadAsync(file);
-            const tasks = [];
-            zip.forEach((relPath, entry) => {
-              if (entry.dir) return;
-              const base = relPath.split('/').pop();
-              if (base.startsWith('.') || relPath.includes('__MACOSX')) return;
-              if (/\.(wav|mp3|ogg|flac|m4a)$/i.test(base)) {
-                tasks.push(entry.async('arraybuffer').then(b => ({ name: base, buffer: b })));
-              } else if (/\.(mid|midi)$/i.test(base)) {
-                entry.async('arraybuffer').then(b => importMidiArrayBuffer(b));
-              }
-            });
-            const extracted = await Promise.all(tasks);
-            audioItems.push(...extracted);
-          } catch (err) {
-            console.error(err);
-            toast(`Fehler beim Entpacken von ${file.name}`, 'error');
-          }
-        } else if (/\.(wav|mp3|ogg|flac|m4a)$/i.test(lower)) {
-          const buf = await file.arrayBuffer();
-          audioItems.push({ name: file.name, buffer: buf });
-        }
-      }
-
-      if (audioItems.length === 0) return;
-
-      // Reset dynamic extra stem tracks before assigning new batch
-      dawState.tracks = dawState.tracks.filter(t => !t.isExtraStem);
-      const primarySlots = ['drums', 'bass', 'music', 'vocals'];
-      const usedPrimary = new Set();
-      let extraCounter = 0;
-
-      for (const item of audioItems) {
-        try {
-          const decoded = await audioEngine.ctx.decodeAudioData(item.buffer.slice(0));
-          const lower = item.name.toLowerCase();
-          let slot = null;
-
-          if (/drum|perc|beat|kick|hat|snare/.test(lower) && !usedPrimary.has('drums')) slot = 'drums';
-          else if (/bass|sub|808|low/.test(lower) && !usedPrimary.has('bass')) slot = 'bass';
-          else if (/vocal|vox|voice|rap|sing|acapella/.test(lower) && !usedPrimary.has('vocals')) slot = 'vocals';
-          else if (/music|inst|synth|melod|pad|chord|other/.test(lower) && !usedPrimary.has('music')) slot = 'music';
-          else slot = primarySlots.find(s => !usedPrimary.has(s)) || null;
-
-          if (slot) {
-            usedPrimary.add(slot);
-            dawState.buffers[slot] = decoded;
-          } else {
-            // Create dynamic individual track row (04b, 04c, ...) right after 04 | Suno Vocals!
-            extraCounter++;
-            const suffix = String.fromCharCode(97 + extraCounter); // b, c, d...
-            const extraId = `extraStem_${extraCounter}`;
-            const cleanName = item.name.replace(/\.[^/.]+$/, '').slice(0, 22);
-
-            const extraTrack = {
-              id: extraId,
-              num: `04${suffix}`,
-              name: `Suno ${cleanName}`,
-              type: 'stem',
-              isExtraStem: true,
-              color: '#34d399',
-              vol: 0.90,
-              pan: 0,
-              mute: false,
-              solo: false,
-              lowCut: true,
-              badge: 'Extra Stem',
-              editTab: 'midi',
-              sectionClips: { intro: true, verse: true, drop: true, break: true, outro: true }
-            };
-
-            const vocalIdx = dawState.tracks.findIndex(t => t.id === 'vocals');
-            dawState.tracks.splice(vocalIdx + extraCounter, 0, extraTrack);
-            dawState.buffers[extraId] = decoded;
-            audioEngine.ensureTrackNode(extraTrack);
-          }
-        } catch (err) {
-          console.error('Decode failed:', item.name, err);
-        }
-      }
-
-      updateAudioToMidiDropdown();
-      renderMultiTrackLanes();
-      renderVerticalMixer();
-      document.getElementById('status-subtitle').textContent = `${audioItems.length} Audio-Stems geladen`;
-      toast(`${audioItems.length} Stems geladen! Alle Spuren sind einzeln sichtbar.`, 'success');
-    }
-
     function autoTrimSilence() {
-      const stemTracks = dawState.tracks.filter(t => t.type === 'stem');
+      const stemTracks = dawState.tracks.filter(t => t.type === 'stem' || t.type === 'audio');
       let minSample = Infinity;
       let sr = 44100;
 
@@ -2666,7 +2562,7 @@
       });
 
       if (minSample === Infinity) {
-        toast('Bitte zuerst Demo-Stems oder eigene Stems laden.', 'warn');
+        toast('Bitte zuerst Audio-Spuren laden.', 'warn');
         return;
       }
 
@@ -2753,7 +2649,10 @@
           input.connect(lowCut);
           tail.connect(scGain);
           scGain.connect(secGate);
-          secGate.connect(panner);
+
+          const { tail: fxTail } = attachPluginsToChain(offCtx, secGate, tr.plugins);
+
+          fxTail.connect(panner);
           panner.connect(fader);
           fader.connect(masterGain);
           if ((tr.type === 'audio' || tr.type === 'stem' || tr.type === 'mic') && vcOn) fader.connect(revConv);
@@ -2767,7 +2666,7 @@
           const buf = dawState.buffers[tr.id];
           if (!buf) return;
           const usable = Math.max(0.2, buf.duration - trimSec);
-          const fillLoop = usable < totalSec - 4 * (60 / dawState.bpm); // nur deutlich kürzere Spuren wiederholen
+          const fillLoop = usable < totalSec - 4 * (60 / dawState.bpm);
           let cursor = 0;
           while (cursor < totalSec) {
             const src = offCtx.createBufferSource();
@@ -2779,7 +2678,6 @@
           }
         });
 
-        // Schedule all 16th steps across totalBars
         const totalSteps = totalBars * 16;
         for (let s = 0; s < totalSteps; s++) {
           const t = s * secPer16th;
@@ -2880,7 +2778,8 @@
 
         const rendered = await offCtx.startRendering();
         const blob = encodeWav16Bit(rendered);
-        const filename = `Sunshine-R_Stem_DAW_Pro_${dawState.bpm}BPM.wav`;
+        const safeProj = (dawState.projectName || 'Sunshine-R').replace(/[^a-z0-9_-]+/gi, '_');
+        const filename = `${safeProj}_Master_${dawState.bpm}BPM.wav`;
         const status = await saveOrShareBlob(blob, filename);
         if (status === 'saved-documents') {
           toast(`Master WAV gespeichert unter Dokumente/SunshineDAW/${filename}`, 'success');
@@ -2927,7 +2826,7 @@
 
     /**
      * ============================================================================
-     * MULTI-TRACK VIEW RENDERING (INDIVIDUAL TRACK HEADERS & TIMELINE LANES)
+     * MULTI-TRACK VIEW RENDERING (INDIVIDUAL TRACK HEADERS, COLLAPSE & TIMELINE)
      * ============================================================================
      */
     function renderArrangementHeaderBar() {
@@ -3035,11 +2934,18 @@
         updateAudioToMidiDropdown();
         drawPianoRoll();
         drawVelocityLane();
-        document.getElementById('status-subtitle').textContent = `${dawState.tracks.length} Spur(en) aktiv`;
+        document.getElementById('status-subtitle').textContent = `${dawState.projectName} · ${dawState.tracks.length} Spur(en)`;
         toast(`Spur ${tr.num} „${tr.name}“ erstellt!`, 'success');
       };
 
       document.body.appendChild(ov);
+    }
+
+    function updateCollapseAllButtonUI() {
+      const btn = document.getElementById('btn-collapse-all');
+      if (!btn) return;
+      const allCollapsed = dawState.tracks.length > 0 && dawState.tracks.every(t => t.collapsed);
+      btn.textContent = allCollapsed ? '▸ Ausklappen' : '▾ Einklappen';
     }
 
     function renderMultiTrackLanes() {
@@ -3047,2016 +2953,21 @@
       container.innerHTML = '';
       const countLabel = dawState.tracks.length === 1 ? '1 Spur' : `${dawState.tracks.length} Spuren`;
       document.getElementById('track-count-pill').textContent = countLabel;
+      updateCollapseAllButtonUI();
 
       if (dawState.tracks.length === 0) {
         const emptyBox = document.createElement('div');
         emptyBox.className = 'p-6 text-center flex flex-col items-center justify-center gap-3 bg-daw-bg/60';
         emptyBox.innerHTML = `
           <div class="text-xs sm:text-sm font-bold text-slate-200">Noch keine Spuren im Projekt</div>
-          <div class="text-[11px] text-slate-400 max-w-md">Lege eine leere Audio- oder MIDI-Spur an oder lade direkt deine WAV-, MP3-, MIDI- oder ZIP-Dateien.</div>
+          <div class="text-[11px] text-slate-400 max-w-md">Lege eine leere Audio- oder MIDI-Spur an, lade deine WAV-, MP3-, MIDI- oder ZIP-Dateien oder öffne ein gespeichertes Projekt.</div>
           <div class="flex flex-wrap items-center justify-center gap-2 mt-1">
             <button id="empty-new-track-btn" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition">➕ Neue Spur erstellen</button>
             <button id="empty-import-btn" class="px-3.5 py-2 rounded-xl bg-daw-surface hover:bg-daw-elevated text-cyan-300 border border-cyan-500/40 font-semibold text-xs transition">📂 Audio / MIDI / ZIP laden</button>
+            <button id="empty-projects-btn" class="px-3.5 py-2 rounded-xl bg-daw-surface hover:bg-daw-elevated text-amber-300 border border-amber-500/40 font-semibold text-xs transition">🗂️ Gespeicherte Projekte</button>
           </div>
         `;
         container.appendChild(emptyBox);
         emptyBox.querySelector('#empty-new-track-btn').addEventListener('click', openNewTrackDialog);
         emptyBox.querySelector('#empty-import-btn').addEventListener('click', () => document.getElementById('universal-file-input').click());
-        return;
-      }
-
-      const totalBars = audioEngine.getTotalArrangementBars();
-
-      dawState.tracks.forEach((tr) => {
-        const row = document.createElement('div');
-        row.className = 'grid grid-cols-12 items-stretch hover:bg-daw-surface/30 transition';
-
-        const dbVal = tr.vol <= 0.001 ? '-∞' : (20 * Math.log10(tr.vol)).toFixed(1);
-        const panStr = tr.pan === 0 ? 'C' : (tr.pan < 0 ? `L${Math.abs(Math.round(tr.pan * 100))}` : `R${Math.round(tr.pan * 100)}`);
-
-        let quickActionHtml = '';
-        if (tr.type === 'audio' || tr.type === 'stem') {
-          quickActionHtml = `
-            <button data-loadaudio="${tr.id}" title="Audiodatei in diese Spur laden" class="tr-load-btn px-1.5 py-0.5 rounded bg-cyan-500/20 hover:bg-cyan-500/35 text-cyan-200 border border-cyan-500/40 text-[9px] font-mono font-bold">📂 Audio</button>
-            <button data-vc="${tr.id}" title="Vocal-Cleanup &amp; Hall umschalten" class="tr-vc-btn px-1.5 py-0.5 rounded ${tr.vocalCleanup ? 'bg-amber-500/25 text-amber-200 border-amber-500/40' : 'bg-daw-surface text-slate-500 border-daw-border'} border text-[9px] font-mono font-bold">VC</button>
-            <button data-a2m="${tr.id}" title="Melodie aus dieser Spur in Piano Roll extrahieren" class="tr-a2m-btn px-1.5 py-0.5 rounded bg-purple-500/20 hover:bg-purple-500/35 text-purple-200 border border-purple-500/40 text-[9px] font-mono font-bold">→ MIDI</button>
-          `;
-        } else if (tr.type === 'mic') {
-          const isThisRec = dawState.isRecordingMic && dawState.recordingMicTrackId === tr.id;
-          quickActionHtml = `<button data-micrec="${tr.id}" class="tr-mic-arm-btn px-1.5 py-0.5 rounded ${isThisRec ? 'bg-rose-500 text-white animate-pulse' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'} text-[9px] font-mono font-bold">● Rec</button>`;
-        } else if (tr.type === 'midi') {
-          const isActiveMidi = tr.id === dawState.activeMidiTrackId;
-          quickActionHtml = `<button data-selmidi="${tr.id}" class="tr-selmidi-btn px-1.5 py-0.5 rounded ${isActiveMidi ? 'bg-purple-500 text-white border-purple-300' : 'bg-purple-500/20 text-purple-200 border-purple-500/40'} border text-[9px] font-mono font-bold">${isActiveMidi ? 'Aktiv' : 'Piano Roll'}</button>`;
-        }
-
-        const headerDiv = document.createElement('div');
-        headerDiv.className = 'col-span-12 lg:col-span-4 xl:col-span-3 px-2.5 py-1.5 border-b lg:border-b-0 lg:border-r border-daw-border bg-daw-panel/80 flex flex-col justify-between gap-1';
-        headerDiv.innerHTML = `
-          <div class="flex items-center justify-between gap-1.5">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-extrabold text-slate-950 shrink-0" style="background:${tr.color}">${tr.num}</span>
-              <span class="text-xs font-bold text-white truncate ${tr.mute ? 'line-through opacity-50' : ''}" title="${tr.name}">${tr.name}</span>
-              ${((tr.type === 'audio' || tr.type === 'stem' || tr.type === 'mic') && dawState.buffers[tr.id]) ? `<span class="text-[9px] font-mono text-sky-300 shrink-0" title="Länge dieser Spur">${formatTimeStr(Math.max(0, dawState.buffers[tr.id].duration - dawState.startOffsetMs / 1000))}</span>` : ''}
-            </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-daw-bg text-slate-400 border border-daw-border hidden sm:inline">${tr.badge}</span>
-              <button data-edit="${tr.editTab}" data-trackid="${tr.id}" class="tr-edit-btn px-1.5 py-0.5 rounded bg-daw-surface hover:bg-daw-elevated text-[9px] font-bold text-cyan-300 border border-daw-border">Edit</button>
-              <button data-del="${tr.id}" title="Spur löschen" class="tr-del-btn px-1.5 py-0.5 rounded bg-rose-500/15 hover:bg-rose-500/30 text-[9px] font-bold text-rose-300 border border-rose-500/35">✕</button>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-1.5">
-            <button data-mute="${tr.id}" class="tr-mute-btn w-6 h-5 rounded text-[10px] font-bold border transition ${tr.mute ? 'bg-rose-500 text-white border-rose-400' : 'bg-daw-surface text-slate-400 border-daw-border hover:text-white'}">M</button>
-            <button data-solo="${tr.id}" class="tr-solo-btn w-6 h-5 rounded text-[10px] font-bold border transition ${tr.solo ? 'bg-amber-400 text-slate-950 border-amber-300' : 'bg-daw-surface text-slate-400 border-daw-border hover:text-white'}">S</button>
-
-            <div class="flex-1 flex items-center gap-1">
-              <input data-vol="${tr.id}" type="range" min="0" max="1.25" step="0.01" value="${tr.vol}" class="tr-vol-slider flex-1 daw-slider" />
-              <span id="tr-db-${tr.id}" class="font-mono text-[9px] text-slate-400 w-9 text-right">${dbVal}dB</span>
-            </div>
-
-            <div class="hidden sm:flex items-center gap-1 w-16">
-              <input data-pan="${tr.id}" type="range" min="-1" max="1" step="0.05" value="${tr.pan}" class="tr-pan-slider w-10 daw-slider" title="Pan L/R" />
-              <span id="tr-pan-${tr.id}" class="font-mono text-[9px] text-slate-400 w-5">${panStr}</span>
-            </div>
-
-            ${quickActionHtml}
-          </div>
-        `;
-
-        const controlArea = headerDiv.querySelector('.tr-edit-btn')?.parentElement;
-        if (controlArea) {
-          const rackBtn = document.createElement('button');
-          rackBtn.className = 'px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-200 border border-amber-500/35 text-[9px] font-bold';
-          rackBtn.textContent = `FX ${Array.isArray(tr.plugins) ? tr.plugins.length : 0}`;
-          rackBtn.title = 'Spur-Plugins und Effekte verwalten';
-          rackBtn.addEventListener('click', () => openTrackPluginRack(tr.id));
-          controlArea.insertBefore(rackBtn, controlArea.querySelector('.tr-del-btn'));
-          if (tr.type === 'midi') {
-            const instrument = document.createElement('select');
-            instrument.className = 'max-w-[92px] bg-daw-surface text-[9px] text-purple-200 border border-purple-500/40 rounded px-1 py-0.5';
-            instrument.title = 'Instrument dieser MIDI-Spur';
-            [['none','— Kein Instrument —'],['supersaw','Supersaw'],['pluck','Pluck'],['acid303','Acid 303'],['rapBell','Bell'],['subBass','Sub Bass']].forEach(([v,l]) => { const o=document.createElement('option'); o.value=v; o.textContent=l; instrument.appendChild(o); });
-            instrument.value = tr.instrumentPreset || dawState.synthPreset;
-            instrument.addEventListener('change', () => { tr.instrumentPreset=instrument.value; toast(instrument.value==='none' ? `Instrument auf „${tr.name}“ entfernt.` : `Instrument für „${tr.name}“ geändert.`, 'success'); });
-            controlArea.insertBefore(instrument, rackBtn);
-          }
-        }
-
-        const laneDiv = document.createElement('div');
-        laneDiv.className = 'col-span-12 lg:col-span-8 xl:col-span-9 relative h-14 bg-daw-bg/90 overflow-hidden flex items-stretch';
-
-        const clipsOverlay = document.createElement('div');
-        clipsOverlay.className = 'absolute inset-0 flex items-stretch z-10 pointer-events-none';
-        dawState.sections.forEach((sec, sIdx) => {
-          const pct = ((sec.bars + (sIdx === dawState.sections.length - 1 ? (totalBars - audioEngine.getSectionBarsSum()) : 0)) / totalBars) * 100;
-          const isClipOn = tr.sectionClips[sec.id] !== false;
-          const clipBox = document.createElement('div');
-          clipBox.style.width = `${pct}%`;
-          clipBox.className = `border-r border-daw-border/60 relative transition ${isClipOn ? 'bg-transparent' : 'bg-black/65'}`;
-
-          const togglePill = document.createElement('button');
-          togglePill.title = `Spur in „${sec.name}“ an/ausschalten`;
-          togglePill.className = `pointer-events-auto absolute top-1 right-1 px-1 py-0.2 rounded text-[8px] font-mono font-bold border transition ${
-            isClipOn ? 'bg-daw-panel/80 text-slate-300 border-daw-border hover:border-cyan-400' : 'bg-rose-950/80 text-rose-300 border-rose-500/40'
-          }`;
-          togglePill.textContent = isClipOn ? 'CLIP' : 'OFF';
-          togglePill.addEventListener('click', (e) => {
-            e.stopPropagation();
-            tr.sectionClips[sec.id] = !isClipOn;
-            renderMultiTrackLanes();
-          });
-
-          clipBox.appendChild(togglePill);
-          clipsOverlay.appendChild(clipBox);
-        });
-
-        const canvas = document.createElement('canvas');
-        canvas.dataset.trackId = tr.id;
-        canvas.className = 'track-lane-canvas w-full h-full block cursor-crosshair';
-        canvas.addEventListener('click', (e) => {
-          const rect = canvas.getBoundingClientRect();
-          const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-          const totalSec = totalBars * 4 * (60 / dawState.bpm);
-          audioEngine.seek(ratio * totalSec);
-        });
-
-        laneDiv.appendChild(canvas);
-        laneDiv.appendChild(clipsOverlay);
-
-        row.appendChild(headerDiv);
-        row.appendChild(laneDiv);
-        container.appendChild(row);
-      });
-
-      document.querySelectorAll('.tr-mute-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tr = dawState.tracks.find(t => t.id === btn.dataset.mute);
-          if (tr) {
-            tr.mute = !tr.mute;
-            audioEngine.syncAudioParams();
-            renderMultiTrackLanes();
-            renderVerticalMixer();
-          }
-        });
-      });
-
-      document.querySelectorAll('.tr-solo-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tr = dawState.tracks.find(t => t.id === btn.dataset.solo);
-          if (tr) {
-            tr.solo = !tr.solo;
-            audioEngine.syncAudioParams();
-            renderMultiTrackLanes();
-            renderVerticalMixer();
-          }
-        });
-      });
-
-      document.querySelectorAll('.tr-vol-slider').forEach(sl => {
-        sl.addEventListener('input', () => {
-          const tr = dawState.tracks.find(t => t.id === sl.dataset.vol);
-          if (tr) {
-            tr.vol = parseFloat(sl.value);
-            const db = tr.vol <= 0.001 ? '-∞' : (20 * Math.log10(tr.vol)).toFixed(1);
-            const lbl = document.getElementById(`tr-db-${tr.id}`);
-            if (lbl) lbl.textContent = `${db}dB`;
-            audioEngine.syncAudioParams();
-          }
-        });
-      });
-
-      document.querySelectorAll('.tr-pan-slider').forEach(sl => {
-        sl.addEventListener('input', () => {
-          const tr = dawState.tracks.find(t => t.id === sl.dataset.pan);
-          if (tr) {
-            tr.pan = parseFloat(sl.value);
-            const pStr = tr.pan === 0 ? 'C' : (tr.pan < 0 ? `L${Math.abs(Math.round(tr.pan * 100))}` : `R${Math.round(tr.pan * 100)}`);
-            const lbl = document.getElementById(`tr-pan-${tr.id}`);
-            if (lbl) lbl.textContent = pStr;
-            audioEngine.syncAudioParams();
-          }
-        });
-      });
-
-      document.querySelectorAll('.tr-vc-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tr = dawState.tracks.find(t => t.id === btn.dataset.vc);
-          if (tr) {
-            tr.vocalCleanup = !tr.vocalCleanup;
-            tr.lowCut = tr.vocalCleanup;
-            audioEngine.syncAudioParams();
-            renderMultiTrackLanes();
-            toast(`Vocal-Cleanup für „${tr.name}“: ${tr.vocalCleanup ? 'AN' : 'AUS'}`, 'info');
-          }
-        });
-      });
-
-      document.querySelectorAll('.tr-load-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          dawState.pendingAudioTargetTrackId = btn.dataset.loadaudio;
-          document.getElementById('single-track-audio-input').click();
-        });
-      });
-
-      document.querySelectorAll('.tr-a2m-btn').forEach(btn => {
-        btn.addEventListener('click', () => extractMidiFromStem(btn.dataset.a2m));
-      });
-
-      document.querySelectorAll('.tr-selmidi-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          selectMidiTrackForEditor(btn.dataset.selmidi);
-          switchBottomTab('midi');
-        });
-      });
-
-      document.querySelectorAll('.tr-edit-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tr = dawState.tracks.find(t => t.id === btn.dataset.trackid);
-          if (tr && tr.type === 'midi') selectMidiTrackForEditor(tr.id);
-          switchBottomTab(btn.dataset.edit);
-        });
-      });
-
-      document.querySelectorAll('.tr-del-btn').forEach(btn => {
-        let armDel = null;
-        btn.addEventListener('click', () => {
-          if (armDel) {
-            clearTimeout(armDel);
-            armDel = null;
-            deleteTrack(btn.dataset.del);
-            return;
-          }
-          btn.textContent = 'Löschen?';
-          armDel = setTimeout(() => {
-            armDel = null;
-            btn.textContent = '✕';
-          }, 2800);
-        });
-      });
-
-      document.querySelectorAll('.tr-mic-arm-btn').forEach(btn => {
-        btn.addEventListener('click', () => audioEngine.toggleMicRecording(btn.dataset.micrec));
-      });
-
-      renderAllTrackCanvases();
-      updateClockLCD();
-    }
-
-    function renderAllTrackCanvases() {
-      const totalBars = audioEngine.getTotalArrangementBars();
-      const totalSec = totalBars * 4 * (60 / dawState.bpm);
-      const trimSec = dawState.startOffsetMs / 1000;
-      const playRatio = totalSec > 0 ? ((dawState.playheadSec % totalSec) / totalSec) : 0;
-
-      const trackById = new Map(dawState.tracks.map(t => [t.id, t]));
-      document.querySelectorAll('.track-lane-canvas').forEach(canvas => {
-        const trId = canvas.dataset.trackId;
-        const tr = trackById.get(trId);
-        if (!tr) return;
-
-        const rect = canvas.getBoundingClientRect();
-        // Skip lanes outside the viewport; they are painted when scrolled into view.
-        if (rect.bottom < 0 || rect.top > window.innerHeight || rect.width <= 0) return;
-        const dpr = Math.min(1.5, window.devicePixelRatio || 1);
-        const w = Math.max(100, Math.floor(rect.width));
-        const h = Math.max(40, Math.floor(rect.height));
-
-        if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-          canvas.width = w * dpr;
-          canvas.height = h * dpr;
-        }
-
-        const ctx = canvas.getContext('2d');
-        ctx.save();
-        ctx.scale(dpr, dpr);
-        ctx.clearRect(0, 0, w, h);
-
-        const barPx = w / totalBars;
-        const gridStride = barPx >= 6 ? 1 : (barPx * 4 >= 6 ? 4 : 16);
-        for (let b = gridStride; b < totalBars; b += gridStride) {
-          const x = (b / totalBars) * w;
-          ctx.strokeStyle = b % 4 === 0 ? 'rgba(148,163,184,0.22)' : 'rgba(148,163,184,0.08)';
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, h);
-          ctx.stroke();
-        }
-
-        ctx.globalAlpha = tr.mute ? 0.25 : 0.9;
-        ctx.fillStyle = tr.color;
-
-        if (tr.type === 'audio' || tr.type === 'stem' || tr.type === 'mic') {
-          const buf = dawState.buffers[tr.id];
-          if (buf) {
-            const data = buf.getChannelData(0);
-            const startSamp = Math.floor(trimSec * buf.sampleRate);
-            const viewSamps = Math.floor(totalSec * buf.sampleRate);
-            const spp = Math.max(1, Math.floor(viewSamps / w));
-            const midY = h / 2;
-
-            for (let x = 0; x < w; x++) {
-              const idx = startSamp + x * spp;
-              if (idx >= data.length) break;
-              let pk = 0;
-              const step = Math.max(1, Math.floor(spp / 6));
-              for (let j = 0; j < spp && idx + j < data.length; j += step) {
-                const v = Math.abs(data[idx + j]);
-                if (v > pk) pk = v;
-              }
-              const bh = Math.max(1.5, pk * h * 0.85);
-              ctx.fillRect(x, midY - bh / 2, 1.5, bh);
-            }
-          } else {
-            ctx.fillStyle = 'rgba(148,163,184,0.45)';
-            ctx.font = '10px JetBrains Mono, monospace';
-            ctx.fillText(tr.type === 'mic' ? 'Bereit für Mikrofon-Aufnahme (● Rec)...' : 'Leere Audio-Spur – tippe „📂 Audio“ zum Laden', 10, h / 2 + 3);
-          }
-        } else if (tr.type === 'midi') {
-          const notes = tr.id === dawState.activeMidiTrackId ? dawState.midiNotes : (tr.midiNotes || []);
-          const totalSteps = totalBars * 16;
-          const stepW = w / totalSteps;
-          for (let s = 0; s < totalSteps; s += 32) {
-            notes.forEach(n => {
-              const x = (s + n.start) * stepW;
-              const nw = Math.max(2, n.dur * stepW - 1);
-              const normPitch = (n.pitch - 36) / 36;
-              const y = h - 6 - normPitch * (h - 12);
-              ctx.fillRect(x, y, nw, 3.5);
-            });
-          }
-        } else if (tr.type === 'kick' || tr.type === 'bass' || tr.type === 'fx') {
-          const totalSteps = totalBars * 16;
-          const stepW = w / totalSteps;
-          const pattern = tr.type === 'kick' ? dawState.seqKick : (tr.type === 'bass' ? dawState.seqBass : dawState.seqFx);
-          for (let s = 0; s < totalSteps; s++) {
-            if (pattern[s % 16]) {
-              const x = s * stepW;
-              const bh = tr.type === 'kick' ? h * 0.65 : h * 0.5;
-              ctx.fillRect(x, h - bh - 4, Math.max(2, stepW - 1), bh);
-            }
-          }
-        }
-
-        ctx.globalAlpha = 1.0;
-
-        // Playhead Line
-        const px = playRatio * w;
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(px, 0);
-        ctx.lineTo(px, h);
-        ctx.stroke();
-
-        ctx.restore();
-      });
-    }
-
-    /**
-     * ============================================================================
-     * TAB 1: INTERACTIVE PIANO ROLL & VELOCITY LANE CANVAS
-     * ============================================================================
-     */
-    const PIANO_MIN_MIDI = 36; // C2
-    const PIANO_MAX_MIDI = 71; // B4
-    const PIANO_KEYS_COUNT = PIANO_MAX_MIDI - PIANO_MIN_MIDI + 1; // 36 rows
-    const KEYBOARD_WIDTH = 48;
-
-    let pianoDragState = null;
-
-    function isBlackKey(midi) {
-      return [1, 3, 6, 8, 10].includes(midi % 12);
-    }
-
-    function isNoteInSelectedScale(midi) {
-      const ivs = SCALES[dawState.midiScale] || SCALES.chromatic;
-      const pc = ((midi - dawState.midiRoot) % 12 + 12) % 12;
-      return ivs.includes(pc);
-    }
-
-    function drawPianoRoll() {
-      const canvas = document.getElementById('piano-roll-canvas');
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const w = Math.max(300, Math.floor(rect.width));
-      const h = 360;
-
-      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
-      }
-
-      const ctx = canvas.getContext('2d');
-      ctx.save();
-      ctx.scale(dpr, dpr);
-
-      const rowH = h / PIANO_KEYS_COUNT;
-      const gridW = w - KEYBOARD_WIDTH;
-      const stepW = gridW / 32;
-
-      // 1. Draw Rows (Scale Highlighting + Piano Keyboard on Left)
-      for (let i = 0; i < PIANO_KEYS_COUNT; i++) {
-        const midi = PIANO_MAX_MIDI - i;
-        const y = i * rowH;
-        const black = isBlackKey(midi);
-        const inScale = isNoteInSelectedScale(midi);
-
-        // Grid Row Background
-        if (!inScale && dawState.midiScale !== 'chromatic') {
-          ctx.fillStyle = '#07090e';
-        } else {
-          ctx.fillStyle = black ? '#0d121d' : '#131a29';
-        }
-        ctx.fillRect(KEYBOARD_WIDTH, y, gridW, rowH);
-
-        // Row Horizontal Border
-        ctx.strokeStyle = (midi % 12 === 0) ? 'rgba(56, 189, 248, 0.35)' : 'rgba(40, 51, 74, 0.45)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(KEYBOARD_WIDTH, y + rowH);
-        ctx.lineTo(w, y + rowH);
-        ctx.stroke();
-
-        // Piano Key Left
-        ctx.fillStyle = black ? '#1e293b' : '#e2e8f0';
-        ctx.fillRect(0, y, KEYBOARD_WIDTH - 1, rowH - 0.5);
-
-        if (midi % 12 === 0 || midi === PIANO_MAX_MIDI) {
-          const octave = Math.floor(midi / 12) - 1;
-          const name = NOTE_NAMES[midi % 12] + octave;
-          ctx.fillStyle = black ? '#94a3b8' : '#0f172a';
-          ctx.font = 'bold 8px JetBrains Mono, monospace';
-          ctx.fillText(name, 4, y + rowH - 2);
-        }
-      }
-
-      // 2. Vertical Step Columns (32 steps = 2 Bars)
-      for (let s = 0; s <= 32; s++) {
-        const x = KEYBOARD_WIDTH + s * stepW;
-        ctx.strokeStyle = s === 16
-          ? 'rgba(56, 189, 248, 0.65)'
-          : (s % 4 === 0 ? 'rgba(148, 163, 184, 0.3)' : 'rgba(40, 51, 74, 0.45)');
-        ctx.lineWidth = s === 16 ? 1.5 : 1;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-        ctx.stroke();
-      }
-
-      // 3. Draw MIDI Notes
-      dawState.midiNotes.forEach(note => {
-        if (note.pitch < PIANO_MIN_MIDI || note.pitch > PIANO_MAX_MIDI) return;
-        const rowIdx = PIANO_MAX_MIDI - note.pitch;
-        const x = KEYBOARD_WIDTH + note.start * stepW + 1;
-        const y = rowIdx * rowH + 1;
-        const nw = Math.max(6, note.dur * stepW - 2);
-        const nh = Math.max(4, rowH - 2);
-
-        const grad = ctx.createLinearGradient(x, y, x, y + nh);
-        grad.addColorStop(0, '#c084fc');
-        grad.addColorStop(1, '#7e22ce');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.roundRect(x, y, nw, nh, 3);
-        ctx.fill();
-
-        ctx.strokeStyle = '#f3e8ff';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        // Resize handle indicator on right edge
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillRect(x + nw - 3, y + 2, 2, nh - 4);
-      });
-
-      // 4. Playhead Indicator on Piano Roll
-      const secPer16th = (60 / dawState.bpm) / 4;
-      const playStep32 = (dawState.playheadSec / secPer16th) % 32;
-      const px = KEYBOARD_WIDTH + playStep32 * stepW;
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(px, 0);
-      ctx.lineTo(px, h);
-      ctx.stroke();
-
-      ctx.restore();
-      document.getElementById('midi-note-count').textContent = `${dawState.midiNotes.length} Noten`;
-    }
-
-    function drawVelocityLane() {
-      const canvas = document.getElementById('velocity-canvas');
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const w = Math.max(300, Math.floor(rect.width));
-      const h = Math.max(36, Math.floor(rect.height));
-
-      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
-      }
-
-      const ctx = canvas.getContext('2d');
-      ctx.save();
-      ctx.scale(dpr, dpr);
-      ctx.fillStyle = '#090c12';
-      ctx.fillRect(0, 0, w, h);
-
-      const gridW = w - KEYBOARD_WIDTH;
-      const stepW = gridW / 32;
-
-      for (let s = 0; s < 32; s++) {
-        const x = KEYBOARD_WIDTH + s * stepW;
-        const vel = dawState.stepVelocities[s] || 105;
-        const hasNote = dawState.midiNotes.some(n => n.start === s);
-        const barH = (vel / 127) * (h - 6);
-
-        ctx.fillStyle = hasNote ? '#a855f7' : 'rgba(100, 116, 139, 0.25)';
-        ctx.fillRect(x + 2, h - barH - 2, Math.max(3, stepW - 4), barH);
-      }
-      ctx.restore();
-    }
-
-    function initPianoRollInteractions() {
-      const canvas = document.getElementById('piano-roll-canvas');
-      const velCanvas = document.getElementById('velocity-canvas');
-
-      function getPointerXY(el, e) {
-        const rect = el.getBoundingClientRect();
-        const pt = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
-        return {
-          rect,
-          x: pt.clientX - rect.left,
-          y: pt.clientY - rect.top,
-          isTouch: Boolean(e.touches || e.changedTouches)
-        };
-      }
-
-      canvas.addEventListener('contextmenu', e => e.preventDefault());
-
-      async function handlePianoDown(e) {
-        if (e.cancelable) e.preventDefault();
-        const { rect, x, y, isTouch } = getPointerXY(canvas, e);
-        const rowH = 360 / PIANO_KEYS_COUNT;
-        const rowIdx = Math.max(0, Math.min(PIANO_KEYS_COUNT - 1, Math.floor(y / rowH)));
-        const pitch = PIANO_MAX_MIDI - rowIdx;
-
-        if (x < KEYBOARD_WIDTH) {
-          await audioEngine.ensureCtx();
-          synthMidiVoice(audioEngine.ctx, audioEngine.channelNodes.midiSynth.input, audioEngine.ctx.currentTime, {
-            midiNote: pitch, durationSec: 0.35, velocity: 0.85,
-            preset: dawState.synthPreset, cutoff: dawState.synthCutoff,
-            res: dawState.synthRes, detune: dawState.synthDetune,
-            attackMs: dawState.synthAttackMs, releaseMs: dawState.synthReleaseMs
-          });
-          return;
-        }
-
-        const gridW = rect.width - KEYBOARD_WIDTH;
-        const stepW = gridW / 32;
-        const rawStep = Math.floor((x - KEYBOARD_WIDTH) / stepW);
-        const step = Math.max(0, Math.min(31, rawStep));
-
-        const hitNoteIdx = dawState.midiNotes.findIndex(
-          n => n.pitch === pitch && step >= n.start && step < n.start + n.dur
-        );
-
-        if (hitNoteIdx !== -1) {
-          const hitNote = dawState.midiNotes[hitNoteIdx];
-          const noteRightPx = KEYBOARD_WIDTH + (hitNote.start + hitNote.dur) * stepW;
-          const edgeHitZone = isTouch ? 14 : 8;
-
-          if (e.button === 2 || (noteRightPx - x) > edgeHitZone) {
-            dawState.midiNotes.splice(hitNoteIdx, 1);
-            drawPianoRoll();
-            drawVelocityLane();
-            renderMultiTrackLanes();
-          } else {
-            pianoDragState = { mode: 'resize', note: hitNote };
-          }
-          return;
-        }
-
-        if (e.button === 2) return;
-
-        const finalPitch = quantizeMidiNoteToScale(pitch, dawState.midiRoot, dawState.midiScale);
-        const snapStep = Math.floor(step / dawState.midiGridStep) * dawState.midiGridStep;
-        const newNote = {
-          id: Date.now() + Math.random(),
-          pitch: finalPitch,
-          start: snapStep,
-          dur: dawState.midiGridStep,
-          vel: dawState.stepVelocities[snapStep] || 108
-        };
-        dawState.midiNotes.push(newNote);
-        pianoDragState = { mode: 'resize', note: newNote };
-
-        await audioEngine.ensureCtx();
-        synthMidiVoice(audioEngine.ctx, audioEngine.channelNodes.midiSynth.input, audioEngine.ctx.currentTime, {
-          midiNote: finalPitch, durationSec: 0.22, velocity: 0.85,
-          preset: dawState.synthPreset, cutoff: dawState.synthCutoff,
-          res: dawState.synthRes, detune: dawState.synthDetune,
-          attackMs: dawState.synthAttackMs, releaseMs: dawState.synthReleaseMs
-        });
-
-        drawPianoRoll();
-        drawVelocityLane();
-        renderMultiTrackLanes();
-      }
-
-      function handlePianoMove(e) {
-        if (!pianoDragState) return;
-        if (e.cancelable) e.preventDefault();
-        const { rect, x } = getPointerXY(canvas, e);
-        const gridW = rect.width - KEYBOARD_WIDTH;
-        const stepW = gridW / 32;
-        const hoverStep = Math.max(0, Math.min(32, Math.ceil((x - KEYBOARD_WIDTH) / stepW)));
-
-        if (pianoDragState.mode === 'resize') {
-          const newDur = Math.max(1, Math.min(32 - pianoDragState.note.start, hoverStep - pianoDragState.note.start));
-          pianoDragState.note.dur = newDur;
-          drawPianoRoll();
-          renderMultiTrackLanes();
-        }
-      }
-
-      canvas.addEventListener('mousedown', handlePianoDown);
-      canvas.addEventListener('touchstart', handlePianoDown, { passive: false });
-      window.addEventListener('mousemove', handlePianoMove);
-      window.addEventListener('touchmove', handlePianoMove, { passive: false });
-      window.addEventListener('mouseup', () => { pianoDragState = null; });
-      window.addEventListener('touchend', () => { pianoDragState = null; });
-      window.addEventListener('touchcancel', () => { pianoDragState = null; });
-
-      let velDragging = false;
-      function updateVelAtPointer(e) {
-        if (e.cancelable) e.preventDefault();
-        const { rect, x, y } = getPointerXY(velCanvas, e);
-        if (x < KEYBOARD_WIDTH) return;
-        const stepW = (rect.width - KEYBOARD_WIDTH) / 32;
-        const step = Math.max(0, Math.min(31, Math.floor((x - KEYBOARD_WIDTH) / stepW)));
-        const vel = Math.max(15, Math.min(127, Math.round((1 - y / rect.height) * 127)));
-        dawState.stepVelocities[step] = vel;
-        dawState.midiNotes.filter(n => n.start === step).forEach(n => n.vel = vel);
-        document.getElementById('vel-hover-readout').textContent = `Step ${step + 1} · Vel: ${vel}`;
-        drawVelocityLane();
-      }
-
-      velCanvas.addEventListener('mousedown', (e) => { velDragging = true; updateVelAtPointer(e); });
-      velCanvas.addEventListener('touchstart', (e) => { velDragging = true; updateVelAtPointer(e); }, { passive: false });
-      window.addEventListener('mousemove', (e) => { if (velDragging) updateVelAtPointer(e); });
-      window.addEventListener('touchmove', (e) => { if (velDragging) updateVelAtPointer(e); }, { passive: false });
-      window.addEventListener('mouseup', () => { velDragging = false; });
-      window.addEventListener('touchend', () => { velDragging = false; });
-    }
-
-    function applyArpGenerator(type) {
-      const rootBase = 48 + dawState.midiRoot; // C3..B3
-      const scaleIvs = SCALES[dawState.midiScale] || SCALES.minor;
-      const notes = [];
-      let idGen = Date.now();
-
-      if (type === 'tranceUp') {
-        const pattern = [0, 2, 4, 7, 4, 2, 0, 4];
-        for (let s = 0; s < 32; s++) {
-          const iv = scaleIvs[pattern[s % pattern.length] % scaleIvs.length];
-          const oct = s >= 16 ? 12 : 0;
-          notes.push({ id: idGen++, pitch: Math.min(71, rootBase + iv + oct), start: s, dur: 1, vel: s % 4 === 0 ? 118 : 96 });
-        }
-      } else if (type === 'darkDown') {
-        const pattern = [7, 4, 3, 2, 0, 3, 2, 0];
-        for (let s = 0; s < 32; s += 2) {
-          const iv = scaleIvs[pattern[(s / 2) % pattern.length] % scaleIvs.length];
-          notes.push({ id: idGen++, pitch: rootBase + iv, start: s, dur: 1, vel: 112 });
-        }
-      } else if (type === 'tranceGate') {
-        const chord = [0, 3, 7, 12];
-        const gateSteps = [0, 2, 3, 6, 8, 10, 12, 14, 16, 18, 19, 22, 24, 26, 28, 30];
-        gateSteps.forEach(st => {
-          chord.forEach(semi => {
-            notes.push({ id: idGen++, pitch: Math.min(71, rootBase + semi), start: st, dur: 1, vel: 105 });
-          });
-        });
-      } else if (type === 'offbeatStab') {
-        const chord = [0, 3, 7];
-        for (let s = 2; s < 32; s += 4) {
-          chord.forEach(semi => {
-            notes.push({ id: idGen++, pitch: rootBase + semi, start: s, dur: 2, vel: 116 });
-          });
-        }
-      } else if (type === 'rapBells') {
-        const seq = [
-          { s: 0, iv: 0, d: 3 }, { s: 4, iv: 7, d: 2 }, { s: 7, iv: 8, d: 3 },
-          { s: 12, iv: 5, d: 4 }, { s: 16, iv: 0, d: 3 }, { s: 20, iv: 7, d: 2 },
-          { s: 23, iv: 10, d: 3 }, { s: 28, iv: 7, d: 4 }
-        ];
-        seq.forEach(item => {
-          notes.push({ id: idGen++, pitch: Math.min(71, rootBase + 12 + item.iv), start: item.s, dur: item.d, vel: 110 });
-        });
-      }
-
-      dawState.midiNotes = notes;
-      syncActiveMidiTrackFromState();
-      drawPianoRoll();
-      drawVelocityLane();
-      renderMultiTrackLanes();
-      toast(`MIDI-Pattern „${type}“ generiert!`, 'success');
-    }
-
-    /**
-     * ============================================================================
-     * TAB 2: DRUM-, 808- & FX-SEQUENCER GRID RENDERER
-     * ============================================================================
-     */
-    function renderDrumSequencerGrids() {
-      const kGrid = document.getElementById('grid-seq-kick');
-      const bGrid = document.getElementById('grid-seq-bass');
-      const hGrid = document.getElementById('grid-seq-hat');
-      const fGrid = document.getElementById('grid-seq-fx');
-
-      kGrid.innerHTML = ''; bGrid.innerHTML = ''; hGrid.innerHTML = ''; fGrid.innerHTML = '';
-
-      for (let i = 0; i < 16; i++) {
-        const beatMark = i % 4 === 0;
-
-        // Kick Pad
-        const kp = document.createElement('button');
-        kp.dataset.step = i;
-        kp.className = `seq-pad h-8 rounded border text-[10px] font-mono font-bold ${
-          dawState.seqKick[i] ? 'on-kick' : (beatMark ? 'bg-daw-surface border-slate-600 text-slate-300' : 'bg-daw-bg border-daw-border text-slate-600')
-        }`;
-        kp.textContent = i + 1;
-        kp.addEventListener('click', () => {
-          dawState.seqKick[i] = dawState.seqKick[i] ? 0 : 1;
-          renderDrumSequencerGrids();
-          renderAllTrackCanvases();
-        });
-        kGrid.appendChild(kp);
-
-        // Bass / 808 Pad (Left click toggles step, Right click cycles semitone offset +0/+3/+5/+7/+12)
-        const bp = document.createElement('button');
-        bp.dataset.step = i;
-        const pOff = dawState.seqBassPitch[i] || 0;
-        bp.className = `seq-pad h-8 rounded border text-[10px] font-mono font-bold ${
-          dawState.seqBass[i] ? 'on-bass' : (beatMark ? 'bg-daw-surface border-slate-600 text-slate-300' : 'bg-daw-bg border-daw-border text-slate-600')
-        }`;
-        bp.textContent = dawState.seqBass[i] ? (pOff > 0 ? `+${pOff}` : '●') : (i + 1);
-        bp.addEventListener('click', () => {
-          dawState.seqBass[i] = dawState.seqBass[i] ? 0 : 1;
-          renderDrumSequencerGrids();
-          renderAllTrackCanvases();
-        });
-        bp.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-          const offsets = [0, 3, 5, 7, 12];
-          const next = offsets[(offsets.indexOf(pOff) + 1) % offsets.length];
-          dawState.seqBassPitch[i] = next;
-          dawState.seqBass[i] = 1;
-          renderDrumSequencerGrids();
-        });
-        bGrid.appendChild(bp);
-
-        // Hat / Clap Pad
-        const hp = document.createElement('button');
-        hp.dataset.step = i;
-        hp.className = `seq-pad h-7 rounded border text-[10px] font-mono font-bold ${
-          dawState.seqHat[i] ? 'on-hat' : (beatMark ? 'bg-daw-surface border-slate-600 text-slate-300' : 'bg-daw-bg border-daw-border text-slate-600')
-        }`;
-        hp.textContent = (i === 4 || i === 12) ? 'CP' : (i + 1);
-        hp.addEventListener('click', () => {
-          dawState.seqHat[i] = dawState.seqHat[i] ? 0 : 1;
-          renderDrumSequencerGrids();
-        });
-        hGrid.appendChild(hp);
-
-        // FX Trigger Pad
-        const fp = document.createElement('button');
-        fp.dataset.step = i;
-        fp.className = `seq-pad h-7 rounded border text-[10px] font-mono font-bold ${
-          dawState.seqFx[i] ? 'on-fx' : (beatMark ? 'bg-daw-surface border-slate-600 text-slate-300' : 'bg-daw-bg border-daw-border text-slate-600')
-        }`;
-        fp.textContent = i === 0 ? 'IMP' : (i === 8 ? 'RIS' : (i + 1));
-        fp.addEventListener('click', () => {
-          dawState.seqFx[i] = dawState.seqFx[i] ? 0 : 1;
-          renderDrumSequencerGrids();
-          renderAllTrackCanvases();
-        });
-        fGrid.appendChild(fp);
-      }
-    }
-
-    function updateStepHighlightUI(step16) {
-      document.querySelectorAll('.seq-pad').forEach(pad => {
-        const s = parseInt(pad.dataset.step, 10);
-        if (s === step16) pad.classList.add('current-play-step');
-        else pad.classList.remove('current-play-step');
-      });
-    }
-
-    /**
-     * ============================================================================
-     * TAB 4: VERTICAL CHANNEL MIXER RENDERER
-     * ============================================================================
-     */
-    function renderVerticalMixer() {
-      const container = document.getElementById('vertical-mixer-strips');
-      container.innerHTML = '';
-
-      dawState.tracks.forEach(tr => {
-        const strip = document.createElement('div');
-        strip.className = 'w-20 bg-daw-surface rounded-xl border border-daw-border p-2 flex flex-col items-center justify-between gap-1.5';
-
-        const dbTxt = tr.vol <= 0.001 ? '-∞' : (20 * Math.log10(tr.vol)).toFixed(1);
-        strip.innerHTML = `
-          <div class="w-full text-center">
-            <div class="text-[10px] font-mono font-extrabold px-1 rounded text-slate-950 mb-0.5" style="background:${tr.color}">${tr.num}</div>
-            <div class="text-[10px] font-bold text-white truncate" title="${tr.name}">${tr.name}</div>
-          </div>
-
-          <!-- Vertical Meter + Fader -->
-          <div class="flex items-center justify-center gap-2 my-1">
-            <div class="w-2 h-28 bg-daw-bg rounded-full overflow-hidden border border-daw-border flex flex-col justify-end">
-              <div id="vmix-meter-${tr.id}" class="w-full h-0 transition-all duration-75" style="background:${tr.color}"></div>
-            </div>
-            <input data-vmixvol="${tr.id}" type="range" min="0" max="1.25" step="0.01" value="${tr.vol}" class="vmix-fader vertical-fader" />
-          </div>
-
-          <div id="vmix-db-${tr.id}" class="font-mono text-[9px] text-slate-300">${dbTxt} dB</div>
-
-          <div class="flex items-center gap-1 w-full">
-            <button data-vmixmute="${tr.id}" class="vmix-mute flex-1 py-0.5 rounded text-[9px] font-bold border ${tr.mute ? 'bg-rose-500 text-white border-rose-400' : 'bg-daw-bg text-slate-400 border-daw-border'}">M</button>
-            <button data-vmixsolo="${tr.id}" class="vmix-solo flex-1 py-0.5 rounded text-[9px] font-bold border ${tr.solo ? 'bg-amber-400 text-slate-950 border-amber-300' : 'bg-daw-bg text-slate-400 border-daw-border'}">S</button>
-          </div>
-        `;
-        container.appendChild(strip);
-      });
-
-      document.querySelectorAll('.vmix-fader').forEach(f => {
-        f.addEventListener('input', () => {
-          const tr = dawState.tracks.find(t => t.id === f.dataset.vmixvol);
-          if (tr) {
-            tr.vol = parseFloat(f.value);
-            const db = tr.vol <= 0.001 ? '-∞' : (20 * Math.log10(tr.vol)).toFixed(1);
-            document.getElementById(`vmix-db-${tr.id}`).textContent = `${db} dB`;
-            audioEngine.syncAudioParams();
-            renderMultiTrackLanes();
-          }
-        });
-      });
-
-      document.querySelectorAll('.vmix-mute').forEach(b => {
-        b.addEventListener('click', () => {
-          const tr = dawState.tracks.find(t => t.id === b.dataset.vmixmute);
-          if (tr) {
-            tr.mute = !tr.mute;
-            audioEngine.syncAudioParams();
-            renderVerticalMixer();
-            renderMultiTrackLanes();
-          }
-        });
-      });
-
-      document.querySelectorAll('.vmix-solo').forEach(b => {
-        b.addEventListener('click', () => {
-          const tr = dawState.tracks.find(t => t.id === b.dataset.vmixsolo);
-          if (tr) {
-            tr.solo = !tr.solo;
-            audioEngine.syncAudioParams();
-            renderVerticalMixer();
-            renderMultiTrackLanes();
-          }
-        });
-      });
-    }
-
-    function updateAudioToMidiDropdown() {
-      const sel = document.getElementById('select-a2m-source');
-      if (!sel) return;
-      sel.innerHTML = '';
-      const audioTracks = dawState.tracks.filter(t => t.type === 'audio' || t.type === 'stem' || t.type === 'mic');
-      if (audioTracks.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Keine Audio-Spur vorhanden';
-        sel.appendChild(opt);
-        return;
-      }
-      audioTracks.forEach(tr => {
-        const opt = document.createElement('option');
-        opt.value = tr.id;
-        opt.textContent = `${tr.num} | ${tr.name}`;
-        sel.appendChild(opt);
-      });
-    }
-
-    /**
-     * ============================================================================
-     * REAL-TIME ANIMATION LOOP (PLAYHEAD, CLOCK, METERS, FFT SPECTRUM)
-     * ============================================================================
-     */
-    let lastHeavyUiPaint = 0;
-    function uiAnimationTick(now = 0) {
-      // Mobile/WebView: keep the animation loop light as track count grows.
-      // The transport clock and arrangement canvases need not be redrawn 60 times/sec.
-      if (dawState.isPlaying && now - lastHeavyUiPaint >= 90) {
-        lastHeavyUiPaint = now;
-        updateClockLCD();
-        renderAllTrackCanvases();
-        if (dawState.activeTab === 'midi') drawPianoRoll();
-      }
-
-      if (audioEngine.ctx) {
-        const buf = new Uint8Array(128);
-
-        // Update Vertical Mixer Meters
-        if (dawState.activeTab === 'mixer') {
-          dawState.tracks.forEach(tr => {
-            const node = audioEngine.channelNodes[tr.id];
-            const el = document.getElementById(`vmix-meter-${tr.id}`);
-            if (node && el) {
-              node.analyser.getByteTimeDomainData(buf);
-              let sum = 0;
-              for (let i = 0; i < buf.length; i++) {
-                const v = (buf[i] - 128) / 128;
-                sum += v * v;
-              }
-              const rms = Math.sqrt(sum / buf.length);
-              el.style.height = `${Math.min(100, Math.round(rms * 310))}%`;
-            }
-          });
-
-          // Sidechain GR Meter
-          const dt = (performance.now() - dawState.lastDuckTime) / 1000;
-          const rel = Math.max(0.05, dawState.scReleaseMs / 1000);
-          const gr = dt < rel ? dawState.lastDuckDb * (1 - dt / rel) : 0;
-          document.getElementById('mixer-sc-gr-db').textContent = `-${gr.toFixed(1)} dB`;
-          document.getElementById('mixer-sc-gr-bar').style.width = `${Math.min(100, (gr / 18) * 100)}%`;
-
-          // Master Peak & FFT Spectrum Analyzer
-          if (audioEngine.masterAnalyser) {
-            audioEngine.masterAnalyser.getByteTimeDomainData(buf);
-            let sum = 0;
-            for (let i = 0; i < buf.length; i++) {
-              const v = (buf[i] - 128) / 128;
-              sum += v * v;
-            }
-            const rms = Math.sqrt(sum / buf.length);
-            const db = rms > 0.001 ? (20 * Math.log10(rms)).toFixed(1) : '-∞';
-            document.getElementById('master-peak-db').textContent = `${db} dB`;
-
-            drawSpectrumAnalyzer(audioEngine.masterAnalyser);
-          }
-        }
-
-        // Mic Input Level Meter
-        if (dawState.isRecordingMic && audioEngine.micAnalyser) {
-          audioEngine.micAnalyser.getByteTimeDomainData(buf);
-          let sum = 0;
-          for (let i = 0; i < buf.length; i++) {
-            const v = (buf[i] - 128) / 128;
-            sum += v * v;
-          }
-          const rms = Math.sqrt(sum / buf.length);
-          document.getElementById('mic-vu-fill').style.width = `${Math.min(100, rms * 340)}%`;
-
-          const recSec = (performance.now() - dawState.micRecStartTime) / 1000;
-          document.getElementById('mic-rec-clock').textContent = formatTimeStr(recSec);
-        }
-      }
-
-      requestAnimationFrame(uiAnimationTick);
-    }
-
-    function drawSpectrumAnalyzer(analyser) {
-      const canvas = document.getElementById('spectrum-canvas');
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const w = Math.max(120, Math.floor(rect.width));
-      const h = Math.max(60, Math.floor(rect.height));
-      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
-      }
-
-      const freqData = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(freqData);
-
-      const ctx = canvas.getContext('2d');
-      ctx.save();
-      ctx.scale(dpr, dpr);
-      ctx.fillStyle = '#090c12';
-      ctx.fillRect(0, 0, w, h);
-
-      const bars = 40;
-      const barW = w / bars;
-      for (let i = 0; i < bars; i++) {
-        const val = freqData[i] / 255;
-        const bh = val * (h - 6);
-        const grad = ctx.createLinearGradient(0, h, 0, 0);
-        grad.addColorStop(0, '#38bdf8');
-        grad.addColorStop(0.6, '#a855f7');
-        grad.addColorStop(1, '#f59e0b');
-        ctx.fillStyle = grad;
-        ctx.fillRect(i * barW + 1, h - bh, Math.max(2, barW - 2), bh);
-      }
-      ctx.restore();
-    }
-
-    function formatTimeStr(sec) {
-      const m = Math.floor(sec / 60);
-      const rem = sec % 60;
-      const s = Math.floor(rem);
-      const t = Math.floor((rem - s) * 10);
-      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${t}`;
-    }
-
-    function updateClockLCD() {
-      const s16 = (60 / dawState.bpm) / 4;
-      const total16 = Math.floor(dawState.playheadSec / s16);
-      const bar = Math.floor(total16 / 16) + 1;
-      const beat = Math.floor((total16 % 16) / 4) + 1;
-      const step = (total16 % 4) + 1;
-
-      document.getElementById('lcd-position').textContent =
-        `${String(bar).padStart(2, '0')} : ${beat} : ${String(step).padStart(2, '0')}`;
-      document.getElementById('lcd-time').textContent = formatTimeStr(dawState.playheadSec);
-
-      // Gesamtlänge: längste Audiodatei, sonst Länge des Arrangements
-      const totalEl = document.getElementById('lcd-total');
-      if (totalEl) {
-        const contentSec = audioEngine.getContentDurationSec();
-        const arrSec = audioEngine.getTotalArrangementBars() * 4 * (60 / dawState.bpm);
-        totalEl.textContent = formatTimeStr(contentSec > 0 ? contentSec : arrSec);
-      }
-    }
-
-    function updatePlayButtonUI() {
-      const btn = document.getElementById('btn-play');
-      const iPlay = document.getElementById('icon-play');
-      const iPause = document.getElementById('icon-pause');
-      const lbl = document.getElementById('lbl-play');
-      if (dawState.isPlaying) {
-        iPlay.classList.add('hidden');
-        iPause.classList.remove('hidden');
-        lbl.textContent = 'Pause';
-        btn.classList.replace('bg-emerald-500', 'bg-amber-400');
-      } else {
-        iPlay.classList.remove('hidden');
-        iPause.classList.add('hidden');
-        lbl.textContent = 'Play';
-        btn.classList.replace('bg-amber-400', 'bg-emerald-500');
-      }
-    }
-
-    function updateMicUI() {
-      const dot = document.getElementById('mic-rec-dot');
-      const lbl = document.getElementById('lbl-mic-btn');
-      if (dawState.isRecordingMic) {
-        dot.className = 'w-3 h-3 rounded-full bg-rose-500 animate-ping';
-        lbl.textContent = '■ Aufnahme stoppen & speichern';
-      } else {
-        dot.className = 'w-3 h-3 rounded-full bg-slate-600';
-        lbl.textContent = '● Aufnahme starten';
-        document.getElementById('mic-vu-fill').style.width = '0%';
-      }
-      renderMultiTrackLanes();
-    }
-
-    function switchBottomTab(tabKey) {
-      dawState.activeTab = tabKey;
-      document.querySelectorAll('.dock-tab-btn').forEach(btn => {
-        const active = btn.dataset.tab === tabKey;
-        btn.className = active
-          ? 'dock-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-500/25 text-purple-200 border border-purple-500/50 transition flex items-center gap-1.5'
-          : 'dock-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:bg-daw-elevated border border-transparent transition flex items-center gap-1.5';
-      });
-      document.querySelectorAll('.dock-tab-panel').forEach(panel => {
-        panel.classList.toggle('hidden', panel.id !== `tab-panel-${tabKey}`);
-      });
-
-      if (tabKey === 'midi') {
-        drawPianoRoll();
-        drawVelocityLane();
-      } else if (tabKey === 'mixer') {
-        renderVerticalMixer();
-      }
-    }
-
-    /**
-     * ============================================================================
-     * INITIALIZATION & EVENT BINDINGS
-     * ============================================================================
-     */
-    window.addEventListener('DOMContentLoaded', () => {
-      const unlockMobileAudio = () => {
-        if (audioEngine.ctx && audioEngine.ctx.state === 'suspended') {
-          audioEngine.ctx.resume().catch(() => {});
-        }
-      };
-      document.addEventListener('touchstart', unlockMobileAudio, { passive: true });
-      document.addEventListener('pointerdown', unlockMobileAudio, { passive: true });
-
-      renderArrangementHeaderBar();
-      renderMultiTrackLanes();
-      renderDrumSequencerGrids();
-      renderVerticalMixer();
-      updateAudioToMidiDropdown();
-      drawPianoRoll();
-      drawVelocityLane();
-      initPianoRollInteractions();
-      requestAnimationFrame(uiAnimationTick);
-
-      // Transport Controls
-      document.getElementById('btn-play').addEventListener('click', () => {
-        if (dawState.isPlaying) audioEngine.stop(false);
-        else audioEngine.play();
-      });
-      document.getElementById('btn-stop').addEventListener('click', () => audioEngine.stop(true));
-
-      document.getElementById('btn-loop').addEventListener('click', (e) => {
-        dawState.isLooping = !dawState.isLooping;
-        e.currentTarget.textContent = `Loop: ${dawState.isLooping ? 'AN' : 'AUS'}`;
-        if (dawState.isPlaying) audioEngine.seek(dawState.playheadSec);
-      });
-
-      document.getElementById('btn-metronome').addEventListener('click', (e) => {
-        dawState.metronomeOn = !dawState.metronomeOn;
-        e.currentTarget.className = dawState.metronomeOn
-          ? 'px-2 py-1.5 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-500/40 text-[11px] font-semibold transition'
-          : 'px-2 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-400 border border-daw-border text-[11px] font-semibold transition';
-      });
-
-      // Spacebar Play/Pause
-      window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' && !['INPUT', 'SELECT'].includes(document.activeElement.tagName)) {
-          e.preventDefault();
-          if (dawState.isPlaying) audioEngine.stop(false);
-          else audioEngine.play();
-        }
-      });
-
-      // BPM & Tap Tempo
-      document.getElementById('input-bpm').addEventListener('change', (e) => {
-        dawState.bpm = Math.max(60, Math.min(180, parseInt(e.target.value, 10) || 120));
-        e.target.value = dawState.bpm;
-        renderMultiTrackLanes();
-        updateClockLCD();
-        if (dawState.isPlaying) audioEngine.seek(dawState.playheadSec);
-      });
-
-      let tapTimes = [];
-      document.getElementById('btn-tap-tempo').addEventListener('click', () => {
-        const now = performance.now();
-        tapTimes = tapTimes.filter(t => now - t < 2500);
-        tapTimes.push(now);
-        if (tapTimes.length >= 2) {
-          let diffs = 0;
-          for (let i = 1; i < tapTimes.length; i++) diffs += tapTimes[i] - tapTimes[i - 1];
-          const avgMs = diffs / (tapTimes.length - 1);
-          const tappedBpm = Math.max(60, Math.min(180, Math.round(60000 / avgMs)));
-          dawState.bpm = tappedBpm;
-          document.getElementById('input-bpm').value = tappedBpm;
-          renderAllTrackCanvases();
-        }
-      });
-
-      // Top File & Quick Action Buttons
-      const fileInput = document.getElementById('universal-file-input');
-      document.getElementById('btn-import-files').addEventListener('click', () => fileInput.click());
-      // Immer den zentralen ZIP-/Audio-/MIDI-Importer verwenden (nicht die alte Demo-Importfunktion).
-      fileInput.addEventListener('change', (e) => window.handleUniversalFileImport(e.target.files));
-
-      // Drag & Drop anywhere on Multi-Track area
-      const dropWrapper = document.getElementById('drop-zone-wrapper');
-      dropWrapper.addEventListener('dragover', (e) => e.preventDefault());
-      dropWrapper.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (e.dataTransfer.files?.length) window.handleUniversalFileImport(e.dataTransfer.files);
-      });
-
-      document.getElementById('btn-auto-trim').addEventListener('click', autoTrimSilence);
-      document.getElementById('btn-export-midi').addEventListener('click', exportMidiFile);
-      document.getElementById('btn-export-wav').addEventListener('click', exportMasterWav);
-
-      // Bottom Tab Dock Switching
-      document.querySelectorAll('.dock-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchBottomTab(btn.dataset.tab));
-      });
-
-      // Web MIDI Connect
-      document.getElementById('btn-connect-webmidi').addEventListener('click', connectWebMidi);
-
-      // Tab 1: MIDI Editor Toolbar Bindings
-      document.querySelectorAll('.midi-grid-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          dawState.midiGridStep = parseInt(btn.dataset.grid, 10);
-          document.querySelectorAll('.midi-grid-btn').forEach(b => {
-            const on = parseInt(b.dataset.grid, 10) === dawState.midiGridStep;
-            b.className = on
-              ? 'midi-grid-btn px-2 py-0.5 rounded bg-purple-500/30 text-purple-200 font-bold'
-              : 'midi-grid-btn px-2 py-0.5 rounded text-slate-400 hover:text-white';
-          });
-        });
-      });
-
-      document.querySelectorAll('.midi-trans-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const semi = parseInt(btn.dataset.trans, 10);
-          dawState.midiNotes.forEach(n => {
-            n.pitch = Math.max(PIANO_MIN_MIDI, Math.min(PIANO_MAX_MIDI, n.pitch + semi));
-          });
-          syncActiveMidiTrackFromState();
-          drawPianoRoll();
-          renderMultiTrackLanes();
-        });
-      });
-
-      document.getElementById('select-midi-root').addEventListener('change', (e) => {
-        dawState.midiRoot = parseInt(e.target.value, 10);
-        drawPianoRoll();
-      });
-
-      document.getElementById('select-midi-scale').addEventListener('change', (e) => {
-        dawState.midiScale = e.target.value;
-        drawPianoRoll();
-      });
-
-      document.getElementById('btn-midi-quantize').addEventListener('click', () => {
-        dawState.midiNotes.forEach(n => {
-          n.pitch = quantizeMidiNoteToScale(n.pitch, dawState.midiRoot, dawState.midiScale);
-        });
-        syncActiveMidiTrackFromState();
-        drawPianoRoll();
-        renderMultiTrackLanes();
-        toast('Alle MIDI-Noten auf gewählte Tonleiter quantisiert!', 'success');
-      });
-
-      document.getElementById('btn-apply-arp').addEventListener('click', () => {
-        const val = document.getElementById('select-midi-arp').value;
-        if (val) applyArpGenerator(val);
-      });
-
-      document.getElementById('btn-clear-midi').addEventListener('click', () => {
-        dawState.midiNotes = [];
-        syncActiveMidiTrackFromState();
-        drawPianoRoll();
-        drawVelocityLane();
-        renderMultiTrackLanes();
-      });
-
-      document.getElementById('btn-extract-midi').addEventListener('click', () => {
-        const src = document.getElementById('select-a2m-source').value;
-        extractMidiFromStem(src);
-      });
-
-      document.getElementById('btn-midi-rec-arm').addEventListener('click', (e) => {
-        dawState.midiRecArmed = !dawState.midiRecArmed;
-        e.currentTarget.className = dawState.midiRecArmed
-          ? 'px-2 py-0.5 rounded bg-rose-500 text-white text-[10px] font-mono font-bold animate-pulse'
-          : 'px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-bold';
-      });
-
-      // MIDI Synth Engine Sliders
-      document.getElementById('select-synth-preset').addEventListener('change', (e) => {
-        dawState.synthPreset = e.target.value;
-      });
-      document.getElementById('sl-m-cutoff').addEventListener('input', (e) => {
-        dawState.synthCutoff = parseInt(e.target.value, 10);
-        document.getElementById('lbl-m-cutoff').textContent = `${dawState.synthCutoff} Hz`;
-      });
-      document.getElementById('sl-m-res').addEventListener('input', (e) => {
-        dawState.synthRes = parseFloat(e.target.value);
-        document.getElementById('lbl-m-res').textContent = dawState.synthRes.toFixed(1);
-      });
-      document.getElementById('sl-m-detune').addEventListener('input', (e) => {
-        dawState.synthDetune = parseInt(e.target.value, 10);
-        document.getElementById('lbl-m-detune').textContent = `${dawState.synthDetune} ct`;
-      });
-      document.getElementById('sl-m-att').addEventListener('input', (e) => {
-        dawState.synthAttackMs = parseInt(e.target.value, 10);
-        document.getElementById('lbl-m-att').textContent = `${dawState.synthAttackMs} ms`;
-      });
-      document.getElementById('sl-m-rel').addEventListener('input', (e) => {
-        dawState.synthReleaseMs = parseInt(e.target.value, 10);
-        document.getElementById('lbl-m-rel').textContent = `${dawState.synthReleaseMs} ms`;
-      });
-      document.getElementById('sl-m-sc').addEventListener('input', (e) => {
-        dawState.synthScAmount = parseInt(e.target.value, 10);
-        document.getElementById('lbl-m-sc').textContent = `${dawState.synthScAmount}%`;
-      });
-
-      // Tab 2: Drum-, 808- & FX-Sequencer Controls
-      document.querySelectorAll('.drum-preset-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const p = btn.dataset.drumpreset;
-          if (p === 'techno44') {
-            dawState.seqKick = [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0];
-            dawState.seqBass = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0];
-            dawState.seqHat  = [0,0,1,0, 1,0,1,0, 0,0,1,0, 1,0,1,0];
-            dawState.bassMode = 'rolling';
-          } else if (p === 'hardtrance') {
-            dawState.seqKick = [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,0];
-            dawState.seqBass = [0,1,1,1, 0,1,1,1, 0,1,1,1, 0,1,1,1];
-            dawState.seqHat  = [0,0,1,0, 1,0,1,0, 0,0,1,0, 1,0,1,1];
-            dawState.bassMode = 'rolling';
-          } else if (p === 'boombap') {
-            dawState.seqKick = [1,0,0,0, 0,0,0,1, 0,0,1,0, 0,0,0,0];
-            dawState.seqBass = [1,0,0,0, 0,0,0,1, 0,0,1,0, 0,0,0,0];
-            dawState.seqHat  = [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0];
-            dawState.bassMode = '808';
-          } else if (p === 'trap808') {
-            dawState.seqKick = [1,0,0,1, 0,0,1,0, 0,0,1,0, 0,1,0,0];
-            dawState.seqBass = [1,0,0,1, 0,0,1,0, 0,0,1,0, 0,1,0,1];
-            dawState.seqHat  = [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1];
-            dawState.bassMode = '808';
-          } else {
-            dawState.seqKick.fill(0); dawState.seqBass.fill(0); dawState.seqHat.fill(0); dawState.seqFx.fill(0);
-          }
-          renderDrumSequencerGrids();
-          renderAllTrackCanvases();
-        });
-      });
-
-      document.getElementById('sl-k-tune').addEventListener('input', (e) => {
-        dawState.kickTuneHz = parseInt(e.target.value, 10);
-        document.getElementById('lbl-k-tune').textContent = `${dawState.kickTuneHz} Hz`;
-      });
-      document.getElementById('sl-k-punch').addEventListener('input', (e) => {
-        dawState.kickPunch = parseInt(e.target.value, 10);
-        document.getElementById('lbl-k-punch').textContent = `${dawState.kickPunch}%`;
-      });
-      document.getElementById('sl-k-decay').addEventListener('input', (e) => {
-        dawState.kickDecayMs = parseInt(e.target.value, 10);
-        document.getElementById('lbl-k-decay').textContent = `${dawState.kickDecayMs}ms`;
-      });
-
-      document.getElementById('btn-b-mode-rolling').addEventListener('click', () => {
-        dawState.bassMode = 'rolling';
-        document.getElementById('btn-b-mode-rolling').className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40';
-        document.getElementById('btn-b-mode-808').className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-daw-surface text-slate-400 border border-daw-border';
-      });
-      document.getElementById('btn-b-mode-808').addEventListener('click', () => {
-        dawState.bassMode = '808';
-        document.getElementById('btn-b-mode-808').className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40';
-        document.getElementById('btn-b-mode-rolling').className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-daw-surface text-slate-400 border border-daw-border';
-      });
-      document.getElementById('btn-b-glide').addEventListener('click', (e) => {
-        dawState.bassGlide = !dawState.bassGlide;
-        e.currentTarget.textContent = `Glide: ${dawState.bassGlide ? 'AN' : 'AUS'}`;
-      });
-      document.getElementById('sl-b-drive').addEventListener('input', (e) => {
-        dawState.bassDrive = parseInt(e.target.value, 10);
-        document.getElementById('lbl-b-drive').textContent = `${dawState.bassDrive}%`;
-      });
-      document.getElementById('sl-sc-depth').addEventListener('input', (e) => {
-        dawState.scDepth = parseInt(e.target.value, 10);
-        document.getElementById('lbl-sc-depth').textContent = `${dawState.scDepth}%`;
-      });
-
-      // Manual FX Trigger Buttons
-      const getFxDest = () => {
-        const fxTr = dawState.tracks.find(t => t.type === 'fx');
-        return (fxTr && audioEngine.channelNodes[fxTr.id]?.input) || audioEngine.masterGain;
-      };
-      document.getElementById('btn-trig-riser').addEventListener('click', async () => {
-        await audioEngine.ensureCtx();
-        synthNoiseRiser(audioEngine.ctx, getFxDest(), audioEngine.noiseBuffer, audioEngine.ctx.currentTime, 2.2);
-      });
-      document.getElementById('btn-trig-impact').addEventListener('click', async () => {
-        await audioEngine.ensureCtx();
-        synthSubImpact(audioEngine.ctx, getFxDest(), audioEngine.noiseBuffer, audioEngine.ctx.currentTime);
-      });
-      document.getElementById('btn-trig-revcrash').addEventListener('click', async () => {
-        await audioEngine.ensureCtx();
-        synthReverseCrash(audioEngine.ctx, getFxDest(), audioEngine.noiseBuffer, audioEngine.ctx.currentTime, 0.9);
-      });
-      document.getElementById('btn-auto-drop-fx').addEventListener('click', (e) => {
-        dawState.autoDropFx = !dawState.autoDropFx;
-        e.currentTarget.textContent = `Auto-Drop FX: ${dawState.autoDropFx ? 'AN' : 'AUS'}`;
-      });
-
-      // Tab 3: Vocal-Cleanup & Mic Controls
-      document.getElementById('btn-v-bypass').addEventListener('click', (e) => {
-        dawState.vocalRackActive = !dawState.vocalRackActive;
-        e.currentTarget.textContent = `Rack: ${dawState.vocalRackActive ? 'AKTIV' : 'BYPASS'}`;
-        audioEngine.syncAudioParams();
-      });
-      document.getElementById('sl-v-hpf').addEventListener('input', (e) => {
-        dawState.vocalHpfHz = parseInt(e.target.value, 10);
-        document.getElementById('lbl-v-hpf').textContent = `${dawState.vocalHpfHz} Hz`;
-        audioEngine.syncAudioParams();
-      });
-      document.getElementById('sl-v-deharsh').addEventListener('input', (e) => {
-        dawState.vocalDeHarshDb = parseFloat(e.target.value);
-        document.getElementById('lbl-v-deharsh').textContent = `-${dawState.vocalDeHarshDb.toFixed(1)} dB`;
-        audioEngine.syncAudioParams();
-      });
-      document.getElementById('sl-v-pres').addEventListener('input', (e) => {
-        dawState.vocalPresenceDb = parseFloat(e.target.value);
-        document.getElementById('lbl-v-pres').textContent = `+${dawState.vocalPresenceDb.toFixed(1)} dB`;
-        audioEngine.syncAudioParams();
-      });
-      document.getElementById('sl-v-deess').addEventListener('input', (e) => {
-        dawState.vocalDeEssDb = parseFloat(e.target.value);
-        document.getElementById('lbl-v-deess').textContent = `-${dawState.vocalDeEssDb.toFixed(1)} dB`;
-        audioEngine.syncAudioParams();
-      });
-      document.getElementById('sl-v-comp').addEventListener('input', (e) => {
-        dawState.vocalCompRatio = parseFloat(e.target.value);
-        document.getElementById('lbl-v-comp').textContent = `${dawState.vocalCompRatio.toFixed(1)} : 1`;
-        audioEngine.syncAudioParams();
-      });
-      document.getElementById('sl-v-rev').addEventListener('input', (e) => {
-        const pct = parseInt(e.target.value, 10);
-        dawState.vocalReverbWet = pct / 100;
-        document.getElementById('lbl-v-rev').textContent = `${pct}%`;
-        audioEngine.syncAudioParams();
-      });
-
-      document.getElementById('btn-mic-toggle').addEventListener('click', () => audioEngine.toggleMicRecording());
-      document.getElementById('btn-mic-countin').addEventListener('click', (e) => {
-        dawState.micCountIn = !dawState.micCountIn;
-        e.currentTarget.textContent = `Vorzähler: ${dawState.micCountIn ? 'AN' : 'AUS'}`;
-      });
-      document.getElementById('btn-mic-delete').addEventListener('click', () => {
-        const micTr = dawState.tracks.find(t => t.id === dawState.recordingMicTrackId) || dawState.tracks.find(t => t.type === 'mic');
-        if (micTr && dawState.buffers[micTr.id]) {
-          delete dawState.buffers[micTr.id];
-          renderMultiTrackLanes();
-          toast(`Mic-Take auf „${micTr.name}“ gelöscht.`, 'info');
-        } else {
-          toast('Kein Mic-Take vorhanden.', 'info');
-        }
-      });
-
-      // Tab 4: Master Volume Fader
-      document.getElementById('sl-master-vol').addEventListener('input', (e) => {
-        dawState.masterGainVal = parseFloat(e.target.value);
-        const db = dawState.masterGainVal <= 0.001 ? '-∞' : (20 * Math.log10(dawState.masterGainVal)).toFixed(1);
-        document.getElementById('lbl-master-vol').textContent = `${db} dB`;
-        audioEngine.syncAudioParams();
-      });
-
-      // Responsive Canvas Redraw on Window Resize
-      window.addEventListener('resize', () => {
-        renderAllTrackCanvases();
-        if (dawState.activeTab === 'midi') {
-          drawPianoRoll();
-          drawVelocityLane();
-        }
-      });
-    });
-  </script>
-<script>
-/* ===== Sunshine@R Stem DAW Studio: Import-Dialog, Undo, Reset ===== */
-(() => {
-  let ready = false;
-  window.addEventListener('load', () => { ready = true; });
-  const $ = id => document.getElementById(id);
-  const safe = f => { try { f(); } catch (e) { console.warn(e); } };
-
-  /* ---------- Undo ---------- */
-  const undoStack = [];
-  const SEQ = ['seqKick', 'seqBass', 'seqBassPitch', 'seqHat', 'seqFx'];
-  const snap = () => ({
-    tracks: JSON.parse(JSON.stringify(dawState.tracks)),
-    buffers: { ...dawState.buffers },
-    midiNotes: JSON.parse(JSON.stringify(dawState.midiNotes)),
-    seq: SEQ.map(k => [...dawState[k]]),
-    vel: [...dawState.stepVelocities],
-    trim: dawState.startOffsetMs,
-    sub: $('status-subtitle').textContent
-  });
-  function updateUndoBtn() { const b = $('btn-undo'); if (b) b.classList.toggle('opacity-40', undoStack.length === 0); }
-  function pushUndo() { if (!ready) return; undoStack.push(snap()); if (undoStack.length > 40) undoStack.shift(); updateUndoBtn(); }
-  window.__dawPushUndo = pushUndo;
-  function refreshAll() {
-    renumberTracks();
-    dawState.tracks.forEach(t => safe(() => audioEngine.ensureTrackNode(t)));
-    safe(renderMultiTrackLanes); safe(renderVerticalMixer); safe(updateAudioToMidiDropdown);
-    safe(renderDrumSequencerGrids); safe(drawPianoRoll); safe(drawVelocityLane);
-    safe(() => audioEngine.syncAudioParams());
-    $('lbl-trim-offset').textContent = `${dawState.startOffsetMs} ms`;
-    if (dawState.isPlaying) safe(() => audioEngine.seek(dawState.playheadSec));
-  }
-  function undo() {
-    const s = undoStack.pop();
-    updateUndoBtn();
-    if (!s) { toast('Nichts zum Rückgängigmachen.', 'info'); return; }
-    dawState.tracks = s.tracks; dawState.buffers = s.buffers; dawState.midiNotes = s.midiNotes;
-    SEQ.forEach((k, i) => { dawState[k] = s.seq[i]; });
-    dawState.stepVelocities = s.vel; dawState.startOffsetMs = s.trim;
-    const firstMidi = dawState.tracks.find(t => t.type === 'midi');
-    dawState.activeMidiTrackId = firstMidi ? firstMidi.id : null;
-    $('status-subtitle').textContent = s.sub;
-    refreshAll();
-    toast('Letzter Schritt rückgängig gemacht.', 'success');
-  }
-  ['autoTrimSilence', 'applyArpGenerator', 'extractMidiFromStem'].forEach(n => {
-    const orig = window[n];
-    if (typeof orig === 'function') window[n] = function (...a) { pushUndo(); return orig.apply(this, a); };
-  });
-  document.addEventListener('pointerdown', e => {
-    const t = e.target;
-    if (!(t instanceof Element) || t.closest('input,select,textarea')) return;
-    if (t.closest('#piano-roll-canvas, #tab-panel-drums, #btn-clear-midi, .midi-trans-btn, #btn-midi-quantize')) pushUndo();
-  }, true);
-  document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !e.target.closest('input,select,textarea')) {
-      e.preventDefault(); undo();
-    }
-  });
-
-  // + Neue Spur Button & Einzelspur-Audio-Upload verbinden
-  const addTrackBtn = $('btn-add-track');
-  if (addTrackBtn) addTrackBtn.addEventListener('click', openNewTrackDialog);
-
-  const singleAudioInput = $('single-track-audio-input');
-  if (singleAudioInput) {
-    singleAudioInput.addEventListener('change', async (e) => {
-      const f = e.target.files && e.target.files[0];
-      const targetId = dawState.pendingAudioTargetTrackId;
-      dawState.pendingAudioTargetTrackId = null;
-      singleAudioInput.value = '';
-      if (!f || !targetId) return;
-      const tr = dawState.tracks.find(t => t.id === targetId);
-      if (!tr) return;
-      try {
-        await audioEngine.ensureCtx();
-        pushUndo();
-        const raw = await f.arrayBuffer();
-        const decoded = await audioEngine.ctx.decodeAudioData(raw.slice(0));
-        dawState.buffers[tr.id] = decoded;
-        if (/^Audio Spur/i.test(tr.name)) {
-          tr.name = f.name.replace(/.[^/.]+$/, '').slice(0, 28);
-        }
-        if (/vocal|vox|voice|acap|rap|sing/i.test(f.name)) {
-          tr.vocalCleanup = true;
-          tr.lowCut = true;
-        }
-        refreshAll();
-        toast(`„${f.name}“ in Spur ${tr.num} geladen!`, 'success');
-      } catch (err) {
-        console.error(err);
-        toast('Audiodatei konnte nicht dekodiert werden.', 'error');
-      }
-    });
-  }
-
-  /* ---------- Reset (komplett leer ohne vordefinierte Spuren) ---------- */
-  function resetProject() {
-    pushUndo();
-    safe(() => { if (dawState.isPlaying) audioEngine.stop(true); });
-    if (audioEngine.channelNodes) {
-      Object.values(audioEngine.channelNodes).forEach(n => { try { n.fader.disconnect(); } catch (_) {} });
-      audioEngine.channelNodes = {};
-    }
-    dawState.tracks = [];
-    dawState.buffers = {};
-    dawState.activeMidiTrackId = null;
-    dawState.midiNotes = [];
-    SEQ.forEach(k => { dawState[k] = new Array(16).fill(0); });
-    dawState.stepVelocities = new Array(32).fill(108);
-    dawState.startOffsetMs = 0; dawState.playheadSec = 0;
-    $('status-subtitle').textContent = 'Leeres Projekt – Spur erstellen oder Datei laden';
-    refreshAll();
-    safe(updatePlayButtonUI); safe(updateClockLCD);
-    toast('Projekt komplett geleert (0 Spuren). „↩ Zurück“ holt alles wieder.', 'success');
-  }
-
-  
-  const imp = $('btn-import-files');
-  const mk = (id, txt, cls, title) => {
-    const b = document.createElement('button');
-    b.id = id; b.textContent = txt; b.title = title;
-    b.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition border ' + cls;
-    imp.parentElement.insertBefore(b, imp); return b;
-  };
-  mk('btn-undo', '↩ Zurück', 'bg-daw-surface hover:bg-daw-elevated text-slate-200 border-daw-border opacity-40', 'Letzten Schritt rückgängig (Strg+Z)').onclick = undo;
-  const br = mk('btn-reset', '🗑 Reset', 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/30', 'Projekt auf Null setzen');
-  let armed = null;
-  br.onclick = () => {
-    if (armed) { clearTimeout(armed); armed = null; br.textContent = '🗑 Reset'; resetProject(); return; }
-    br.textContent = 'Wirklich leeren?';
-    armed = setTimeout(() => { armed = null; br.textContent = '🗑 Reset'; }, 3000);
-  };
-
-  /* ---------- Lokaler OPFS-Zwischenspeicher ---------- */
-  const STEM_CACHE_DIR = 'sunshine-stem-cache';
-  let stemCacheReady = false;
-  let stemCacheDir = null;
-  let stemCacheBackend = null; // 'OPFS' oder 'IndexedDB'
-  let stemCacheDbPromise = null;
-
-  // IndexedDB ist der Ausweichspeicher, insbesondere wenn die HTML-Datei
-  // lokal aus dem Android-Dateimanager (file://) geöffnet wird.
-  function openStemCacheDB() {
-    if (!('indexedDB' in window)) return Promise.reject(new Error('IndexedDB wird von diesem Browser nicht unterstützt'));
-    if (stemCacheDbPromise) return stemCacheDbPromise;
-    stemCacheDbPromise = new Promise((resolve, reject) => {
-      const req = indexedDB.open('SunshineStemCache', 1);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains('stems')) db.createObjectStore('stems', { keyPath: 'id' });
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error || new Error('IndexedDB konnte nicht geöffnet werden'));
-      req.onblocked = () => reject(new Error('IndexedDB ist durch einen anderen Tab blockiert'));
-    });
-    return stemCacheDbPromise;
-  }
-
-  async function cacheStemFileIndexedDB(blob, originalName, sourceName) {
-    const db = await openStemCacheDB();
-    const id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
-    const record = { id, name: originalName, source: sourceName || '', blob, size: blob.size || 0, savedAt: Date.now() };
-    await new Promise((resolve, reject) => {
-      const tx = db.transaction('stems', 'readwrite');
-      tx.objectStore('stems').put(record);
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error || new Error('IndexedDB-Schreibfehler'));
-      tx.onabort = () => reject(tx.error || new Error('IndexedDB-Speicherung abgebrochen'));
-    });
-    stemCacheBackend = 'IndexedDB';
-    stemCacheReady = true;
-    return record;
-  }
-
-  async function getStemCacheDir() {
-    if (!navigator.storage?.getDirectory) return null;
-    if (stemCacheDir) return stemCacheDir;
-    try {
-      const root = await navigator.storage.getDirectory();
-      stemCacheDir = await root.getDirectoryHandle(STEM_CACHE_DIR, { create: true });
-      stemCacheReady = true;
-      stemCacheBackend = 'OPFS';
-      try { await navigator.storage.persist?.(); } catch (_) {}
-      return stemCacheDir;
-    } catch (err) {
-      console.warn('OPFS nicht verfügbar:', err);
-      return null;
-    }
-  }
-
-  function safeCacheName(name) {
-    return String(name || 'stem').replace(/[^a-z0-9._-]+/gi, '_').slice(-90) || 'stem';
-  }
-
-  async function cacheStemFile(blob, originalName, sourceName) {
-    const dir = await getStemCacheDir();
-    if (!dir || !blob) return null;
-    const id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
-    const storedName = `${id}_${safeCacheName(originalName)}`;
-    const handle = await dir.getFileHandle(storedName, { create: true });
-    const writable = await handle.createWritable();
-    try {
-      await writable.write(blob);
-      await writable.close();
-    } catch (err) {
-      try { await writable.abort(); } catch (_) {}
-      throw err;
-    }
-    const meta = { name: originalName, source: sourceName || '', storedName, size: blob.size || 0, savedAt: Date.now() };
-    try {
-      const metaHandle = await dir.getFileHandle(`${id}.json`, { create: true });
-      const w = await metaHandle.createWritable();
-      await w.write(JSON.stringify(meta));
-      await w.close();
-    } catch (err) { console.warn('Cache-Metadaten konnten nicht gespeichert werden:', err); }
-    return meta;
-  }
-
-  async function getStemCacheUsage() {
-    try {
-      const estimate = await navigator.storage?.estimate?.();
-      return estimate ? { usage: estimate.usage || 0, quota: estimate.quota || 0 } : null;
-    } catch (_) { return null; }
-  }
-
-  async function saveImportItemToCache(item) {
-    // Datei zuerst holen und in einen Blob überführen. OPFS ist nur ein Zusatz-Cache:
-    // Wenn der Browser-Speicher voll/gesperrt ist, darf dadurch der Import nicht abbrechen.
-    const value = await item.get();
-    const blob = value instanceof Blob ? value : new Blob([value], {
-      type: item.kind === 'midi' ? 'audio/midi' : 'application/octet-stream'
-    });
-    try {
-      const dir = await getStemCacheDir();
-      if (dir) {
-        await cacheStemFile(blob, item.name, item.src);
-        stemCacheBackend = 'OPFS';
-        stemCacheReady = true;
-      } else {
-        await cacheStemFileIndexedDB(blob, item.name, item.src);
-      }
-    } catch (cacheError) {
-      // Falls OPFS zwar vorhanden war, das Schreiben aber scheitert,
-      // unmittelbar IndexedDB versuchen. Der Audioimport bleibt unabhängig.
-      try {
-        await cacheStemFileIndexedDB(blob, item.name, item.src);
-      } catch (idbError) {
-        console.warn('Lokale Zwischenspeicherung fehlgeschlagen; Import läuft ohne Cache weiter:', cacheError, idbError);
-      }
-    }
-    // AudioDecoder und MIDI-Importer bekommen immer einen ArrayBuffer.
-    return await blob.arrayBuffer();
-  }
-
-  /* ---------- Import: ZIP / Audio / MIDI ---------- */
-  const kindOf = n => /\.(wav|mp3|ogg|flac|m4a|aac)$/i.test(n) ? 'audio' : /\.(mid|midi)$/i.test(n) ? 'midi' : null;
-  function guessSlot(name) {
-    const l = name.toLowerCase();
-    if (/back|bgv|harmon|choir/.test(l)) return null;
-    if (/drum|perc|kick|snare|hat/.test(l)) return 'drums';
-    if (/bass|808|\bsub/.test(l)) return 'bass';
-    if (/vocal|vox|voice|acap|rap|sing/.test(l)) return 'vocals';
-    if (/music|instrument|synth|keys|piano|guitar|melod|pad|chord|other/.test(l)) return 'music';
-    return null;
-  }
-
-  async function readZipNative(file) {
-    const buf = await file.arrayBuffer(), dv = new DataView(buf), u8 = new Uint8Array(buf);
-    let e = -1;
-    for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
-    if (e < 0) throw new Error('Kein gültiges ZIP');
-    const count = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const entries = [];
-    for (let n = 0; n < count && dv.getUint32(p, true) === 0x02014b50; n++) {
-      const nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
-      entries.push({ method: dv.getUint16(p + 10, true), csize: dv.getUint32(p + 20, true), off: dv.getUint32(p + 42, true),
-        name: new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nl)) });
-      p += 46 + nl + el + cl;
-    }
-    const read = async en => {
-      const ln = dv.getUint16(en.off + 26, true), le = dv.getUint16(en.off + 28, true);
-      const st = en.off + 30 + ln + le, data = u8.subarray(st, st + en.csize);
-      if (en.method === 0) return data.slice().buffer;
-      if (en.method === 8 && window.DecompressionStream)
-        return await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
-      throw new Error('Kompression ' + en.method + ' nicht unterstützt');
-    };
-    return { entries, read };
-  }
-  async function readZip(file) {
-    // JSZip zuerst verwenden: DecompressionStream('deflate-raw') ist nicht
-    // in allen Android-/Browser-Versionen verfügbar bzw. gleich implementiert.
-    if (typeof JSZip !== 'undefined') {
-      try {
-        const z = await JSZip.loadAsync(file), entries = [];
-        z.forEach((p, en) => { if (!en.dir) entries.push({ name: p, en }); });
-        return { entries, read: x => x.en.async('blob') };
-      } catch (jsZipError) {
-        console.warn('JSZip konnte ZIP nicht lesen; nativer Fallback:', jsZipError);
-      }
-    }
-    return await readZipNative(file);
-  }
-  async function collect(files) {
-    const items = [];
-    for (const f of files) {
-      if (/\.zip$/i.test(f.name)) {
-        try {
-          const zip = await readZip(f); let found = 0;
-          zip.entries.forEach(en => {
-            if (en.name.endsWith('/') || en.name.includes('__MACOSX')) return;
-            const base = en.name.split('/').pop();
-            const k = base && !base.startsWith('.') && kindOf(base);
-            if (k) { found++; items.push({ name: base, kind: k, src: f.name, get: () => zip.read(en) }); }
-          });
-          if (!found) toast(`ZIP „${f.name}“ enthält keine WAV/MP3/MIDI. Inhalt: ${zip.entries.slice(0, 4).map(x => x.name).join(', ')}`, 'warn');
-        } catch (e) { console.error(e); toast(`ZIP „${f.name}“ nicht lesbar: ${e.message}`, 'error'); }
-      } else if (kindOf(f.name)) {
-        items.push({ name: f.name, kind: kindOf(f.name), src: '', get: () => Promise.resolve(f) });
-      }
-    }
-    return items;
-  }
-  async function applyImport(items, sel, mode, useAutoTrim = false) {
-    await audioEngine.ensureCtx();
-    pushUndo();
-    if (mode === 'replace') {
-      if (audioEngine.channelNodes) {
-        Object.values(audioEngine.channelNodes).forEach(n => { try { n.fader.disconnect(); } catch (_) {} });
-        audioEngine.channelNodes = {};
-      }
-      dawState.tracks = [];
-      dawState.buffers = {};
-      dawState.midiNotes = [];
-      dawState.activeMidiTrackId = null;
-    }
-
-    let ok = 0, midi = 0; const failed = [];
-    for (const { i, target } of sel) {
-      const it = items[i];
-      try {
-        const raw = await saveImportItemToCache(it);
-        if (it.kind === 'midi') {
-          let midiTr = (target && target !== 'new-midi')
-            ? dawState.tracks.find(t => t.id === target && t.type === 'midi')
-            : null;
-          if (!midiTr) {
-            const cleanName = it.name.replace(/.[^/.]+$/, '').slice(0, 28);
-            midiTr = createTrack('midi', cleanName);
-          } else {
-            selectMidiTrackForEditor(midiTr.id);
-          }
-          importMidiArrayBuffer(raw);
-          syncActiveMidiTrackFromState();
-          midi++;
-          continue;
-        }
-
-        const decoded = await audioEngine.ctx.decodeAudioData(raw.slice(0));
-        const cleanName = it.name.replace(/.[^/.]+$/, '').slice(0, 28);
-        const looksLikeVocals = /vocal|vox|voice|acap|rap|sing/i.test(it.name);
-
-        let tr = (target && target !== 'new')
-          ? dawState.tracks.find(t => t.id === target)
-          : null;
-
-        if (!tr) {
-          tr = createTrack('audio', cleanName, {
-            vocalCleanup: looksLikeVocals,
-            lowCut: looksLikeVocals
-          });
-        } else if (/^Audio Spur/i.test(tr.name)) {
-          tr.name = cleanName;
-        }
-
-        dawState.buffers[tr.id] = decoded;
-        tr.mute = false;
-        ok++;
-      } catch (e) {
-        console.error('Import fehlgeschlagen:', it.name, e);
-        failed.push(`${it.name}: ${e?.message || e}`);
-      }
-    }
-
-    refreshAll();
-    if (useAutoTrim && ok > 0) {
-      try { autoTrimSilence(); }
-      catch (trimError) {
-        console.warn('Auto-Trim konnte nicht ausgeführt werden:', trimError);
-      }
-    }
-    $('status-subtitle').textContent = `${dawState.tracks.length} Spur(en) aktiv`;
-    toast(ok + midi ? `${ok} Audio-Spur(en), ${midi} MIDI geladen.` : `Keine Datei importiert.`, ok + midi ? 'success' : 'warn');
-    if (failed.length) toast(`Importfehler (${failed.length}): ${failed[0].slice(0, 150)}`, 'error');
-  }
-
-  function openDialog(items) {
-    const ov = document.createElement('div');
-    ov.className = 'fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3';
-    ov.innerHTML = `<div class="bg-daw-surface border border-daw-border rounded-2xl w-full max-w-2xl max-h-[88vh] flex flex-col shadow-2xl text-slate-200">
-      <div class="p-3.5 border-b border-daw-border font-bold text-sm">📂 Laden / Hinzufügen – ${items.length} Datei(en) gefunden</div>
-      <div class="p-3.5 flex flex-col gap-1.5 text-xs border-b border-daw-border">
-        <label class="flex items-center gap-2"><input type="radio" name="imp-mode" value="add" checked> <b>Hinzufügen</b> – bestehende Spuren bleiben unverändert, Auswahl kommt dazu</label>
-        <label class="flex items-center gap-2"><input type="radio" name="imp-mode" value="replace"> <b>Projekt vorher leeren</b> – entfernt vorhandene Spuren vor dem Import</label>
-        <label class="flex items-center gap-2 mt-1"><input id="imp-auto-trim" type="checkbox"> <span>✂️ Auto-Trim nach dem Import (optional)</span></label>
-      </div>
-      <div class="px-3.5 pt-2 flex gap-2 text-xs"><button data-all="1" class="underline text-cyan-300">Alle</button><button data-all="0" class="underline text-cyan-300">Keine</button></div>
-      <div id="imp-list" class="p-3.5 overflow-y-auto flex flex-col gap-1"></div>
-      <div class="p-3.5 border-t border-daw-border flex justify-end gap-2">
-        <button id="imp-cancel" class="px-3 py-1.5 rounded-lg bg-daw-bg border border-daw-border text-xs">Abbrechen</button>
-        <button id="imp-ok" class="px-3.5 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">Laden</button>
-      </div></div>`;
-
-    const list = ov.querySelector('#imp-list');
-    const existingAudio = dawState.tracks.filter(t => t.type === 'audio' || t.type === 'stem' || t.type === 'mic');
-    const existingMidi = dawState.tracks.filter(t => t.type === 'midi');
-
-    items.forEach((it, i) => {
-      const row = document.createElement('div');
-      row.className = 'flex items-center gap-2 text-xs bg-daw-bg rounded-lg px-2 py-1.5';
-      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true; cb.dataset.i = i;
-      const nm = document.createElement('span'); nm.className = 'flex-1 truncate';
-      nm.textContent = `${it.kind === 'midi' ? '🎹' : '🎵'} ${it.name}${it.src ? '  (' + it.src + ')' : ''}`;
-      row.append(cb, nm);
-
-      const s = document.createElement('select');
-      s.className = 'bg-daw-surface border border-daw-border rounded px-1.5 py-0.5 max-w-[170px]';
-      if (it.kind === 'audio') {
-        s.add(new Option('➕ Als neue Audio-Spur', 'new'));
-        existingAudio.forEach(tr => s.add(new Option(`→ ${tr.num} | ${tr.name}`, tr.id)));
-      } else {
-        s.add(new Option('➕ Als neue MIDI-Spur', 'new-midi'));
-        existingMidi.forEach(tr => s.add(new Option(`→ ${tr.num} | ${tr.name}`, tr.id)));
-      }
-      row.append(s);
-      list.append(row);
-    });
-
-    ov.querySelectorAll('[data-all]').forEach(b => b.onclick = () => list.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = b.dataset.all === '1'));
-    const close = () => ov.remove();
-    ov.querySelector('#imp-cancel').onclick = close;
-    ov.querySelector('#imp-ok').onclick = () => {
-      const sel = [...list.children].map(r => ({
-        i: +r.querySelector('input').dataset.i,
-        on: r.querySelector('input').checked,
-        target: r.querySelector('select')?.value || 'new'
-      })).filter(s => s.on);
-      const mode = ov.querySelector('input[name=imp-mode]:checked').value;
-      const useAutoTrim = ov.querySelector('#imp-auto-trim').checked;
-      close();
-      if (!sel.length) { toast('Nichts ausgewählt.', 'warn'); return; }
-      applyImport(items, sel, mode, useAutoTrim);
-    };
-    document.body.append(ov);
-  }
-
-  window.handleUniversalFileImport = async function (fileList) {
-    const files = Array.from(fileList || []);
-    const input = $('universal-file-input'); if (input) input.value = '';
-    if (!files.length) return;
-    let items;
-    try { items = await collect(files); } catch (e) { toast('Import-Fehler: ' + e.message, 'error'); return; }
-    if (!items.length) { toast('Keine Audio- oder MIDI-Dateien gefunden.', 'warn'); return; }
-    openDialog(items);
-  };
-})();
-</script>
-<script>
-/* Sunshine@R DAW: Projektformat, Autosave und Spur-Plugin-Racks */
-(() => {
-  const $ = id => document.getElementById(id);
-  const PRESETS = ['supersaw','pluck','acid303','rapBell','subBass'];
-  const clone = value => JSON.parse(JSON.stringify(value));
-  function encodeWav(buffer) {
-    const channels=buffer.numberOfChannels, frames=buffer.length, rate=buffer.sampleRate;
-    const bytes=44+frames*channels*2, ab=new ArrayBuffer(bytes), v=new DataView(ab);
-    const str=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
-    str(0,'RIFF'); v.setUint32(4,bytes-8,true); str(8,'WAVE'); str(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,channels,true); v.setUint32(24,rate,true); v.setUint32(28,rate*channels*2,true); v.setUint16(32,channels*2,true); v.setUint16(34,16,true); str(36,'data'); v.setUint32(40,frames*channels*2,true);
-    const data=Array.from({length:channels},(_,c)=>buffer.getChannelData(c)); let off=44;
-    for(let i=0;i<frames;i++) for(let c=0;c<channels;c++){let x=Math.max(-1,Math.min(1,data[c][i]));v.setInt16(off,x<0?x*32768:x*32767,true);off+=2;}
-    return new Blob([ab],{type:'audio/wav'});
-  }
-  const blobToData = blob => new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(blob);});
-  async function saveProject() {
-    try {
-      if (dawState.isPlaying) audioEngine.stop(true);
-      const state={};
-      Object.keys(dawState).forEach(k=>{if(!['buffers','isPlaying','lastDuckTime','lastDuckDb'].includes(k)){try{state[k]=clone(dawState[k]);}catch(_){}}});
-      const audio={};
-      for(const [id,buf] of Object.entries(dawState.buffers||{})) if(buf) audio[id]=await blobToData(encodeWav(buf));
-      const project={format:'SunshineR-DAW',version:1,savedAt:new Date().toISOString(),state,audio};
-      const blob=new Blob([JSON.stringify(project)],{type:'application/x-srdaw'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='SunshineR-Projekt.srdaw'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
-      toast('Projekt inklusive Audio und Spur-Einstellungen gespeichert.','success');
-    } catch(err){console.error(err);toast('Projekt konnte nicht gespeichert werden: '+err.message,'error');}
-  }
-  async function openProject(file) {
-    try {
-      const project=JSON.parse(await file.text());
-      if(project.format!=='SunshineR-DAW' || !project.state) throw new Error('Keine gültige Sunshine@R-Projektdatei');
-      if(dawState.isPlaying) audioEngine.stop(true);
-      const s=project.state;
-      Object.keys(s).forEach(k=>{if(k in dawState && k!=='buffers') dawState[k]=s[k];});
-      dawState.isPlaying=false; dawState.buffers={};
-      await audioEngine.ensureCtx();
-      for(const [id,data] of Object.entries(project.audio||{})){
-        const response=await fetch(data); const raw=await response.arrayBuffer();
-        dawState.buffers[id]=await audioEngine.ctx.decodeAudioData(raw.slice(0));
-      }
-      if(audioEngine.channelNodes) Object.values(audioEngine.channelNodes).forEach(n=>{try{n.input.disconnect();}catch(_){} try{n.fader.disconnect();}catch(_){}});
-      audioEngine.channelNodes={};
-      dawState.tracks.forEach(t=>audioEngine.ensureTrackNode(t));
-      audioEngine.syncAudioParams();
-      dawState.activeMidiTrackId=dawState.activeMidiTrackId || (dawState.tracks.find(t=>t.type==='midi')||{}).id || null;
-      const active=dawState.tracks.find(t=>t.id===dawState.activeMidiTrackId);
-      if(active){dawState.midiNotes=clone(active.midiNotes||[]);dawState.stepVelocities=clone(active.stepVelocities||new Array(32).fill(108));}
-      renumberTracks(); renderMultiTrackLanes(); renderVerticalMixer(); updateAudioToMidiDropdown(); drawPianoRoll(); drawVelocityLane();
-      toast('Projekt geöffnet. Spuren, Instrumente und Audio wurden geladen.','success');
-    } catch(err){console.error(err);toast('Projekt konnte nicht geöffnet werden: '+err.message,'error');}
-  }
-  function openTrackPluginRack(trackId){
-    const tr=dawState.tracks.find(t=>t.id===trackId); if(!tr)return;
-    const choices=[['eq','Parametrischer EQ'],['compressor','Compressor'],['filter','Filter'],['delay','Delay'],['distortion','Distortion']];
-    tr.plugins=tr.plugins||[];
-    const current=tr.plugins.map((x,i)=>`${i+1} = ${x.label}`).join('\n');
-    const choice=prompt('PLUGIN-RACK – '+tr.name+'\n\nHinzufügen:\n1 = EQ\n2 = Compressor\n3 = Filter\n4 = Delay\n5 = Distortion\n\nVorhandene Plugins entfernen (R + Nummer):\n'+(current||'Noch keine Plugins')+'\n\nBeispiel: R2 entfernt Plugin 2.');
-    if(choice===null)return;
-    const remove=choice.trim().match(/^r\s*(\d+)$/i);
-    if(remove){const idx=Number(remove[1])-1;if(idx<0||idx>=tr.plugins.length){toast('Plugin-Nummer nicht gefunden.','warn');return;}const gone=tr.plugins.splice(idx,1)[0];rebuildTrack(tr);renderMultiTrackLanes();toast(gone.label+' von „'+tr.name+'“ entfernt.','success');return;}
-    const item=choices[Number(choice)-1]; if(!item){toast('Ungültige Auswahl.','warn');return;}
-    tr.plugins.push({id:'fx_'+Date.now(),type:item[0],label:item[1],enabled:true});
-    rebuildTrack(tr); renderMultiTrackLanes(); toast(item[1]+' zu „'+tr.name+'“ hinzugefügt.','success');
-  }
-  function rebuildTrack(tr){
-    const old=audioEngine.channelNodes[tr.id]; if(old){try{old.input.disconnect();}catch(_){} try{old.fader.disconnect();}catch(_){} delete audioEngine.channelNodes[tr.id];}
-    if(audioEngine.ctx){audioEngine.ensureTrackNode(tr);audioEngine.syncAudioParams();}
-  }
-  // Public hooks for the UI and later plugin-browser expansion.
-  window.openTrackPluginRack=openTrackPluginRack;
-  $('btn-project-save')?.addEventListener('click',saveProject);
-  $('btn-project-open')?.addEventListener('click',()=>$('srdaw-project-input').click());
-  $('srdaw-project-input')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)openProject(f);e.target.value='';});
-  // Save project structure periodically to IndexedDB as recovery metadata (audio remains in explicit .srdaw export).
-  setInterval(()=>{try{const minimal={savedAt:Date.now(),bpm:dawState.bpm,tracks:dawState.tracks.map(t=>({...t,midiNotes:clone(t.midiNotes||[])})),sections:clone(dawState.sections),midiNotes:clone(dawState.midiNotes),stepVelocities:clone(dawState.stepVelocities)}; localStorage.setItem('sunshineR_autosave_v1',JSON.stringify(minimal));}catch(e){console.warn('Autosave übersprungen',e);}},20000);
-})();
-</script>
-
-</body>
-</html>
+        emptyBox.querySelector('#empty-projects-btn').addEventListener('click', () => { if (window.openProjectManager) window.open
