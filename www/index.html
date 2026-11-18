@@ -7416,6 +7416,699 @@ html[data-radius="round"] .rounded-2xl{border-radius:36px!important}
 })();
 </script>
 <script>
+/* ===== Sunshine@R · KI-Rechenkern (Tempo, Mix, Rauschfilter, Pattern, Sprachbefehle) ===== */
+/* ===== Sunshine@R · Studio-Assistent (lokal, ohne Server): Tempo/Takt, Auto-Mix, Rauschfilter, Lern-Pattern, Sprachbefehle ===== */
+(function () {
+  'use strict';
+  const dsp = {};
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  /* ---------- FFT ---------- */
+  function makeFFT(N) {
+    const rev = new Uint32Array(N), cos = new Float64Array(N / 2), sin = new Float64Array(N / 2);
+    for (let i = 0, j = 0; i < N; i++) { rev[i] = j; let b = N >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; }
+    for (let k = 0; k < N / 2; k++) { cos[k] = Math.cos(2 * Math.PI * k / N); sin[k] = -Math.sin(2 * Math.PI * k / N); }
+    return function (re, im, inverse) {
+      for (let i = 0; i < N; i++) { const j = rev[i]; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+      for (let len = 2; len <= N; len <<= 1) {
+        const h = len >> 1, step = N / len;
+        for (let i = 0; i < N; i += len) for (let k = 0; k < h; k++) {
+          const wr = cos[k * step], wi = inverse ? -sin[k * step] : sin[k * step];
+          const a = i + k, b = a + h, xr = re[b] * wr - im[b] * wi, xi = re[b] * wi + im[b] * wr;
+          re[b] = re[a] - xr; im[b] = im[a] - xi; re[a] += xr; im[a] += xi;
+        }
+      }
+      if (inverse) for (let i = 0; i < N; i++) { re[i] /= N; im[i] /= N; }
+    };
+  }
+  dsp.makeFFT = makeFFT;
+
+  function toMono(buf, maxSec, startSec) {
+    const sr = buf.sampleRate, i0 = Math.floor((startSec || 0) * sr), n = Math.min(buf.length - i0, Math.floor((maxSec || 1e9) * sr));
+    const out = new Float32Array(Math.max(0, n)), nc = buf.numberOfChannels;
+    for (let c = 0; c < nc; c++) { const d = buf.getChannelData(c); for (let i = 0; i < n; i++) out[i] += d[i0 + i] / nc; }
+    return { x: out, sr };
+  }
+  dsp.toMono = toMono;
+  function decimate(x, sr, target) {
+    const f = Math.max(1, Math.round(sr / target)); if (f === 1) return { x, sr };
+    const n = Math.floor(x.length / f), y = new Float32Array(n);
+    for (let i = 0; i < n; i++) { let s = 0; for (let k = 0; k < f; k++) s += x[i * f + k]; y[i] = s / f; }
+    return { x: y, sr: sr / f };
+  }
+
+  /* ---------- Tempo & Takt ---------- */
+  function onsetEnv(x0, sr0) {
+    const { x, sr } = decimate(x0, sr0, 22050), N = 1024, HOP = 256, fft = makeFFT(N), re = new Float64Array(N), im = new Float64Array(N);
+    const win = new Float64Array(N); for (let i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1));
+    const kLo = Math.max(1, Math.floor(30 * N / sr)), kLoHi = Math.floor(180 * N / sr), kHi = Math.min(N / 2 - 1, Math.floor(8000 * N / sr));
+    const T = Math.max(0, Math.floor((x.length - N) / HOP) + 1), env = new Float32Array(T), low = new Float32Array(T);
+    let prev = new Float32Array(N / 2);
+    for (let t = 0; t < T; t++) {
+      for (let i = 0; i < N; i++) { re[i] = x[t * HOP + i] * win[i]; im[i] = 0; }
+      fft(re, im);
+      let f = 0, l = 0; const cur = new Float32Array(N / 2);
+      for (let k = kLo; k <= kHi; k++) { const m = Math.log(1 + 80 * Math.hypot(re[k], im[k]) / N * 8); cur[k] = m; if (t > 0) { const d = m - prev[k]; if (d > 0) { f += d; if (k <= kLoHi) l += d; } } }
+      env[t] = f; low[t] = l; prev = cur;
+    }
+    return { env, low, fps: sr / HOP, lat: (N / 2) / sr };
+  }
+  function normEnv(e, fps) {
+    const n = e.length, out = new Float32Array(n), w = Math.max(3, Math.round(fps * 0.8)), cs = new Float64Array(n + 1);
+    for (let i = 0; i < n; i++) cs[i + 1] = cs[i] + e[i];
+    let ss = 0;
+    for (let i = 0; i < n; i++) { const a = Math.max(0, i - w), b = Math.min(n, i + w + 1), m = (cs[b] - cs[a]) / (b - a); const v = Math.max(0, e[i] - m); out[i] = v; ss += v * v; }
+    const sd = Math.sqrt(ss / Math.max(1, n)) || 1; for (let i = 0; i < n; i++) out[i] /= sd;
+    return out;
+  }
+  function at(a, p) { const i = Math.floor(p), f = p - i; if (i < 0 || i + 1 >= a.length) return 0; return a[i] * (1 - f) + a[i + 1] * f; }
+
+  /* x: Mono-Float32Array, sr → {bpm, bpmApp, confidence, firstBeatSec, firstBarSec, beatsPerBar:4, candidates[], downbeatIdx} */
+  dsp.detectTempo = function (x, sr, opt) {
+    opt = opt || {};
+    const { env: e0, low: l0, fps, lat: LAT } = onsetEnv(x, sr);
+    if (e0.length < fps * 4) return { bpm: 0, bpmApp: 0, confidence: 0, error: 'Zu wenig Audio (mind. ca. 4 Sekunden).' };
+    const full = normEnv(e0, fps), low = normEnv(l0, fps), n = full.length;
+    const envT = new Float32Array(n); for (let i = 0; i < n; i++) envT[i] = 0.5 * full[i] + low[i];   // Kick/Tiefen zählen stärker als Hi-Hat-Rauschen
+    const smooth = new Float32Array(n); for (let i = 0; i < n; i++) smooth[i] = 0.25 * (envT[Math.max(0, i - 1)] + 2 * envT[i] + envT[Math.min(n - 1, i + 1)]);
+    const lagMin = Math.floor(fps * 60 / 215), lagMax = Math.ceil(fps * 60 / 55), maxL = Math.min(n - 2, lagMax * 2 + 2);
+    const acf = new Float64Array(maxL + 1);
+    for (let l = lagMin; l <= maxL; l++) { let sum = 0; for (let i = 0; i + l < n; i++) sum += envT[i] * envT[i + l]; acf[l] = sum / (n - l); }
+    const prior = bpm => Math.exp(-0.5 * Math.pow(Math.log2(bpm / (opt.prior || 115)) / 0.6, 2));
+    const comb = (period) => {
+      let best = -1, bestPh = 0; const stepsN = Math.max(8, Math.round(period * 2));
+      for (let st = 0; st < stepsN; st++) { const ph = period * st / stepsN; let sum = 0, cnt = 0; for (let p = ph; p < n - 1; p += period) { sum += at(smooth, p); cnt++; } sum /= Math.max(1, cnt); if (sum > best) { best = sum; bestPh = ph; } }
+      return { score: best, phase: bestPh };
+    };
+    // Kandidaten: ACF-Spitzen + Oktav-Verwandte
+    const pk = [];
+    for (let l = lagMin + 1; l < Math.min(lagMax, maxL); l++) if (acf[l] > acf[l - 1] && acf[l] >= acf[l + 1] && acf[l] > 0) {
+      const aa = acf[l - 1], bb = acf[l], cc = acf[l + 1], d = aa - 2 * bb + cc, off = d ? 0.5 * (aa - cc) / d : 0; pk.push({ lag: l + off, v: bb });
+    }
+    pk.sort((a, b) => b.v - a.v);
+    const lags = []; const addLag = l => { if (l >= lagMin && l <= lagMax && !lags.some(q => Math.abs(q / l - 1) < 0.03)) lags.push(l); };
+    pk.slice(0, 5).forEach(p => { addLag(p.lag); addLag(p.lag * 2); addLag(p.lag / 2); });
+    if (!lags.length) return { bpm: 0, bpmApp: 0, confidence: 0, error: 'Kein klarer Puls gefunden.' };
+    const scored = lags.map(l => { const c = comb(l), bpm = 60 * fps / l; return { lag: l, bpm, pt: c.score, score: c.score * prior(bpm) }; }).sort((a, b) => b.score - a.score);
+    const win = scored[0];
+    // Feinabstimmung ±2,4 % (reiner Kamm-Score, ohne Prior)
+    let bestP = win.lag, bestS = -1, bestPh = 0;
+    for (let k = -24; k <= 24; k++) { const p = win.lag * (1 + k * 0.001), r = comb(p); if (r.score > bestS) { bestS = r.score; bestP = p; bestPh = r.phase; } }
+    const period = bestP, bpm = 60 * fps / period;
+    // Downbeat (4/4): Tiefen-Onsets auf Zählzeit 1..4 vergleichen
+    const nb = Math.floor((n - 1 - bestPh) / period) + 1, S = [0, 0, 0, 0], C = [0, 0, 0, 0];
+    for (let k = 0; k < nb; k++) { const p = bestPh + k * period; let l = 0, f = 0; for (let d = -1; d <= 1; d++) { l = Math.max(l, at(low, p + d)); f = Math.max(f, at(full, p + d)); } S[k % 4] += l + 0.08 * f; C[k % 4]++; /* Snare liegt auf 2/4 – darum zählen fast nur Tiefen-Einsätze */ }
+    const avg = S.map((v, i) => C[i] ? v / C[i] : 0), mean = (avg[0] + avg[1] + avg[2] + avg[3]) / 4 || 1;
+    let m = 0; for (let i = 1; i < 4; i++) if (avg[i] > avg[m]) m = i;
+    const dbConf = clamp((avg[m] / mean - 1) / 0.6, 0, 1);
+    let mx = 0; for (let i = 0; i < n; i++) if (smooth[i] > mx) mx = smooth[i];
+    let c0 = 0; while (c0 < n && smooth[c0] < 0.25 * mx) c0++;
+    let k0 = Math.max(0, Math.ceil((c0 - bestPh - period * 0.5) / period)); while (k0 % 4 !== m) k0++;
+    let tot = 0; for (let i = 0; i < n; i++) tot += Math.max(0, smooth[i]); tot /= n;
+    const conf = clamp((bestS / (tot || 1) - 1.5) / 3.0, 0, 1);
+    let app = bpm; while (app > 180) app /= 2; while (app < 60) app *= 2;
+    return {
+      bpm, bpmApp: Math.round(app), confidence: conf, beatPeriodSec: period / fps, firstBeatSec: bestPh / fps + LAT,
+      firstBarSec: (bestPh + k0 * period) / fps + LAT, downbeatIdx: m, downbeatConfidence: dbConf,
+      candidates: scored.slice(0, 3).map(t => ({ bpm: Math.round(t.bpm * 10) / 10 })), beatsPerBar: 4
+    };
+  };
+
+  /* ---------- Spur-Statistik & Auto-Mix ---------- */
+  dsp.trackStats = function (buf, maxSec) {
+    const sr = buf.sampleRate, { x } = toMono(buf, maxSec || 90, 0), N = 2048, fft = makeFFT(N), re = new Float64Array(N), im = new Float64Array(N);
+    const blk = Math.floor(sr * 0.4), nb = Math.floor(x.length / blk), rms = [];
+    let peak = 0; for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); const n = Math.min(d.length, x.length); for (let i = 0; i < n; i++) { const a = Math.abs(d[i]); if (a > peak) peak = a; } }
+    for (let b = 0; b < nb; b++) { let s = 0; for (let i = 0; i < blk; i++) { const v = x[b * blk + i]; s += v * v; } rms.push(Math.sqrt(s / blk)); }
+    const db = v => 20 * Math.log10(Math.max(v, 1e-9));
+    const gate = db(Math.max(...rms, 1e-9)) - 40, act = rms.map((r, i) => (db(r) > gate && r > 1e-4) ? i : -1).filter(i => i >= 0);
+    let rmsDb = -90; if (act.length) { let s = 0; act.forEach(i => s += rms[i] * rms[i]); rmsDb = db(Math.sqrt(s / act.length)); }
+    const win = new Float64Array(N); for (let i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1));
+    const band = [0, 0, 0, 0, 0], edges = [0, 120, 500, 2000, 6000, 1e9]; let cen = 0, tot = 0, frames = 0;
+    const take = act.length > 24 ? Math.ceil(act.length / 24) : 1;
+    for (let a = 0; a < act.length; a += take) {
+      const b = act[a], off = b * blk + Math.floor(blk / 2) - N / 2; if (off < 0 || off + N > x.length) continue;
+      for (let i = 0; i < N; i++) { re[i] = x[off + i] * win[i]; im[i] = 0; } fft(re, im);
+      for (let k = 1; k < N / 2; k++) { const f = k * sr / N, p = re[k] * re[k] + im[k] * im[k]; for (let q = 0; q < 5; q++) if (f >= edges[q] && f < edges[q + 1]) { band[q] += p; break; } cen += f * p; tot += p; }
+      frames++;
+    }
+    const sum = band.reduce((s, v) => s + v, 0) || 1, frac = band.map(v => v / sum);
+    let corr = 1;
+    if (buf.numberOfChannels > 1) { const L = buf.getChannelData(0), R = buf.getChannelData(1), n = Math.min(L.length, R.length, Math.floor(sr * 20)); let sl = 0, sr2 = 0, sx = 0; for (let i = 0; i < n; i++) { sl += L[i] * L[i]; sr2 += R[i] * R[i]; sx += L[i] * R[i]; } corr = sx / (Math.sqrt(sl * sr2) || 1); }
+    return { rmsDb, peak, peakDb: db(peak), band: frac, centroid: tot ? cen / tot : 0, mono: buf.numberOfChannels === 1 || corr > 0.98, corr, active: act.length / Math.max(1, nb), seconds: x.length / sr };
+  };
+
+  const ROLE_RX = [['vocal', /vocal|vox|voice|sing|acap|rap|lead\s*voc|mic/i], ['drums', /drum|beat|perc|kick|snare|hat|cymbal|clap/i], ['bass', /bass|808|sub\b/i], ['fx', /\bfx\b|riser|impact|sweep|transition|noise/i], ['other', /pad|synth|keys|piano|klavier|guitar|gitarre|string|organ|lead|chord|arp|pluck|brass|choir|chor\b/i]];
+  dsp.roleOf = function (name, type, st) {
+    if (type === 'mic') return 'vocal'; if (type === 'kick') return 'drums'; if (type === 'bass') return 'bass'; if (type === 'fx') return 'fx';
+    for (const [r, rx] of ROLE_RX) if (rx.test(name || '')) return r;
+    if (st) { if (st.band[0] + st.band[1] > 0.85 && st.centroid < 250) return 'bass'; }
+    return 'other';
+  };
+  const ROLE_NAME = { vocal: 'Gesang', drums: 'Drums', bass: 'Bass', fx: 'FX', other: 'Instrument/Sonstiges' };
+  const ROLE_OFF = { vocal: 0, drums: -1.5, bass: -3, other: -4.5, fx: -8 };
+  dsp.ROLE_NAME = ROLE_NAME;
+
+  /* items: [{id,name,type,vol,pan,lowCut,buf}] → {rows[], mixPeakBefore/After, anchor} */
+  dsp.suggestMix = function (items, opt) {
+    opt = opt || {};
+    const rows = items.map(it => {
+      if (!it.buf) return { id: it.id, name: it.name, skipped: true, reason: 'ohne Audio (MIDI/Sequencer) – nicht analysierbar', curVol: it.vol, curPan: it.pan };
+      const st = dsp.trackStats(it.buf, opt.maxSec || 90), role = dsp.roleOf(it.name, it.type, st);
+      return { id: it.id, name: it.name, role, roleName: ROLE_NAME[role], st, curVol: it.vol, curPan: it.pan, curLowCut: !!it.lowCut, buf: it.buf, silent: st.rmsDb < -70 };
+    });
+    const an = rows.filter(r => !r.skipped && !r.silent);
+    if (!an.length) return { rows, anchor: null, empty: true };
+    const anchorRole = an.some(r => r.role === 'vocal') ? 'vocal' : (an.some(r => r.role === 'drums') ? 'drums' : an[0].role);
+    const target = opt.anchorDb ?? -18;
+    const reasons = (r, rawDb) => {
+      const out = [], curDb = rawDb + 20 * Math.log10(Math.max(r.curVol, 1e-4)), tgt = r.targetDb, d = tgt - curDb;
+      if (d > 2.5) out.push(`${r.roleName} zu leise (${d.toFixed(1)} dB zu wenig)`); else if (d < -2.5) out.push(`${r.roleName} zu laut (${(-d).toFixed(1)} dB zu viel)`); else out.push('Pegel passt schon');
+      return out;
+    };
+    an.forEach(r => {
+      r.targetDb = target + ROLE_OFF[r.role] - ROLE_OFF[anchorRole];
+      let v = Math.pow(10, (r.targetDb - r.st.rmsDb) / 20);
+      r.newVol = clamp(v, 0.03, 1.25); r.reasons = reasons(r, r.st.rmsDb);
+    });
+    // Headroom: geschätzte Summenspitze (nur Audio) ≤ 0.89
+    const mixPeak = (vols) => {
+      const L = Math.min(...an.map(r => r.buf.length), 44100 * 40); let pk = 0; const step = 2;
+      for (let i = 0; i < L; i += step) { let s = 0; for (const r of an) { const d = r.buf.getChannelData(0); s += d[i] * vols(r); } if (Math.abs(s) > pk) pk = Math.abs(s); }
+      return pk;
+    };
+    const before = mixPeak(r => r.curVol), p0 = mixPeak(r => r.newVol);
+    let scale = 1; if (p0 > 0.89) scale = 0.89 / p0;
+    an.forEach(r => { r.newVol = clamp(r.newVol * scale, 0.02, 1.25); });
+    const after = mixPeak(r => r.newVol);
+    // Pan & Tiefenschnitt
+    const spread = an.filter(r => r.role === 'other' && r.st.mono);
+    spread.forEach((r, i) => { if (spread.length >= 2) { r.newPan = (i % 2 ? 1 : -1) * 0.3; r.reasons.push(`Mono → ${i % 2 ? 'rechts' : 'links'} 30 % (Breite)`); } });
+    an.forEach(r => {
+      if (r.newPan === undefined) r.newPan = (r.role === 'other' && !r.st.mono) ? r.curPan : (['vocal', 'bass', 'drums'].includes(r.role) ? 0 : r.curPan);
+      const lowE = r.st.band[0];
+      r.newLowCut = r.curLowCut;
+      if ((r.role === 'other' || r.role === 'vocal') && lowE > 0.12) { r.newLowCut = true; if (!r.curLowCut) r.reasons.push(`Tiefenanteil ${Math.round(lowE * 100)} % → Low-Cut (macht Platz für Bass)`); }
+    });
+    return { rows, anchor: anchorRole, mixPeakBefore: before, mixPeakAfter: after, scale };
+  };
+
+  /* ---------- Rauschfilter (spektral, mit Rauschprofil aus den leisesten Stellen) ---------- */
+  dsp.denoiseChannel = function (d, sr, opt) {
+    opt = opt || {};
+    const N = 2048, HOP = 512, fft = makeFFT(N), strength = clamp(opt.strength ?? 0.5, 0, 1);
+    const maxRedDb = 8 + 22 * strength, gMin = Math.pow(10, -maxRedDb / 20), alpha = 1.0 + 1.6 * strength;
+    const n = d.length, T = Math.floor((n + N) / HOP) + 1, win = new Float64Array(N), H = N / 2 + 1;
+    for (let i = 0; i < N; i++) win[i] = Math.sin(Math.PI * (i + 0.5) / N);   /* sqrt-Hann (Analyse & Synthese) */
+    const re = new Float64Array(N), im = new Float64Array(N);
+    const frame = t => { const off = t * HOP - N / 2; for (let i = 0; i < N; i++) { const j = off + i; re[i] = (j >= 0 && j < n ? d[j] : 0) * win[i]; im[i] = 0; } fft(re, im); };
+    /* Durchgang 1: nur die Energie je Frame (kein Speicher pro Frame -> auch lange Songs sicher) */
+    const en = new Float32Array(T);
+    for (let t = 0; t < T; t++) { frame(t); let e = 0; for (let k = 0; k < H; k++) e += re[k] * re[k] + im[k] * im[k]; en[t] = e; }
+    /* Rauschprofil: Mittel der leisesten 12 % der Frames */
+    const idx = Array.from({ length: T }, (_, i) => i).sort((a, b) => en[a] - en[b]), q = Math.max(3, Math.floor(T * 0.12));
+    const noise = new Float64Array(H);
+    for (let a = 0; a < q; a++) { frame(idx[a]); for (let k = 0; k < H; k++) noise[k] += Math.hypot(re[k], im[k]) / q; }
+    for (let k = 1; k < H - 1; k++) noise[k] = (noise[k - 1] + 2 * noise[k] + noise[k + 1]) / 4;
+    /* Durchgang 2: filtern und überlappt addieren */
+    const out = new Float32Array(n), norm = new Float32Array(n), prevG = new Float32Array(H).fill(1), g = new Float32Array(H), m = new Float32Array(H), pr = new Float32Array(H), pi = new Float32Array(H);
+    for (let t = 0; t < T; t++) {
+      frame(t);
+      for (let k = 0; k < H; k++) { m[k] = Math.hypot(re[k], im[k]); pr[k] = re[k]; pi[k] = im[k]; }
+      for (let k = 0; k < H; k++) { const nz = alpha * noise[k]; g[k] = m[k] > 1e-12 ? Math.max(gMin, 1 - nz / m[k]) : gMin; }
+      for (let k = 1; k < H - 1; k++) g[k] = (g[k - 1] + 2 * g[k] + g[k + 1]) / 4 * 0.5 + g[k] * 0.5;            /* Frequenzglättung */
+      for (let k = 0; k < H; k++) { const a = g[k] < prevG[k] ? 0.55 : 0.85; g[k] = prevG[k] * (1 - a) + g[k] * a; prevG[k] = g[k]; }   /* Zeitglättung gegen „Zwitschern“ */
+      for (let k = 0; k < H; k++) { re[k] = pr[k] * g[k]; im[k] = pi[k] * g[k]; if (k > 0 && k < N / 2) { re[N - k] = re[k]; im[N - k] = -im[k]; } }
+      im[0] = 0; im[N / 2] = 0;
+      fft(re, im, true);
+      const off = t * HOP - N / 2;
+      for (let i = 0; i < N; i++) { const j = off + i; if (j >= 0 && j < n) { out[j] += re[i] * win[i]; norm[j] += win[i] * win[i]; } }
+    }
+    for (let i = 0; i < n; i++) out[i] = norm[i] > 1e-6 ? out[i] / norm[i] : 0;
+    return out;
+  };
+
+  dsp.denoiseBuffer = async function (ctx, buf, opt, progress) {
+    const out = ctx.createBuffer(buf.numberOfChannels, buf.length, buf.sampleRate);
+    for (let c = 0; c < buf.numberOfChannels; c++) {
+      out.copyToChannel(dsp.denoiseChannel(buf.getChannelData(c), buf.sampleRate, opt), c);
+      if (progress) progress((c + 1) / buf.numberOfChannels);
+      await new Promise(r => setTimeout(r, 0));
+    }
+    return out;
+  };
+
+  /* ---------- Lern-Pattern (Markov über Intervalle + Rhythmus-Wahrscheinlichkeiten) ---------- */
+  function rng(seed) { let a = (seed >>> 0) || 1; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  dsp.learnPattern = function (notes) {
+    if (!notes || notes.length < 6) return null;
+    const byStart = new Map(); notes.forEach(n => { const o = byStart.get(n.start); if (!o || n.pitch > o.pitch) byStart.set(n.start, n); });
+    const seq = [...byStart.values()].sort((a, b) => a.start - b.start);
+    const pos = new Float64Array(16).fill(0.05), dur = new Float64Array(9).fill(0.2), iv = {};
+    seq.forEach(n => { pos[n.start % 16] += 1; dur[clamp(n.dur, 1, 8)] += 1; });
+    for (let i = 1; i < seq.length; i++) { const d = clamp(seq[i].pitch - seq[i - 1].pitch, -12, 12); iv[d] = (iv[d] || 0) + 1; }
+    for (let d = -12; d <= 12; d++) iv[d] = (iv[d] || 0) + (Math.abs(d) <= 3 ? 0.3 : 0.05);
+    const pitches = seq.map(n => n.pitch);
+    return { pos: [...pos], dur: [...dur], iv, lo: Math.min(...pitches), hi: Math.max(...pitches), first: seq[0].pitch, vel: Math.round(seq.reduce((s, n) => s + (n.vel || 100), 0) / seq.length), count: seq.length, span: Math.max(...seq.map(n => n.start + n.dur)) };
+  };
+  const pick = (weights, r) => { let tot = 0; for (const w of weights) tot += w; let x = r * tot; for (let i = 0; i < weights.length; i++) { x -= weights[i]; if (x <= 0) return i; } return weights.length - 1; };
+  dsp.generateVariation = function (model, original, o) {
+    o = o || {}; const r = rng(o.seed || 1), v = clamp(o.variation ?? 0.4, 0, 1), steps = o.steps || 32, snap = o.snap || (p => p);
+    const keep = []; const used = new Set();
+    original.forEach(n => {
+      if (r() < 1 - 0.8 * v) {
+        let p = n.pitch;
+        if (r() < 0.3 * v) { const keys = Object.keys(model.iv).map(Number), d = keys[pick(keys.map(k => model.iv[k]), r())]; p = clamp(snap(p + d), 36, 71); }
+        let s = n.start; if (r() < 0.25 * v) s = clamp(s + (r() < 0.5 ? -1 : 1), 0, steps - 1);
+        const k = s + ':' + p; if (!used.has(k)) { used.add(k); keep.push({ pitch: p, start: s, dur: n.dur, vel: n.vel || model.vel }); }
+      }
+    });
+    const add = Math.round(v * original.length * 0.8), occupied = new Set(keep.map(n => n.start));
+    for (let a = 0; a < add; a++) {
+      const w = []; for (let s = 0; s < steps; s++) w.push(occupied.has(s) ? 0 : model.pos[s % 16]);
+      if (!w.some(x => x > 0)) break;
+      const s = pick(w, r()); occupied.add(s);
+      const prev = keep.filter(n => n.start < s).sort((x, y) => y.start - x.start)[0], base = prev ? prev.pitch : model.first;
+      const keys = Object.keys(model.iv).map(Number), d = keys[pick(keys.map(k => model.iv[k]), r())];
+      const p = clamp(snap(clamp(base + d, model.lo - 3, model.hi + 3)), 36, 71);
+      const dd = clamp(pick(model.dur, r()), 1, 8);
+      keep.push({ pitch: p, start: s, dur: Math.min(dd, steps - s), vel: clamp(model.vel + Math.round((r() - 0.5) * 24), 40, 127) });
+    }
+    keep.sort((a, b) => a.start - b.start || a.pitch - b.pitch);
+    // Überlappungen gleicher Tonhöhe vermeiden
+    keep.forEach((n, i) => { const nx = keep.find((m, j) => j > i && m.pitch === n.pitch && m.start > n.start); if (nx && n.start + n.dur > nx.start) n.dur = Math.max(1, nx.start - n.start); n.dur = Math.min(n.dur, steps - n.start); });
+    return keep;
+  };
+
+  /* ---------- Sprachbefehle (Text → Aktion) ---------- */
+  const NUM_W = { null: 0, eins: 1, ein: 1, eine: 1, zwei: 2, drei: 3, vier: 4, fuenf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9, zehn: 10, elf: 11, zwoelf: 12 };
+  const TENS = { zwanzig: 20, dreissig: 30, vierzig: 40, fuenfzig: 50, sechzig: 60, siebzig: 70, achtzig: 80, neunzig: 90 };
+  const norm = t => String(t || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[.,!?;:]/g, ' ').replace(/\s+/g, ' ').trim();
+  function parseNum(s) {
+    const m = s.match(/\d+/); if (m) return parseInt(m[0], 10);
+    const ws = s.split(' '); let total = 0, found = false;
+    for (let i = 0; i < ws.length; i++) {
+      const w = ws[i]; if (/^(ein)?hundert/.test(w)) { total += 100; found = true; const rest = w.replace(/^(ein)?hundert/, ''); if (rest) { const r2 = parseNum(rest); if (r2) total += r2; } continue; }
+      const m2 = w.match(/^(\w+?)und(\w+)$/); if (m2 && NUM_W[m2[1]] !== undefined && TENS[m2[2]] !== undefined) { total += NUM_W[m2[1]] + TENS[m2[2]]; found = true; continue; }
+      if (TENS[w] !== undefined) { total += TENS[w]; found = true; continue; }
+      if (NUM_W[w] !== undefined && w !== 'ein' && w !== 'eine') { total += NUM_W[w]; found = true; }
+    }
+    return found ? total : null;
+  }
+  dsp.parseNum = parseNum;
+  dsp.parseCommand = function (text) {
+    const t = norm(text); if (!t) return { cmd: 'none' };
+    if (/\b(reset|loesch|loeschen|alles leeren|projekt leeren|entfern)/.test(t)) return { cmd: 'blocked', text: t };
+    const tn = t.match(/\b(?:spur|track)\s+([a-z0-9]+(?:\s?(?:und)?\s?[a-z]+)?)/);
+    const trackNo = () => { if (!tn) return null; const n = parseNum(tn[1].split(' ')[0]) ?? parseNum(tn[1]); return n; };
+    let m;
+    if ((m = t.match(/\b(?:tempo|bpm|geschwindigkeit)\s*(?:auf|=)?\s*([a-z0-9 ]+)/)) || (m = t.match(/\b([a-z0-9]+)\s*bpm/))) { const n = parseNum(m[1]); if (n) return { cmd: 'bpm', value: n }; }
+    if (/tempo erkennen|bpm erkennen|takt erkennen|tempo analysier/.test(t)) return { cmd: 'open', what: 'tempo' };
+    if (/auto ?mix|automix|mischen vorschlag|mix vorschlag/.test(t)) return { cmd: 'open', what: 'mix' };
+    if (/rausch/.test(t)) return { cmd: 'open', what: 'denoise' };
+    if (/variation|pattern lernen|aus meinen noten/.test(t)) return { cmd: 'open', what: 'pattern' };
+    if (/\b(zurueck|rueckgaengig|undo|letzten schritt)\b/.test(t)) return { cmd: 'undo' };
+    if (/\b(vor|wiederherstellen|wieder herstellen|redo|nochmal)\b/.test(t) && !/spur/.test(t)) return { cmd: 'redo' };
+    if (/\b(stopp|stop|halt|anhalten|pause|pausieren)\b/.test(t)) return { cmd: 'stop' };
+    if (/\b(play|start|starte|abspielen|spiel|los|wiedergabe)\b/.test(t) && !/spur/.test(t)) return { cmd: 'play' };
+    if (/metronom|klick/.test(t)) return { cmd: 'metronome', on: !/\baus\b|deaktiv/.test(t) };
+    if (/\bloop\b|schleife/.test(t)) return { cmd: 'loop', on: !/\baus\b|deaktiv/.test(t) };
+    if (/speicher/.test(t)) return { cmd: 'save' };
+    if (/neue spur|spur hinzu|spur erstell/.test(t)) return { cmd: 'newtrack' };
+    if (/wav|master export|exportier|bounce/.test(t)) return { cmd: 'exportwav' };
+    if ((m = t.match(/\b(editor|piano ?roll|midi|drums?|sequencer|vocals?|gesang|mixer|kanal)\b/)) && /\b(zeig|oeffne|wechsel|gehe|tab|geh)/.test(t)) {
+      const k = m[1]; return { cmd: 'tab', tab: /editor|piano|midi/.test(k) ? 'midi' : /drum|sequencer/.test(k) ? 'drums' : /vocal|gesang/.test(k) ? 'vocals' : 'mixer' };
+    }
+    if (tn) {
+      const n = trackNo(); const common = { track: n };
+      if (/\b(solo)\b/.test(t)) return Object.assign({ cmd: 'solo', on: !/\baus\b|nicht|beenden/.test(t) }, common);
+      if (/\b(stumm|mute|muten|leise stellen)\b/.test(t)) return Object.assign({ cmd: 'mute', on: !/\baus\b|nicht|entstumm|aufheben/.test(t) }, common);
+      if (/\bentstumm/.test(t)) return Object.assign({ cmd: 'mute', on: false }, common);
+      if (/\b(lauter|hoeher|anheben)\b/.test(t)) return Object.assign({ cmd: 'vol', db: +2 }, common);
+      if (/\b(leiser|tiefer|absenken)\b/.test(t)) return Object.assign({ cmd: 'vol', db: -2 }, common);
+    }
+    if (/\blauter\b/.test(t)) return { cmd: 'master', db: +1.5 };
+    if (/\bleiser\b/.test(t)) return { cmd: 'master', db: -1.5 };
+    return { cmd: 'unknown', text: t };
+  };
+
+  window.StudioAI = { dsp, version: 1 };
+})();
+
+</script>
+<script>
+/* ===== Sunshine@R: KI-Assistent (lokale DSP-/Lernverfahren) + Sprachsteuerung (Test) ===== */
+(function () {
+  'use strict';
+  if (!window.StudioAI || !StudioAI.dsp) return;
+  const D = StudioAI.dsp;
+  const $ = id => document.getElementById(id);
+  const say = (m, k) => { try { toast(m, k || 'info'); } catch (_) { console.log(m); } };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const push = () => { try { window.__dawPushUndo && window.__dawPushUndo(); } catch (_) {} };
+  const safe = f => { try { return f(); } catch (e) { console.warn(e); } };
+  const refresh = () => { safe(() => audioEngine.syncAudioParams()); safe(renderVerticalMixer); safe(renderMultiTrackLanes); };
+  const audioTracks = () => dawState.tracks.filter(t => t.type !== 'midi' && dawState.buffers[t.id]);
+  const pct = v => Math.round(v * 100) + ' %';
+  const panTxt = p => !p ? 'Mitte' : (p < 0 ? 'L ' : 'R ') + Math.round(Math.abs(p) * 100) + ' %';
+  const nextFrame = () => new Promise(r => setTimeout(r, 30));
+
+  /* ------------------------------------------------------------------ Assistent-Dialog */
+  const S = { tempo: null, mix: null, patOrigin: null, busy: false };
+
+  function srcOptions() {
+    const at = audioTracks();
+    return '<option value="all">Alle Audio-Spuren (Summe)</option>' + at.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
+  }
+  function trackOptions() {
+    const at = audioTracks();
+    if (!at.length) return '<option value="">– keine Audio-Spur geladen –</option>';
+    const pre = at.find(t => t.vocalCleanup || /vocal|vox|voice|gesang/i.test(t.name) || t.type === 'mic') || at[0];
+    return at.map(t => `<option value="${esc(t.id)}" ${t.id === pre.id ? 'selected' : ''}>${esc(t.name)}</option>`).join('');
+  }
+  const BTN = 'py-2.5 px-3 rounded-xl border text-xs font-bold ';
+  const B_MAIN = BTN + 'border-amber-400/70 bg-amber-400/15 text-amber-100';
+  const B_SEC = BTN + 'border-slate-700 bg-slate-900 text-slate-200';
+  const SUM = 'cursor-pointer list-none flex items-center gap-2 px-3 py-3 text-sm font-bold select-none';
+
+  function openAssistant(section) {
+    $('assistant-modal')?.remove();
+    S.tempo = null; S.mix = null; S.patOrigin = null;
+    const ov = document.createElement('div');
+    ov.id = 'assistant-modal';
+    ov.className = 'fixed inset-0 z-[120] bg-black/80 flex items-end sm:items-center justify-center p-2 sm:p-5';
+    const sec = (id, ico, title, sub, body) => `<details id="as-sec-${id}" class="rounded-2xl border border-slate-800 bg-slate-900/60 mb-2.5" ${section === id ? 'open' : ''}>
+        <summary class="${SUM}"><span class="text-lg">${ico}</span><span class="min-w-0"><span class="block">${title}</span><span class="block text-[11px] font-normal text-slate-400">${sub}</span></span><span class="ml-auto text-slate-500 text-xs">▾</span></summary>
+        <div class="px-3 pb-3 space-y-2.5">${body}</div></details>`;
+    const notes = dawState.midiNotes.length;
+    ov.innerHTML = `<div class="w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-2xl border border-purple-500/40 bg-slate-950 p-4 shadow-2xl text-slate-100" role="dialog" aria-label="KI-Assistent">
+      <div class="flex items-center gap-3 mb-1"><div class="text-base font-black">✨ KI-Assistent</div><button type="button" data-close class="ml-auto px-3 py-2 rounded-lg bg-slate-800 text-slate-300" aria-label="Schließen">✕</button></div>
+      <div class="text-[11px] text-slate-400 mb-3">Alles läuft lokal auf deinem Gerät – kein Upload, kein Konto. Jede Änderung lässt sich mit „↩ Zurück“ rückgängig machen.</div>
+      ${sec('tempo', '🥁', 'Tempo &amp; Taktraster erkennen', 'BPM, Zählzeit 1 und Takt-Anfang aus dem Audio', `
+        <label class="block text-[11px] text-slate-400">Analysieren aus<select id="as-src" class="mt-1 w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-sm">${srcOptions()}</select></label>
+        <button type="button" data-as="tempo" class="w-full ${B_MAIN}">Tempo analysieren</button>
+        <div id="as-tempo-res" class="text-xs text-slate-300"></div>`)}
+      ${sec('mix', '🎚️', 'Auto-Mix', 'Pegel, Stereo-Breite und Tiefen-Filter vorschlagen', `
+        <div class="text-[11px] text-slate-400">Analysiert Lautheit, Klangfarbe und Stereo-Bild jeder Audio-Spur und schlägt Lautstärke, Pan und Low-Cut vor. Du siehst erst die Liste und bestätigst.</div>
+        <button type="button" data-as="mix" class="w-full ${B_MAIN}">Spuren analysieren</button>
+        <div id="as-mix-res" class="text-xs text-slate-300"></div>`)}
+      ${sec('denoise', '🧹', 'Vocal-Cleanup · Rauschfilter', 'Rauschen, Brummen und Zischen aus einer Spur dämpfen', `
+        <label class="block text-[11px] text-slate-400">Spur<select id="as-dn-track" class="mt-1 w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-sm">${trackOptions()}</select></label>
+        <label class="block"><div class="flex justify-between text-[11px] text-slate-400"><span>Stärke</span><span id="as-dn-v" class="font-mono">60 %</span></div><input id="as-dn-str" type="range" min="20" max="100" value="60" class="w-full daw-slider"></label>
+        <button type="button" data-as="denoise" class="w-full ${B_MAIN}">Rauschen entfernen</button>
+        <div id="as-dn-res" class="text-xs text-slate-300"></div>
+        <div class="text-[10px] leading-snug text-slate-500">Spektrales Entrauschen (Signalverarbeitung): lernt das Rauschen aus den leisesten Stellen der Spur. Das ist keine Stimmen-KI wie RNNoise – bei zu hoher Stärke klingt Gesang „unter Wasser“. Ohne Pausen in der Spur wirkt es schwächer.</div>`)}
+      ${sec('pattern', '🧬', 'Pattern-Variation', 'Lernt aus deinen MIDI-Noten und erzeugt Varianten im selben Stil', `
+        <div id="as-pat-info" class="text-[11px] text-slate-400">Aktive MIDI-Spur: <b class="text-slate-200">${notes}</b> Noten ${notes < 6 ? '– mindestens 6 nötig.' : ''}</div>
+        <label class="block"><div class="flex justify-between text-[11px] text-slate-400"><span>Abweichung vom Original</span><span id="as-pat-v" class="font-mono">40 %</span></div><input id="as-pat-var" type="range" min="0" max="100" value="40" class="w-full daw-slider"></label>
+        <div class="grid grid-cols-2 gap-2"><button type="button" data-as="pattern" class="${B_MAIN}">Variation erzeugen</button><button type="button" data-as="pattern-orig" class="${B_SEC}">Original zurück</button></div>
+        <div class="text-[10px] leading-snug text-slate-500">Lokales Lernmodell (Wahrscheinlichkeiten für Rhythmus-Positionen, Notenlängen und Tonschritte aus deinen Noten) – kein neuronales Netz. Jeder Klick würfelt eine neue Variante aus dem Original.</div>`)}
+    </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e => {
+      const t = e.target;
+      if (t === ov || t.closest('[data-close]')) { ov.remove(); return; }
+      const b = t.closest('button[data-as]'); if (b) { run(b.dataset.as, b); return; }
+      const alt = t.closest('button[data-as-alt]'); if (alt && S.tempo) { setBpmChoice(+alt.dataset.asAlt); return; }
+      const ap = t.closest('button[data-as-apply]'); if (ap) { apply(ap.dataset.asApply); return; }
+    });
+    ov.addEventListener('input', e => {
+      if (e.target.id === 'as-dn-str') $('as-dn-v').textContent = e.target.value + ' %';
+      if (e.target.id === 'as-pat-var') $('as-pat-v').textContent = e.target.value + ' %';
+    });
+    if (section) setTimeout(() => { const d = $('as-sec-' + section); d && d.scrollIntoView({ block: 'nearest' }); }, 30);
+  }
+
+  async function run(what, btn) {
+    if (S.busy) return; S.busy = true; const old = btn.textContent; btn.disabled = true;
+    try {
+      if (what === 'tempo') await runTempo(btn);
+      else if (what === 'mix') await runMix();
+      else if (what === 'denoise') await runDenoise(btn);
+      else if (what === 'pattern') runPattern(false);
+      else if (what === 'pattern-orig') runPattern(true);
+    } catch (e) { console.error(e); say('KI-Assistent: ' + e.message, 'error'); }
+    finally { S.busy = false; btn.disabled = false; if (btn.isConnected) btn.textContent = old; }
+  }
+
+  /* ---------- Tempo ---------- */
+  async function runTempo(btn) {
+    const sel = $('as-src').value, at = audioTracks();
+    const list = sel === 'all' ? at : at.filter(t => String(t.id) === sel);
+    const res = $('as-tempo-res');
+    if (!list.length) { res.innerHTML = '<span class="text-amber-300">Noch keine Audio-Spur geladen – zuerst Stems importieren.</span>'; return; }
+    btn.textContent = 'Analysiere …'; await nextFrame();
+    const first = D.toMono(dawState.buffers[list[0].id], 90, 0); let x = first.x; const sr = first.sr;
+    for (let i = 1; i < list.length; i++) {
+      const b = dawState.buffers[list[i].id]; if (b.sampleRate !== sr) continue;
+      const m = D.toMono(b, 90, 0).x, n = Math.min(x.length, m.length); const y = new Float32Array(n);
+      for (let k = 0; k < n; k++) y[k] = x[k] + m[k]; x = y;
+    }
+    const r = D.detectTempo(x, sr, {});
+    if (r.error) { res.innerHTML = `<span class="text-amber-300">${esc(r.error)}</span>`; S.tempo = null; return; }
+    S.tempo = r; renderTempo();
+  }
+  function renderTempo(choice) {
+    const r = S.tempo, res = $('as-tempo-res'); if (!r || !res) return;
+    const bpm = choice || r.bpmApp, conf = Math.round((r.confidence || 0) * 100), dconf = Math.round((r.downbeatConfidence || 0) * 100);
+    const alts = (r.candidates || []).slice(0, 4).map(c => Math.round(c.bpm || c)).filter((v, i, a) => a.indexOf(v) === i && v >= 60 && v <= 180 && v !== Math.round(bpm));
+    const bar = r.firstBarSec != null ? r.firstBarSec : r.firstBeatSec || 0;
+    S.pickBpm = Math.round(bpm);
+    res.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-900 p-3 space-y-2">
+      <div class="flex items-end gap-3"><div><div class="text-[10px] uppercase text-slate-500">Tempo</div><div class="text-2xl font-black text-amber-300 leading-none">${Math.round(bpm)} <span class="text-xs font-bold text-slate-400">BPM</span></div></div>
+        <div class="text-[11px] text-slate-400 leading-tight">Sicherheit: <b class="text-slate-200">${conf} %</b><br>Takt-Anfang: <b class="text-slate-200">${bar.toFixed(2)} s</b> <span class="text-slate-500">(${dconf} % sicher)</span></div></div>
+      ${r.bpm && Math.abs(r.bpm - bpm) > 1 ? `<div class="text-[10px] text-slate-500">Rohwert ${r.bpm.toFixed(1)} BPM – für die App-Skala (60–180) auf ${Math.round(bpm)} umgerechnet.</div>` : ''}
+      ${alts.length ? `<div class="text-[11px] text-slate-400">Andere Möglichkeiten: ${alts.map(a => `<button type="button" data-as-alt="${a}" class="ml-1 px-2 py-1 rounded-lg border border-slate-700 bg-slate-950 text-slate-200 font-mono">${a}</button>`).join('')}</div>` : ''}
+      <div class="grid grid-cols-1 gap-2"><button type="button" data-as-apply="bpm" class="${B_SEC}">BPM auf ${Math.round(bpm)} setzen</button>
+      <button type="button" data-as-apply="bar" class="${B_SEC}">Takt 1 auf ${bar.toFixed(2)} s legen <span class="font-normal text-slate-400">(Vorspann wird abgeschnitten)</span></button>
+      <button type="button" data-as-apply="both" class="${B_MAIN}">Beides übernehmen</button></div></div>`;
+  }
+  function setBpmChoice(v) { renderTempo(v); }
+  function setBpm(v) {
+    v = clamp(Math.round(v), 60, 180);
+    const inp = $('input-bpm'); if (!inp) return false;
+    inp.value = v; inp.dispatchEvent(new Event('change', { bubbles: true })); return v;
+  }
+  function setBar(sec) {
+    dawState.startOffsetMs = Math.max(0, Math.round(sec * 1000));
+    const l = $('lbl-trim-offset'); if (l) l.textContent = dawState.startOffsetMs + ' ms';
+    safe(renderMultiTrackLanes); if (dawState.isPlaying) safe(() => audioEngine.seek(dawState.playheadSec));
+  }
+  function apply(what) {
+    if (what === 'bpm' || what === 'bar' || what === 'both') {
+      const r = S.tempo; if (!r) return; push();
+      const bar = r.firstBarSec != null ? r.firstBarSec : r.firstBeatSec || 0; const msg = [];
+      if (what !== 'bar') { const v = setBpm(S.pickBpm || r.bpmApp); msg.push(v + ' BPM'); }
+      if (what !== 'bpm') { setBar(bar); msg.push('Takt 1 bei ' + dawState.startOffsetMs + ' ms'); }
+      say('Übernommen: ' + msg.join(' · '), 'success');
+    } else if (what === 'mix') applyMix();
+  }
+
+  /* ---------- Auto-Mix ---------- */
+  async function runMix() {
+    const res = $('as-mix-res');
+    if (!audioTracks().length) { res.innerHTML = '<span class="text-amber-300">Noch keine Audio-Spur geladen – zuerst Stems importieren.</span>'; return; }
+    res.textContent = 'Analysiere …'; await nextFrame();
+    const items = dawState.tracks.map(t => ({ id: t.id, name: t.name, type: t.type, vol: t.vol, pan: t.pan || 0, lowCut: !!t.lowCut, buf: (t.type !== 'midi' && dawState.buffers[t.id]) || null }));
+    const r = D.suggestMix(items, {}); S.mix = r;
+    if (r.empty) { res.innerHTML = '<span class="text-amber-300">Alle Spuren sind (nahezu) stumm – nichts zu mischen.</span>'; return; }
+    const rows = r.rows.map(x => {
+      if (x.skipped) return `<tr class="border-t border-slate-800 text-slate-500"><td class="py-2 pr-2" colspan="3"><span class="font-semibold">${esc(x.name)}</span> · ${esc(x.reason)}</td></tr>`;
+      if (x.silent) return `<tr class="border-t border-slate-800 text-slate-500"><td class="py-2 pr-2" colspan="3"><span class="font-semibold">${esc(x.name)}</span> · stumm – unverändert</td></tr>`;
+      return `<tr class="border-t border-slate-800 align-top"><td class="py-2 pr-2"><div class="font-semibold text-slate-100">${esc(x.name)} <span class="text-[10px] font-normal text-slate-500">· ${esc(x.roleName)}</span></div><div class="text-[10px] leading-snug text-slate-400">${x.reasons.map(esc).join(' · ')}</div></td>
+        <td class="py-2 pr-2 font-mono whitespace-nowrap">${pct(x.curVol)}<br>→ <b class="text-amber-300">${pct(x.newVol)}</b></td>
+        <td class="py-2 whitespace-nowrap">${panTxt(x.curPan)}${(x.newPan || 0) !== (x.curPan || 0) ? '<br>→ <b class="text-amber-300">' + panTxt(x.newPan) + '</b>' : ''}${x.newLowCut && !x.curLowCut ? '<div class="text-[10px] text-amber-300">+ Low-Cut</div>' : ''}</td></tr>`;
+    }).join('');
+    res.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-900 p-2.5 space-y-2"><table class="w-full text-[11px]"><thead><tr class="text-[10px] uppercase text-slate-500 text-left"><th class="pr-2">Spur &amp; Begründung</th><th class="pr-2">Lautst.</th><th>Pan</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="text-[10px] text-slate-500">Bezug: ${esc(D.ROLE_NAME[r.anchor] || r.anchor)} · geschätzte Summenspitze ${(r.mixPeakBefore * 100).toFixed(0)} % → ${(r.mixPeakAfter * 100).toFixed(0)} %</div>
+      <button type="button" data-as-apply="mix" class="w-full ${B_MAIN}">Vorschlag übernehmen</button></div>`;
+  }
+  function applyMix() {
+    const r = S.mix; if (!r) return; push(); let n = 0;
+    r.rows.forEach(x => {
+      if (x.skipped || x.silent || x.newVol == null) return;
+      const t = dawState.tracks.find(t => t.id === x.id); if (!t) return;
+      t.vol = x.newVol; t.pan = x.newPan; t.lowCut = !!x.newLowCut; n++;
+    });
+    refresh(); say(`Auto-Mix auf ${n} Spuren angewendet – mit „↩ Zurück“ umkehrbar.`, 'success');
+  }
+
+  /* ---------- Rauschfilter ---------- */
+  async function runDenoise(btn) {
+    const id = $('as-dn-track').value, res = $('as-dn-res');
+    const t = dawState.tracks.find(t => String(t.id) === id), buf = t && dawState.buffers[t.id];
+    if (!buf) { res.innerHTML = '<span class="text-amber-300">Keine Audio-Spur gewählt.</span>'; return; }
+    const strength = (+$('as-dn-str').value) / 100; await audioEngine.ensureCtx(); const ctx = audioEngine.ctx;
+    if (buf.duration > 600) { res.innerHTML = '<span class="text-amber-300">Spur ist länger als 10 Minuten – bitte vorher kürzen.</span>'; return; }
+    const t0 = performance.now(); btn.textContent = 'Filtere … 0 %'; await nextFrame();
+    const out = await D.denoiseBuffer(ctx, buf, { strength }, f => { btn.textContent = `Filtere … ${Math.round(f * 100)} %`; });
+    push(); dawState.buffers[t.id] = out;
+    refresh();
+    const sec = ((performance.now() - t0) / 1000).toFixed(1);
+    res.innerHTML = `<span class="text-emerald-300">✓ „${esc(t.name)}“ gefiltert (${sec} s). Zum Vergleich: „↩ Zurück“ und wieder „↪ Vor“.</span>`;
+    say('Rauschfilter angewendet.', 'success');
+  }
+
+  /* ---------- Pattern-Variation ---------- */
+  function runPattern(restore) {
+    const info = $('as-pat-info');
+    if (restore) {
+      if (!S.patOrigin) { say('Noch keine Variation erzeugt.', 'info'); return; }
+      push(); setNotes(S.patOrigin.map(n => Object.assign({}, n))); say('Original wiederhergestellt.', 'success'); return;
+    }
+    if (!S.patOrigin) {
+      if (dawState.midiNotes.length < 6) { say('Für ein Lernmodell braucht es mindestens 6 Noten in der aktiven MIDI-Spur.', 'warn'); return; }
+      S.patOrigin = dawState.midiNotes.map(n => Object.assign({}, n));
+    }
+    const model = D.learnPattern(S.patOrigin); if (!model) { say('Zu wenige Noten für das Lernmodell.', 'warn'); return; }
+    const classes = new Set(S.patOrigin.map(n => n.pitch % 12));
+    const snap = p => { for (let d = 0; d < 6; d++) { if (classes.has(((p + d) % 12 + 12) % 12)) return p + d; if (classes.has(((p - d) % 12 + 12) % 12)) return p - d; } return p; };
+    const v = (+$('as-pat-var').value) / 100, seed = 1 + Math.floor(Math.random() * 99999);
+    const out = D.generateVariation(model, S.patOrigin, { variation: v, seed, snap });
+    if (!out.length) { say('Variation war leer – nochmal versuchen.', 'warn'); return; }
+    push(); setNotes(out.map(n => ({ id: Date.now() + Math.random(), pitch: n.pitch, start: n.start, dur: n.dur, vel: n.vel })));
+    say(`Variation (${Math.round(v * 100)} % Abweichung, ${out.length} Noten) – „↩ Zurück“ stellt den vorherigen Stand her.`, 'success');
+    if (info) info.innerHTML = `Aktive MIDI-Spur: <b class="text-slate-200">${out.length}</b> Noten (Original: ${S.patOrigin.length})`;
+  }
+  function setNotes(arr) {
+    arr.forEach(n => { if (!n.id) n.id = Date.now() + Math.random(); });
+    dawState.midiNotes = arr;
+    arr.forEach(n => { dawState.stepVelocities[n.start] = Math.max(dawState.stepVelocities[n.start] || 0, n.vel); });
+    safe(syncActiveMidiTrackFromState); safe(drawPianoRoll); safe(drawVelocityLane); safe(renderMultiTrackLanes);
+  }
+
+  /* ------------------------------------------------------------------ Menü-/Button-Einbau */
+  function injectEntryPoints() {
+    const menu = $('file-menu');
+    if (menu && !$('btn-assistant')) {
+      const b = document.createElement('button');
+      b.id = 'btn-assistant'; b.type = 'button'; b.className = 'fm-item'; b.setAttribute('role', 'menuitem');
+      b.innerHTML = '<span>✨</span><span>KI-Assistent</span>';
+      b.addEventListener('click', () => openAssistant('tempo'));
+      const anchor = $('btn-settings');
+      if (anchor && anchor.parentNode === menu) menu.insertBefore(b, anchor); else menu.appendChild(b);
+    }
+    const ps = $('btn-pattern-studio');
+    if (ps && !$('btn-pattern-variation')) {
+      const b = document.createElement('button');
+      b.id = 'btn-pattern-variation'; b.type = 'button'; b.title = 'Variation aus deinen eigenen Noten lernen';
+      b.className = ps.className; b.innerHTML = '🧬 Variation';
+      b.addEventListener('click', () => openAssistant('pattern'));
+      ps.after(b);
+    }
+  }
+
+  /* ------------------------------------------------------------------ Sprachsteuerung (Test) */
+  const LS_UI = 'sunshine.ui';
+  const voiceOn = () => { try { return !!JSON.parse(localStorage.getItem(LS_UI) || '{}').voice; } catch (_) { return false; } };
+  const SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const V = { log: [], rec: null, listening: false };
+
+  function clickIf(id) { const b = $(id); if (b) { b.click(); return true; } return false; }
+  function trackBy(n) { return dawState.tracks[n - 1] || null; }
+  function execute(c) {
+    switch (c.cmd) {
+      case 'play': if (!dawState.isPlaying) clickIf('btn-play'); return 'Wiedergabe';
+      case 'stop': if (dawState.isPlaying) clickIf('btn-stop'); else clickIf('btn-stop'); return 'Stopp';
+      case 'undo': window.__dawUndo && window.__dawUndo(); return 'Zurück';
+      case 'redo': window.__dawRedo && window.__dawRedo(); return 'Vor';
+      case 'bpm': { if (c.value < 60 || c.value > 180) return { err: `Tempo ${c.value} liegt außerhalb 60–180.` }; push(); setBpm(c.value); return 'Tempo ' + c.value; }
+      case 'mute': case 'solo': {
+        const t = trackBy(c.track); if (!t) return { err: `Spur ${c.track} gibt es nicht.` };
+        const key = c.cmd, want = c.on; if (!!t[key] !== want) { const b = document.querySelector(`[data-${key}="${CSS.escape(String(t.id))}"]`); if (b) b.click(); else { t[key] = want; refresh(); } }
+        return `Spur ${c.track} ${key === 'mute' ? (want ? 'stumm' : 'hörbar') : (want ? 'solo' : 'solo aus')}`;
+      }
+      case 'vol': {
+        const t = trackBy(c.track); if (!t) return { err: `Spur ${c.track} gibt es nicht.` };
+        push(); t.vol = clamp(t.vol * Math.pow(10, c.db / 20), 0.02, 1.25); refresh(); return `Spur ${c.track} ${c.db > 0 ? 'lauter' : 'leiser'}`;
+      }
+      case 'master': {
+        const s = $('sl-master-vol'); if (!s) return { err: 'Master-Regler nicht gefunden.' };
+        const min = +s.min || 0, max = +s.max || 1, step = (max - min) * 0.08 * (c.db > 0 ? 1 : -1);
+        s.value = clamp(+s.value + step, min, max); s.dispatchEvent(new Event('input', { bubbles: true })); return c.db > 0 ? 'Master lauter' : 'Master leiser';
+      }
+      case 'loop': if (!!dawState.isLooping !== c.on) clickIf('btn-loop'); return 'Loop ' + (c.on ? 'an' : 'aus');
+      case 'metronome': if (!!dawState.metronomeOn !== c.on) clickIf('btn-metronome'); return 'Metronom ' + (c.on ? 'an' : 'aus');
+      case 'tab': { const b = document.querySelector(`.dock-tab-btn[data-tab="${c.tab}"]`); if (b) b.click(); return 'Bereich ' + c.tab; }
+      case 'save': clickIf('btn-save-project'); return 'Projekt speichern';
+      case 'newtrack': clickIf('btn-add-track'); return 'Neue Spur';
+      case 'exportwav': clickIf('btn-export-wav'); return 'WAV-Export';
+      case 'open': openAssistant(c.what === 'tempo' ? 'tempo' : c.what); return 'KI-Assistent: ' + c.what;
+      case 'blocked': return { err: 'Löschen und Zurücksetzen sind per Sprache aus Sicherheitsgründen gesperrt.' };
+      case 'unknown': return { err: `Nicht verstanden: „${c.text}“` };
+      default: return { err: 'Kein Befehl erkannt.' };
+    }
+  }
+  function handle(text) {
+    const c = D.parseCommand(text);
+    let r; try { r = execute(c); } catch (e) { r = { err: 'Fehler: ' + e.message }; }
+    const ok = !(r && r.err), msg = ok ? r : r.err;
+    V.log.unshift({ text, ok, msg }); V.log.length = Math.min(V.log.length, 6); renderVoice();
+    say((ok ? '🎤 ' : '🎤 ✗ ') + msg, ok ? 'success' : 'warn');
+    return { ok, msg, cmd: c };
+  }
+
+  function renderVoice() {
+    const p = $('voice-panel'); if (!p) return;
+    p.querySelector('#vp-log').innerHTML = V.log.length ? V.log.map(l => `<div class="${l.ok ? 'text-emerald-300' : 'text-amber-300'}">${l.ok ? '✓' : '✗'} <span class="text-slate-400">„${esc(l.text)}“</span> → ${esc(l.msg)}</div>`).join('') : '<div class="text-slate-500">Noch keine Befehle.</div>';
+    const mic = p.querySelector('#vp-mic'); mic.textContent = V.listening ? '● Ich höre zu …' : '🎤 Sprechen';
+    mic.classList.toggle('animate-pulse', V.listening);
+  }
+  function startListening() {
+    if (!SRC) { say('Spracherkennung ist in diesem Browser/WebView nicht verfügbar – Befehl bitte tippen oder das 🎤 der Tastatur nutzen.', 'warn'); return; }
+    if (V.listening) { try { V.rec.stop(); } catch (_) {} return; }
+    const rec = new SRC(); rec.lang = 'de-DE'; rec.interimResults = false; rec.maxAlternatives = 3; V.rec = rec;
+    rec.onstart = () => { V.listening = true; renderVoice(); };
+    rec.onend = () => { V.listening = false; renderVoice(); };
+    rec.onerror = e => { V.listening = false; renderVoice(); say('Spracherkennung: ' + (e.error === 'not-allowed' ? 'Mikrofon-Zugriff verweigert.' : e.error === 'network' ? 'braucht Internet.' : e.error), 'warn'); };
+    rec.onresult = e => { const alts = Array.from(e.results[0] || []).map(a => a.transcript); let best = alts[0] || ''; for (const a of alts) { if (D.parseCommand(a).cmd !== 'unknown') { best = a; break; } } if (best) handle(best); };
+    try { rec.start(); } catch (e) { say('Mikrofon konnte nicht gestartet werden: ' + e.message, 'warn'); }
+  }
+  function buildVoice() {
+    if ($('voice-fab')) return;
+    const fab = document.createElement('button');
+    fab.id = 'voice-fab'; fab.type = 'button'; fab.setAttribute('aria-label', 'Sprachsteuerung (Test)'); fab.title = 'Sprachsteuerung (Test)';
+    fab.textContent = '🎤'; fab.hidden = true;
+    fab.style.cssText = 'position:fixed;right:14px;bottom:calc(88px + env(safe-area-inset-bottom,0px));width:52px;height:52px;border-radius:26px;z-index:70;font-size:22px;background:rgba(15,23,42,.92);border:1px solid rgba(251,191,36,.6);box-shadow:0 6px 22px rgba(0,0,0,.5)';
+    document.body.appendChild(fab);
+    const p = document.createElement('div');
+    p.id = 'voice-panel'; p.hidden = true;
+    p.style.cssText = 'position:fixed;left:10px;right:10px;bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:71;max-width:440px;margin-left:auto;padding:12px;border-radius:18px;background:rgba(2,6,23,.96);border:1px solid rgba(168,85,247,.45);color:#e2e8f0;box-shadow:0 10px 40px rgba(0,0,0,.6)';
+    p.innerHTML = `<div class="flex items-center gap-2 mb-2"><div class="text-sm font-black">🎤 Sprachsteuerung <span class="text-[10px] font-bold text-amber-300 border border-amber-400/50 rounded px-1 ml-1">TEST</span></div><button type="button" id="vp-close" class="ml-auto px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300" aria-label="Schließen">✕</button></div>
+      <div class="flex gap-2"><input id="vp-in" type="text" autocomplete="off" placeholder="z. B. „Tempo 120“ oder „Spur 2 stumm“" class="flex-1 min-w-0 rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-sm"><button type="button" id="vp-go" class="px-3 rounded-xl border border-amber-400/70 bg-amber-400/15 text-amber-100 text-sm font-bold">OK</button></div>
+      <button type="button" id="vp-mic" class="mt-2 w-full py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm font-bold ${SRC ? '' : 'opacity-50'}">🎤 Sprechen</button>
+      <div id="vp-log" class="mt-2 text-[11px] space-y-0.5 max-h-24 overflow-y-auto"></div>
+      <div class="mt-2 text-[10px] leading-snug text-slate-500">Beispiele: Play · Stopp · Zurück · Vor · Tempo 128 · Spur 2 stumm · Spur 3 solo · Spur 1 lauter · Loop aus · Metronom an · Mixer zeigen · Tempo erkennen · Auto-Mix · speichern.<br>${SRC ? 'Spracherkennung nutzt je nach Gerät einen Online-Dienst.' : 'Hier gibt es keine eingebaute Spracherkennung – nutze das Tipp-Feld mit dem 🎤 deiner Android-Tastatur.'} Löschen/Reset sind gesperrt.</div>`;
+    document.body.appendChild(p);
+    fab.addEventListener('click', () => { p.hidden = !p.hidden; if (!p.hidden) { renderVoice(); setTimeout(() => $('vp-in').focus(), 50); } });
+    p.querySelector('#vp-close').addEventListener('click', () => { p.hidden = true; });
+    const go = () => { const i = $('vp-in'); const v = i.value.trim(); if (!v) return; handle(v); i.value = ''; };
+    p.querySelector('#vp-go').addEventListener('click', go);
+    p.querySelector('#vp-in').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+    p.querySelector('#vp-mic').addEventListener('click', startListening);
+  }
+  function syncVoice() {
+    const on = voiceOn();
+    if (on) buildVoice();
+    const fab = $('voice-fab'), p = $('voice-panel');
+    if (fab) fab.hidden = !on;
+    if (p && !on) { p.hidden = true; try { V.rec && V.rec.stop(); } catch (_) {} }
+  }
+
+  /* ------------------------------------------------------------------ Start */
+  window.SunshineAI = { open: openAssistant, state: S };
+  window.SunshineVoice = { handle, supported: !!SRC, get enabled() { return voiceOn(); }, parse: D.parseCommand };
+  document.addEventListener('sunshine-ui', syncVoice);
+  window.addEventListener('storage', e => { if (e.key === LS_UI) syncVoice(); });
+  const boot = () => { injectEntryPoints(); syncVoice(); };
+  if (document.readyState === 'complete') setTimeout(boot, 0); else window.addEventListener('load', () => setTimeout(boot, 0));
+  /* Menü kann später gebaut werden → kurz nachprüfen */
+  let tries = 0; const iv = setInterval(() => { injectEntryPoints(); if ((($('btn-assistant') && $('btn-pattern-variation')) || ++tries > 20)) clearInterval(iv); }, 500);
+})();
+
+</script>
+<script>
 /* ===== Sunshine@R · Design-Auswahl & Optionen ===== */
 (function () {
   'use strict';
@@ -7434,7 +8127,7 @@ html[data-radius="round"] .rounded-2xl{border-radius:36px!important}
   const LS_THEME = 'sunshine.theme', LS_UI = 'sunshine.ui';
   const html = document.documentElement;
   const getTheme = () => { const t = html.getAttribute('data-theme'); return THEMES.some(x => x.id === t) ? t : 'aurora'; };
-  const UI_DEFAULTS = { glass: true, glow: true, large: false, accent: null, glassK: 40, blur: null, radius: 'normal' };
+  const UI_DEFAULTS = { glass: true, glow: true, large: false, accent: null, glassK: 40, blur: null, radius: 'normal', voice: false };
   const readUi = () => { try { return Object.assign({}, UI_DEFAULTS, JSON.parse(localStorage.getItem(LS_UI) || '{}')); } catch (_) { return Object.assign({}, UI_DEFAULTS); } };
   function applyUi(p) {
     if (typeof window.__sunUi === 'function') { window.__sunUi(p); return; }
@@ -7450,7 +8143,7 @@ html[data-radius="round"] .rounded-2xl{border-radius:36px!important}
     const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t.meta);
     if (persist !== false) { try { localStorage.setItem(LS_THEME, t.id); } catch (_) {} }
   }
-  function saveUi(p) { try { localStorage.setItem(LS_UI, JSON.stringify(p)); } catch (_) {} applyUi(p); }
+  function saveUi(p) { try { localStorage.setItem(LS_UI, JSON.stringify(p)); } catch (_) {} applyUi(p); try { document.dispatchEvent(new CustomEvent('sunshine-ui', { detail: p })); } catch (_) {} }
 
   function previewHtml(t) {
     const p = t.pv;
@@ -7511,6 +8204,8 @@ html[data-radius="round"] .rounded-2xl{border-radius:36px!important}
       </div>
       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Klang</div>
       <label class="flex items-start gap-3 py-2 cursor-pointer ${spessaOk ? '' : 'opacity-50'}"><input type="checkbox" data-spessa ${spessaOk && SpessaEngine.enabled ? 'checked' : ''} ${spessaOk ? '' : 'disabled'} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">SpessaSynth-Engine für SoundFonts</span><span class="block text-[11px] text-slate-400">Volle SoundFont-Unterstützung (Zonen, Filter, Drums). Aus = einfacher Ersatz-Player.</span></span></label>
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Experimentell</div>
+      <div class="rounded-xl border border-slate-800 px-3 py-1">${toggle('voice', '🎤 Sprachsteuerung (Test)', 'Blendet einen Mikrofon-Knopf ein: Befehle wie „Play“, „Tempo 120“, „Spur 2 stumm“ sprechen oder tippen. Löschen und Zurücksetzen sind gesperrt. Ob Sprechen geht, hängt vom Gerät ab – Tippen geht immer.', ui.voice)}</div>
       <div class="flex items-center gap-3 mt-4 pt-3 border-t border-slate-800"><img src="assets/sunshine-r-app-icon.png" alt="" class="w-10 h-10 rounded-xl" onerror="this.remove()"><div class="min-w-0"><div class="text-sm font-bold">Sunshine@R Stem DAW Studio <span class="text-[10px] font-mono text-cyan-300">PRO</span></div><div class="text-[11px] text-slate-400">Design wird auf diesem Gerät gespeichert.</div></div><button type="button" data-close class="ml-auto px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-sm">Fertig</button></div>
     </div>`;
     document.body.appendChild(ov);
