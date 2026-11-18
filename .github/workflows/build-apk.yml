@@ -44,6 +44,9 @@ jobs:
             fs.writeFileSync(p, xml);
           '
 
+      - name: Android-Feinschliff (Vollbild im Querformat, Zurück-Taste)
+        run: node scripts/patch-android.cjs
+
       - name: Web-Assets synchronisieren & Debug-APK bauen
         run: |
           npx cap sync android
