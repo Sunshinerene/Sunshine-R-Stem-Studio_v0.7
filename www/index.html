@@ -405,6 +405,7 @@
 
               <select id="select-midi-scale" class="bg-daw-surface border border-daw-border rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none">
                 <option value="chromatic">Chromatisch (Frei)</option>
+                <option value="major">Major (Dur)</option>
                 <option value="minor" selected>Natural Minor (Moll)</option>
                 <option value="harmonicMinor">Harmonic Minor</option>
                 <option value="phrygian">Phrygian (Hard Trance)</option>
@@ -429,6 +430,12 @@
               <button id="btn-apply-arp" class="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/40 text-xs font-semibold transition">
                 Generieren
               </button>
+              <button id="btn-pattern-auto" type="button" title="Vollautomatisch: Stil, Progression und Rhythmus würfeln" class="px-2.5 py-1 rounded-lg bg-purple-500/25 hover:bg-purple-500/40 text-purple-100 border border-purple-500/50 text-xs font-semibold transition">
+                🎲 Auto
+              </button>
+              <button id="btn-pattern-studio" type="button" title="Pattern-Studio: Stil, Progression, Rhythmus, Seed" class="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/40 text-xs font-semibold transition">
+                ✨ Studio
+              </button>
               <button id="btn-clear-midi" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold transition">
                 Leeren
               </button>
@@ -441,7 +448,7 @@
               <div class="text-xs font-bold text-purple-200 flex items-center gap-1.5">
                 <span>🧬 Audio-to-MIDI Pitch Extraktor</span>
               </div>
-              <div class="text-[10px] text-slate-400">Erkennt Tonhöhen (YIN/Autokorrelation) &amp; schreibt editierbare Noten</div>
+              <div class="text-[10px] text-slate-400">YIN-Pitch-Tracking, Akkord-Erkennung &amp; automatische Tonart – schreibt editierbare Noten</div>
             </div>
 
             <div class="flex items-center gap-1.5 flex-1 sm:flex-initial justify-end">
@@ -451,8 +458,18 @@
                 <option value="vocals">04 | Suno Vocals</option>
               </select>
               <button id="btn-extract-midi" class="px-3 py-1.5 rounded-lg bg-purple-500 hover:bg-purple-400 text-slate-950 font-bold text-xs shadow-md shadow-purple-500/20 transition whitespace-nowrap">
-                Melodie extrahieren
+                Analysieren &amp; extrahieren
               </button>
+            </div>
+            <div class="w-full flex flex-wrap items-center gap-1.5 text-[10px] text-slate-300">
+              <select id="select-a2m-mode" title="Erkennungsmodus" class="bg-daw-surface border border-daw-border rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none">
+                <option value="auto" selected>🤖 Auto (erkennt Typ)</option>
+                <option value="melody">Melodie (monophon)</option>
+                <option value="bass">Bass</option>
+                <option value="chords">Akkorde (polyphon)</option>
+              </select>
+              <label class="flex items-center gap-1 bg-daw-surface border border-daw-border rounded-lg px-2 py-1">Ab Takt <input id="input-a2m-bar" type="number" min="1" max="999" value="1" inputmode="numeric" class="w-12 bg-transparent text-xs text-slate-100 focus:outline-none"></label>
+              <label class="flex items-center gap-1 bg-daw-surface border border-daw-border rounded-lg px-2 py-1 cursor-pointer"><input id="chk-a2m-key" type="checkbox" checked> Tonart auto + einrasten</label>
             </div>
           </div>
         </div>
@@ -805,6 +822,7 @@
     const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const SCALES = {
       chromatic:     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      major:         [0, 2, 4, 5, 7, 9, 11],
       minor:         [0, 2, 3, 5, 7, 8, 10],
       harmonicMinor: [0, 2, 3, 5, 7, 8, 11],
       phrygian:      [0, 1, 3, 5, 7, 8, 10],
@@ -1640,6 +1658,24 @@
       return id;
     }
 
+    /* Externe Links (Capacitor-Browser, sonst neues Fenster) */
+    function openExternalUrl(url) {
+      try {
+        const cap = window.Capacitor, B = cap && cap.Plugins && cap.Plugins.Browser;
+        if (B && typeof B.open === 'function') { B.open({ url }); return; }
+      } catch (_) {}
+      const w = window.open(url, '_blank', 'noopener');
+      if (!w) toast(`Link konnte nicht geöffnet werden: ${url}`, 'warn');
+    }
+
+    const SF_FREE_SOURCES = [
+      { name: 'GeneralUser GS', note: 'ca. 30 MB · General MIDI, gut für den Einstieg', url: 'https://schristiancollins.com/generaluser.php' },
+      { name: 'TimGM6mb (MuseScore-Liste)', note: 'ca. 6 MB · sehr klein, GPL', url: 'https://musescore.org/en/handbook/soundfonts-and-sfz-files' },
+      { name: 'FreePats', note: 'freie Instrumente (z. B. Klaviere) · Größen vorher prüfen', url: 'https://freepats.zenvoid.org/' },
+      { name: 'Polyphone Soundfonts', note: 'Community-Sammlung, viele kleine Bänke', url: 'https://www.polyphone.io/en/soundfonts' },
+      { name: 'Musical Artifacts', note: 'großes Archiv · Lizenz je Datei beachten', url: 'https://musical-artifacts.com/' }
+    ];
+
     function openSoundFontPicker(track) {
       document.getElementById('sf-picker-modal')?.remove();
       const ov = document.createElement('div');
@@ -1649,6 +1685,13 @@
         <div class="flex items-center gap-3 mb-2"><div class="text-base font-black">🎼 SoundFont · ${escapeText(track.name)}</div><button type="button" data-close class="ml-auto px-3 py-1 rounded-lg bg-slate-800 text-slate-300">✕</button></div>
         <div class="flex gap-2 mb-2"><select id="sf-font" class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm"></select><button type="button" data-sf-del class="px-3 rounded-lg border border-rose-500/40 text-rose-300 text-xs" title="SoundFont vom Gerät entfernen">🗑</button></div>
         <button type="button" data-sf-load class="mb-2 px-3 py-2 rounded-lg bg-purple-500 text-white font-bold text-xs">📂 SoundFont laden (.sf2)</button>
+        <details class="mb-2 rounded-lg border border-slate-800 bg-slate-900/60">
+          <summary class="px-3 py-2 text-xs font-bold text-cyan-300 cursor-pointer">🌐 Kostenlose SoundFonts herunterladen</summary>
+          <div class="px-3 pb-2 space-y-1">
+            ${SF_FREE_SOURCES.map(x => `<button type="button" data-ext="${escapeText(x.url)}" class="w-full text-left rounded-lg px-2 py-1.5 hover:bg-slate-800"><span class="text-xs font-semibold text-slate-100">${escapeText(x.name)}</span> <span class="text-[10px] text-slate-400">– ${escapeText(x.note)}</span><div class="text-[10px] text-cyan-400/80 break-all">${escapeText(x.url)}</div></button>`).join('')}
+            <div class="text-[10px] text-slate-500 pt-1">Nach dem Download hier über „SoundFont laden“ auswählen. Nur .sf2 (kein SF3). Lizenz und Dateigröße vor dem Download prüfen – auf dem Handy am besten unter ca. 60 MB bleiben.</div>
+          </div>
+        </details>
         <div id="sf-status" class="text-[11px] text-slate-400 mb-2">Lade eine .sf2-Datei (SF3 wird nicht unterstützt). Sie bleibt auf diesem Gerät gespeichert.</div>
         <input id="sf-search" type="search" placeholder="Preset suchen …" class="mb-2 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm w-full" />
         <div id="sf-list" class="flex-1 min-h-[120px] overflow-y-auto rounded-lg border border-slate-800 divide-y divide-slate-800"></div>
@@ -1687,6 +1730,7 @@
       ov.addEventListener('click', async e => {
         const t = e.target instanceof Element ? e.target : null; if (!t) return;
         if (t === ov || t.closest('[data-close]')) { ov.remove(); return; }
+        const ext = t.closest('[data-ext]'); if (ext) { openExternalUrl(ext.dataset.ext); return; }
         if (t.closest('[data-sf-load]')) {
           const inp = document.createElement('input'); inp.type = 'file'; inp.style.display = 'none';
           document.body.appendChild(inp);
@@ -2757,102 +2801,532 @@
 
     /**
      * ============================================================================
-     * AUDIO-TO-MIDI PITCH EXTRACTOR (AUTOCORRELATION OVER 32 STEPS)
+     * AUDIO-TO-MIDI v2 (reine DSP, kein Netzwerk, keine KI-Modelle)
+     *  - Melodie/Bass: YIN-Pitch-Tracking (Downsampling, Median-Glättung, Segmentierung in Noten)
+     *  - Akkorde:      Chroma (FFT) + Dur/Moll-Dreiklangs-Matching pro halbem Takt
+     *  - Tonart:       Krumhansl-Schmuckler (Dur/Moll) aus Tonhöhen bzw. Chroma
+     *  - Auto-Modus:   wählt Melodie/Bass/Akkorde nach Spurname und Periodizität
      * ============================================================================
      */
-    function extractMidiFromStem(stemId) {
+    const A2M_KEY_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+    const A2M_KEY_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+    const A2M_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+    function a2mMedian(arr) {
+      const a = Array.from(arr).sort((x, y) => x - y);
+      const n = a.length; if (!n) return NaN;
+      return n % 2 ? a[(n - 1) >> 1] : (a[n / 2 - 1] + a[n / 2]) / 2;
+    }
+
+    /* Mono-Mix + Downsampling (~11 kHz) des Analysefensters */
+    function a2mPrepare(buf, startSample, lenSamples, targetSr) {
+      targetSr = targetSr || 11025;
+      const sr = buf.sampleRate, chs = [];
+      for (let c = 0; c < buf.numberOfChannels; c++) chs.push(buf.getChannelData(c));
+      const factor = Math.max(1, Math.round(sr / targetSr));
+      const n = Math.max(0, Math.min(lenSamples, buf.length - startSample));
+      const m = Math.floor(n / factor), x = new Float32Array(m);
+      for (let i = 0; i < m; i++) {
+        let sum = 0; const base = startSample + i * factor;
+        for (let k = 0; k < factor; k++) for (let c = 0; c < chs.length; c++) sum += chs[c][base + k];
+        x[i] = sum / (factor * chs.length);
+      }
+      return { x, sr: sr / factor };
+    }
+
+    /* Ein YIN-Frame: liefert {freq, conf} oder null */
+    function a2mYinFrame(x, i0, W, tauMin, tauMax, sr, buf) {
+      const d = buf.d, cm = buf.c;
+      for (let tau = 1; tau <= tauMax; tau++) {
+        let sum = 0;
+        for (let j = 0; j < W; j++) { const df = x[i0 + j] - x[i0 + j + tau]; sum += df * df; }
+        d[tau] = sum;
+      }
+      cm[0] = 1; let run = 0;
+      for (let tau = 1; tau <= tauMax; tau++) { run += d[tau]; cm[tau] = run > 1e-12 ? d[tau] * tau / run : 1; }
+      let best = -1;
+      for (let tau = tauMin; tau <= tauMax; tau++) {
+        if (cm[tau] < 0.15) { while (tau + 1 <= tauMax && cm[tau + 1] < cm[tau]) tau++; best = tau; break; }
+      }
+      let conf;
+      if (best < 0) {
+        let mn = 1e9;
+        for (let tau = tauMin; tau <= tauMax; tau++) if (cm[tau] < mn) { mn = cm[tau]; best = tau; }
+        if (mn > 0.4) return null;
+        conf = 1 - mn;
+      } else conf = 1 - cm[best];
+      let t0 = best;
+      if (best > 1 && best < tauMax) {
+        const s0 = cm[best - 1], s1 = cm[best], s2 = cm[best + 1], den = s0 - 2 * s1 + s2;
+        if (den > 1e-9) t0 = best + (s0 - s2) / (2 * den);
+      }
+      return { freq: sr / t0, conf };
+    }
+
+    /* Pitch-Verlauf über das ganze Fenster */
+    function a2mPitchTrack(x, sr, fmin, fmax) {
+      const W = Math.round(sr * 0.046), hop = Math.max(1, Math.round(sr * 0.0116));
+      const tauMax = Math.min(Math.floor(sr / fmin), W), tauMin = Math.max(2, Math.floor(sr / fmax));
+      const buf = { d: new Float32Array(tauMax + 2), c: new Float32Array(tauMax + 2) };
+      const midi = [], rms = [], conf = [];
+      for (let i0 = 0; i0 + W + tauMax <= x.length; i0 += hop) {
+        let e = 0; for (let j = 0; j < W; j++) e += x[i0 + j] * x[i0 + j];
+        rms.push(Math.sqrt(e / W));
+        const r = a2mYinFrame(x, i0, W, tauMin, tauMax, sr, buf);
+        if (r && r.freq >= fmin && r.freq <= fmax) { midi.push(69 + 12 * Math.log2(r.freq / 440)); conf.push(r.conf); }
+        else { midi.push(NaN); conf.push(0); }
+      }
+      return { midi, rms, conf, W, hop, sr };
+    }
+
+    /* Frames → Noten (Sekunden) */
+    function a2mSegment(tr) {
+      const n = tr.midi.length; if (!n) return [];
+      const sorted = Array.from(tr.rms).sort((a, b) => a - b);
+      const p95 = sorted[Math.floor(n * 0.95)] || 0;
+      const gate = Math.max(0.006, 0.08 * p95);
+      // Median-Glättung (5 Frames) der Pitch-Kurve
+      const m = new Array(n).fill(NaN);
+      for (let f = 0; f < n; f++) {
+        if (isNaN(tr.midi[f])) continue;
+        const win = []; for (let k = -2; k <= 2; k++) { const v = tr.midi[f + k]; if (v !== undefined && !isNaN(v)) win.push(v); }
+        m[f] = a2mMedian(win);
+      }
+      const notes = []; let cur = null;
+      const close = endF => {
+        if (!cur) return;
+        if (endF - cur.start >= 3) notes.push({ f0: cur.start, f1: endF, midi: a2mMedian(cur.ps), rms: cur.peak });
+        cur = null;
+      };
+      for (let f = 0; f < n; f++) {
+        const voiced = !isNaN(m[f]) && tr.rms[f] > gate;
+        if (!voiced) { if (cur && f - cur.last > 2) close(cur.last + 1); continue; }
+        if (!cur) { cur = { start: f, ps: [m[f]], peak: tr.rms[f], last: f }; continue; }
+        if (f - cur.last > 3) { close(cur.last + 1); cur = { start: f, ps: [m[f]], peak: tr.rms[f], last: f }; continue; }
+        const med = a2mMedian(cur.ps);
+        const jump = Math.abs(m[f] - med) > 0.7;
+        const onset = f > 0 && tr.rms[f] > 1.9 * Math.max(1e-6, tr.rms[f - 1]) && cur.ps.length >= 5;
+        if (jump || onset) {
+          const a = m[f + 1], b = m[f + 2];
+          const agree = onset || ((a !== undefined && !isNaN(a) && Math.abs(a - m[f]) < 0.6) && (b === undefined || isNaN(b) || Math.abs(b - m[f]) < 0.7));
+          if (agree) { close(cur.last + 1); cur = { start: f, ps: [m[f]], peak: tr.rms[f], last: f }; }
+          continue;
+        }
+        cur.ps.push(m[f]); cur.last = f; cur.peak = Math.max(cur.peak, tr.rms[f]);
+      }
+      if (cur) close(cur.last + 1);
+      return notes.map(o => ({
+        t0: (o.f0 * tr.hop + tr.W * 0.25) / tr.sr, t1: (o.f1 * tr.hop + tr.W * 0.5) / tr.sr, midi: o.midi, rms: o.rms
+      }));
+    }
+
+    function a2mFft(re, im) {
+      const n = re.length;
+      for (let i = 1, j = 0; i < n; i++) {
+        let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit;
+        if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; }
+      }
+      for (let len = 2; len <= n; len <<= 1) {
+        const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang), h = len >> 1;
+        for (let i = 0; i < n; i += len) {
+          let cr = 1, ci = 0;
+          for (let k = 0; k < h; k++) {
+            const ur = re[i + k], ui = im[i + k];
+            const vr = re[i + k + h] * cr - im[i + k + h] * ci, vi = re[i + k + h] * ci + im[i + k + h] * cr;
+            re[i + k] = ur + vr; im[i + k] = ui + vi; re[i + k + h] = ur - vr; im[i + k + h] = ui - vi;
+            const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+          }
+        }
+      }
+    }
+
+    /* Chroma (12 Tonklassen) eines Abschnitts [i0, i1) */
+    function a2mChroma(x, sr, i0, i1) {
+      const N = 4096, hann = new Float32Array(N), re = new Float64Array(N), im = new Float64Array(N), chroma = new Float64Array(12);
+      for (let i = 0; i < N; i++) hann[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1));
+      const binPc = new Int8Array(N / 2).fill(-1);
+      for (let k = 1; k < N / 2; k++) { const f = k * sr / N; if (f >= 100 && f <= 2000) binPc[k] = ((Math.round(69 + 12 * Math.log2(f / 440)) % 12) + 12) % 12; }
+      const end = Math.min(i1, x.length);
+      for (let s = i0; s < end - 1024 || s === i0; s += 2048) {
+        for (let i = 0; i < N; i++) { const v = s + i < end ? x[s + i] : 0; re[i] = v * hann[i]; im[i] = 0; }
+        a2mFft(re, im);
+        for (let k = 1; k < N / 2; k++) if (binPc[k] >= 0) chroma[binPc[k]] += Math.sqrt(Math.sqrt(re[k] * re[k] + im[k] * im[k]));
+        if (s + 2048 >= end) break;
+      }
+      return chroma;
+    }
+
+    /* Krumhansl-Schmuckler → {root, mode:'major'|'minor', score} */
+    function a2mKey(chroma) {
+      const c = Array.from(chroma); const mean = c.reduce((a, b) => a + b, 0) / 12;
+      if (c.reduce((a, b) => a + b, 0) <= 0) return null;
+      let best = null;
+      for (const [mode, prof] of [['major', A2M_KEY_MAJOR], ['minor', A2M_KEY_MINOR]]) {
+        const pm = prof.reduce((a, b) => a + b, 0) / 12;
+        for (let t = 0; t < 12; t++) {
+          let num = 0, dc = 0, dp = 0;
+          for (let i = 0; i < 12; i++) { const a = c[(t + i) % 12] - mean, b = prof[i] - pm; num += a * b; dc += a * a; dp += b * b; }
+          const r = num / (Math.sqrt(dc * dp) + 1e-12);
+          if (!best || r > best.score) best = { root: t, mode, score: r };
+        }
+      }
+      return best;
+    }
+
+    /* Akkorde pro Fenster (chordSteps 16tel) → [{step, dur, root, quality:'maj'|'min'}] */
+    function a2mChords(x, sr, stepSamples, steps, chordSteps, keyHint) {
+      const wins = [], energies = [];
+      for (let w = 0; w * chordSteps < steps; w++) {
+        const i0 = Math.round(w * chordSteps * stepSamples), i1 = Math.round((w + 1) * chordSteps * stepSamples);
+        if (i0 >= x.length) break;
+        const ch = a2mChroma(x, sr, i0, i1); const en = ch.reduce((a, b) => a + b, 0);
+        wins.push(ch); energies.push(en);
+      }
+      const maxE = Math.max(...energies, 1e-9);
+      const inKey = (root, q) => {
+        if (!keyHint) return false;
+        const iv = keyHint.mode === 'major' ? [0, 2, 4, 5, 7, 9, 11] : [0, 2, 3, 5, 7, 8, 10];
+        const set = new Set(iv.map(v => (v + keyHint.root) % 12));
+        return [0, q === 'maj' ? 4 : 3, 7].every(t => set.has((root + t) % 12));
+      };
+      const out = []; let prev = null;
+      wins.forEach((ch, w) => {
+        if (energies[w] < 0.12 * maxE) { prev = null; return; }
+        const norm = Math.sqrt(ch.reduce((a, b) => a + b * b, 0)) + 1e-12;
+        let best = null;
+        for (let r = 0; r < 12; r++) for (const q of ['maj', 'min']) {
+          const tpl = new Array(12).fill(0); tpl[r] = 1; tpl[(r + (q === 'maj' ? 4 : 3)) % 12] = 0.85; tpl[(r + 7) % 12] = 0.8;
+          const tn = Math.sqrt(tpl.reduce((a, b) => a + b * b, 0));
+          let dot = 0; for (let i = 0; i < 12; i++) dot += ch[i] * tpl[i];
+          let score = dot / (norm * tn); if (inKey(r, q)) score *= 1.05;
+          if (!best || score > best.score) best = { root: r, quality: q, score };
+        }
+        if (prev && prev.root !== best.root || prev && prev.quality !== best.quality) {
+          // Hysterese: vorigen Akkord behalten, wenn er fast gleich gut passt
+          let dot = 0; const tpl = new Array(12).fill(0); tpl[prev.root] = 1; tpl[(prev.root + (prev.quality === 'maj' ? 4 : 3)) % 12] = 0.85; tpl[(prev.root + 7) % 12] = 0.8;
+          for (let i = 0; i < 12; i++) dot += ch[i] * tpl[i];
+          const ps = dot / (norm * Math.sqrt(tpl.reduce((a, b) => a + b * b, 0))) * (inKey(prev.root, prev.quality) ? 1.05 : 1);
+          if (ps >= best.score * 0.94) best = { root: prev.root, quality: prev.quality, score: ps };
+        }
+        prev = best;
+        const last = out[out.length - 1];
+        if (last && last.root === best.root && last.quality === best.quality && last.step + last.dur === w * chordSteps) last.dur += chordSteps;
+        else out.push({ step: w * chordSteps, dur: chordSteps, root: best.root, quality: best.quality });
+      });
+      return out;
+    }
+
+    /* Hauptfunktion: liefert {mode, notes[{pitch,start,dur,vel}], key, chords, info} */
+    function analyzeAudioToMidi(buf, o) {
+      const steps = o.steps || 32, secPer16th = o.secPer16th, sr0 = buf.sampleRate;
+      const prep = a2mPrepare(buf, o.startSample, Math.floor(steps * secPer16th * sr0));
+      const x = prep.x, sr = prep.sr;
+      if (x.length < sr * 0.2) return { mode: o.mode, notes: [], key: null, chords: null, info: 'Zu wenig Audio im gewählten Bereich.' };
+      let mode = o.mode || 'auto', track = null;
+      const nameBass = /bass|808|sub/i.test(o.name || ''), nameVoc = /vocal|voc\b|vox|lead|sing|mic|melod/i.test(o.name || '');
+      const runTrack = (fmin, fmax) => a2mPitchTrack(x, sr, fmin, fmax);
+      if (mode === 'auto') {
+        if (nameBass) mode = 'bass';
+        else if (nameVoc) mode = 'melody';
+        else {
+          track = runTrack(70, 1000);
+          const s = Array.from(track.rms).sort((a, b) => a - b), gate = Math.max(0.006, 0.08 * (s[Math.floor(s.length * 0.95)] || 0));
+          let cs = 0, cn = 0; for (let f = 0; f < track.rms.length; f++) if (track.rms[f] > gate) { cn++; cs += track.conf[f]; }
+          mode = cn > 5 && cs / cn >= 0.8 ? 'melody' : 'chords';
+        }
+      }
+      let notes = [], chords = null, key = null;
+      if (mode === 'chords') {
+        const stepSamples = secPer16th * sr;
+        const cr = new Float64Array(12);
+        for (let w = 0; w * 8 < steps; w++) { const i0 = Math.round(w * 8 * stepSamples), i1 = Math.round((w + 1) * 8 * stepSamples); if (i0 >= x.length) break; const c = a2mChroma(x, sr, i0, i1); for (let i = 0; i < 12; i++) cr[i] += c[i]; }
+        key = a2mKey(cr);
+        chords = a2mChords(x, sr, stepSamples, steps, 8, key);
+        chords.forEach(c => {
+          const base = 48 + c.root, tones = [0, c.quality === 'maj' ? 4 : 3, 7];
+          tones.forEach(t => notes.push({ pitch: Math.min(71, base + t), start: c.step, dur: Math.min(c.dur, steps - c.step), vel: 96 }));
+        });
+        return { mode, notes, key, chords, info: chords.map(c => A2M_NOTE_NAMES[c.root] + (c.quality === 'min' ? 'm' : '')).join(' – ') };
+      }
+      // Melodie / Bass
+      const fmin = mode === 'bass' ? 38 : 70, fmax = mode === 'bass' ? 330 : 1000;
+      if (!track || mode === 'bass') track = runTrack(fmin, fmax);
+      else if (mode === 'melody' && !track) track = runTrack(fmin, fmax);
+      const seg = a2mSegment(track);
+      let raw = seg.map(sg => {
+        const s0 = Math.round(sg.t0 / secPer16th), s1 = Math.round(sg.t1 / secPer16th);
+        return { midi: Math.round(sg.midi), start: s0, dur: Math.max(1, s1 - s0), rms: sg.rms };
+      }).filter(n => n.start >= 0 && n.start < steps);
+      raw.sort((a, b) => a.start - b.start || b.dur - a.dur);
+      const mono = [];
+      raw.forEach(n => {
+        const last = mono[mono.length - 1];
+        if (last && last.start === n.start) return;                 // gleicher Start → längere (zuerst sortiert) behalten
+        if (last && last.start + last.dur > n.start) last.dur = Math.max(1, n.start - last.start);
+        mono.push(n);
+      });
+      mono.forEach(n => { n.dur = Math.min(n.dur, steps - n.start); });
+      if (!mono.length) return { mode, notes: [], key: null, chords: null, info: 'Keine Töne erkannt.' };
+      // Tonart aus gewichteter Tonhöhenverteilung
+      if (mono.length >= 4) {
+        const hist = new Float64Array(12); mono.forEach(n => { hist[((n.midi % 12) + 12) % 12] += n.dur; });
+        key = a2mKey(hist);
+      }
+      // Oktav-Verschiebung der ganzen Phrase, damit sie in den Piano-Roll-Bereich (36–71) passt
+      let bestK = 0, bestOut = Infinity;
+      for (const k of [0, -1, 1, -2, 2, -3, 3]) {
+        const out = mono.filter(n => n.midi + 12 * k < 36 || n.midi + 12 * k > 71).length;
+        if (out < bestOut) { bestOut = out; bestK = k; }
+      }
+      const peak = Math.max(...mono.map(n => n.rms), 1e-9);
+      mono.forEach(n => {
+        let p = n.midi + 12 * bestK; while (p < 36) p += 12; while (p > 71) p -= 12;
+        notes.push({ pitch: p, start: n.start, dur: n.dur, vel: Math.round(70 + 50 * Math.pow(n.rms / peak, 0.7)) });
+      });
+      const kn = key ? A2M_NOTE_NAMES[key.root] + (key.mode === 'minor' ? ' Moll' : ' Dur') : '';
+      return { mode, notes, key, chords: null, info: `${notes.length} Noten${kn ? ' · Tonart ' + kn : ''}` };
+    }
+
+    async function extractMidiFromStem(stemId) {
       const buf = dawState.buffers[stemId];
       if (!buf) {
         toast('Dieser Stem ist noch leer – bitte zuerst Demo-Stems oder eine Datei laden.', 'warn');
         return;
       }
+      const $ = id => document.getElementById(id);
+      const mode = $('select-a2m-mode') ? $('select-a2m-mode').value : 'auto';
+      const startBar = Math.max(1, parseInt($('input-a2m-bar') ? $('input-a2m-bar').value : '1', 10) || 1);
+      const snap = $('chk-a2m-key') ? $('chk-a2m-key').checked : true;
+      const tr = dawState.tracks.find(t => t.id === stemId);
+      const secPer16th = (60 / dawState.bpm) / 4, sr = buf.sampleRate;
+      const startSample = Math.floor((dawState.startOffsetMs / 1000) * sr + (startBar - 1) * 16 * secPer16th * sr);
+      if (startSample >= buf.length - sr * 0.2) { toast('Takt ' + startBar + ' liegt hinter dem Ende der Audio-Datei.', 'warn'); return; }
+      toast('Analysiere Audio …', 'info');
+      await new Promise(r => setTimeout(r, 40));
+      let res;
+      try { res = analyzeAudioToMidi(buf, { startSample, secPer16th, steps: 32, mode, name: tr ? tr.name : '' }); }
+      catch (err) { console.error('[Audio→MIDI]', err); toast(`Analyse fehlgeschlagen: ${err && err.message ? err.message : err}`, 'error'); return; }
+      if (!res.notes.length) { toast('Keine eindeutige Musik erkannt – anderen Stem, Modus oder Takt versuchen.', 'warn'); return; }
 
-      const data = buf.getChannelData(0);
-      const sr = buf.sampleRate;
-      const trimSamples = Math.floor((dawState.startOffsetMs / 1000) * sr);
-      const secPer16th = (60 / dawState.bpm) / 4;
-      const stepSamples = Math.floor(secPer16th * sr);
-
-      const extracted = [];
+      let notes = res.notes;
+      if (snap && res.key) {
+        dawState.midiRoot = res.key.root; dawState.midiScale = res.key.mode;
+        const rs = $('select-midi-root'), ss = $('select-midi-scale');
+        if (rs) rs.value = String(res.key.root);
+        if (ss) ss.value = res.key.mode;
+        if (res.mode !== 'chords') notes = notes.map(n => Object.assign({}, n, { pitch: quantizeMidiNoteToScale(n.pitch, res.key.root, res.key.mode) }));
+      } else if (snap && res.mode !== 'chords') {
+        notes = notes.map(n => Object.assign({}, n, { pitch: quantizeMidiNoteToScale(n.pitch, dawState.midiRoot, dawState.midiScale) }));
+      }
       let idCounter = Date.now();
-      let prevMidi = -1;
-
-      for (let s = 0; s < 32; s++) {
-        const startIdx = trimSamples + s * stepSamples;
-        if (startIdx + stepSamples >= data.length) break;
-
-        // 1. Compute RMS Energy for onset/gate
-        let rms = 0;
-        for (let i = 0; i < stepSamples; i++) {
-          const v = data[startIdx + i];
-          rms += v * v;
-        }
-        rms = Math.sqrt(rms / stepSamples);
-        if (rms < 0.022) {
-          prevMidi = -1;
-          continue;
-        }
-
-        // 2. Autocorrelation Pitch Detection (65 Hz .. 900 Hz)
-        const minLag = Math.floor(sr / 900);
-        const maxLag = Math.min(Math.floor(sr / 65), Math.floor(stepSamples * 0.8));
-        let bestLag = -1;
-        let bestCorr = 0;
-
-        for (let lag = minLag; lag <= maxLag; lag++) {
-          let corr = 0;
-          let normA = 0;
-          let normB = 0;
-          for (let i = 0; i < stepSamples - lag; i += 2) {
-            const a = data[startIdx + i];
-            const b = data[startIdx + i + lag];
-            corr += a * b;
-            normA += a * a;
-            normB += b * b;
-          }
-          const denom = Math.sqrt(normA * normB) + 1e-9;
-          const r = corr / denom;
-          if (r > bestCorr) {
-            bestCorr = r;
-            bestLag = lag;
-          }
-        }
-
-        if (bestLag > 0 && bestCorr > 0.35) {
-          const detectedFreq = sr / bestLag;
-          let midi = Math.round(69 + 12 * Math.log2(detectedFreq / 440));
-          // Fold into Piano Roll Range C2 (36) .. B4 (71)
-          while (midi < 36) midi += 12;
-          while (midi > 71) midi -= 12;
-
-          midi = quantizeMidiNoteToScale(midi, dawState.midiRoot, dawState.midiScale);
-          const vel = Math.min(127, Math.max(65, Math.round(rms * 380)));
-
-          if (midi === prevMidi && extracted.length > 0 && extracted[extracted.length - 1].start + extracted[extracted.length - 1].dur === s) {
-            // Extend sustained note
-            extracted[extracted.length - 1].dur += 1;
-          } else {
-            extracted.push({ id: idCounter++, pitch: midi, start: s, dur: 1, vel });
-            dawState.stepVelocities[s] = vel;
-          }
-          prevMidi = midi;
-        }
-      }
-
-      if (extracted.length === 0) {
-        toast('Keine eindeutige Melodie erkannt – versuche einen anderen Stem.', 'warn');
-        return;
-      }
+      const out = notes.map(n => ({ id: idCounter++, pitch: n.pitch, start: n.start, dur: n.dur, vel: n.vel }));
+      out.forEach(n => { dawState.stepVelocities[n.start] = n.vel; });
+      dawState.detectedChords = res.chords && res.chords.length ? res.chords : null;
 
       if (!getActiveMidiTrack()) createTrack('midi', 'Extrahierte MIDI');
-      dawState.midiNotes = extracted;
+      dawState.midiNotes = out;
       syncActiveMidiTrackFromState();
       switchBottomTab('midi');
       drawPianoRoll();
       drawVelocityLane();
       renderMultiTrackLanes();
-      toast(`${extracted.length} MIDI-Noten aus „${stemId.toUpperCase()}“ extrahiert!`, 'success');
+      const label = { melody: 'Melodie', bass: 'Bass', chords: 'Akkorde' }[res.mode] || res.mode;
+      toast(`${label}: ${res.info}${res.mode === 'chords' ? ' (für den Pattern-Generator gemerkt)' : ''}`, 'success');
     }
+
+    /**
+     * ============================================================================
+     * PATTERN-GENERATOR v2 (Akkord-/Tonleiter-bewusst, Euklid-Rhythmen, Seed-Würfeln)
+     * Erzeugt 2 Takte (32 Steps) im Piano-Roll-Bereich C2–B4 aus Tonart, Progression,
+     * Rhythmus und Stil. Progression kann aus der Audio-Akkorderkennung stammen.
+     * ============================================================================
+     */
+    const PATTERN_STYLES = {
+      arpUp: 'Arp aufwärts', arpDown: 'Arp abwärts', arpUpDown: 'Arp auf & ab', arpRandom: 'Arp zufällig',
+      stab: 'Akkord-Stabs', bass: 'Bassline', melody: 'Melodie', bell: 'Glocken-Melodie'
+    };
+    const PATTERN_PROGRESSIONS = {
+      '1-6-3-7': [0, 5, 2, 6], '1-4-5-1': [0, 3, 4, 0], '1-7-6-7': [0, 6, 5, 6], '1-3-7-6': [0, 2, 6, 5],
+      '1-5-6-4': [0, 4, 5, 3], '1-4-6-5': [0, 3, 5, 4], '6-4-1-5': [5, 3, 0, 4], '1-1-1-1': [0, 0, 0, 0]
+    };
+    const PATTERN_RHYTHMS = {
+      straight16: '16tel durchgehend', eighths: '8tel', offbeat: 'Offbeat', sync: 'Synkopiert',
+      euclid5: 'Euklid 5/16', euclid7: 'Euklid 7/16', euclid9: 'Euklid 9/16', random: 'Zufall'
+    };
+    const PATTERN_CFG = { style: 'arpUp', prog: '1-6-3-7', rhythm: 'straight16', oct: 2, len: 'normal', human: 'light', seed: 1 };
+
+    function patMulberry32(a) {
+      return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    }
+    function patMask(kind, rng) {
+      const m = new Array(16).fill(0);
+      if (kind === 'straight16') m.fill(1);
+      else if (kind === 'eighths') for (let i = 0; i < 16; i += 2) m[i] = 1;
+      else if (kind === 'offbeat') for (let i = 2; i < 16; i += 4) m[i] = 1;
+      else if (kind === 'sync') [0, 3, 6, 9, 12, 14].forEach(i => m[i] = 1);
+      else if (kind.startsWith('euclid')) {
+        const k = parseInt(kind.slice(6), 10), rot = Math.floor(rng() * 4);
+        for (let i = 0; i < 16; i++) if (((i * k) % 16) < k) m[(i + rot) % 16] = 1;
+      } else { for (let i = 0; i < 16; i++) m[i] = rng() < 0.55 ? 1 : 0; m[0] = 1; }
+      return m;
+    }
+    function patChordFromDegree(deg, root, scaleKey) {
+      let iv = SCALES[scaleKey] || SCALES.minor;
+      if (iv.length !== 7) iv = SCALES.minor;
+      const abs = k => iv[((k % 7) + 7) % 7] + 12 * Math.floor(k / 7);
+      const r = abs(deg);
+      return { rootPc: (root + r) % 12, tones: [0, abs(deg + 2) - r, abs(deg + 4) - r] };
+    }
+    function patBuildChords(cfg, info) {
+      if (cfg.prog === 'audio' && info.audioChords && info.audioChords.length) {
+        const out = [];
+        for (let w = 0; w < 4; w++) {
+          const c = info.audioChords.find(ch => w * 8 >= ch.step && w * 8 < ch.step + ch.dur) || info.audioChords[w % info.audioChords.length];
+          out.push({ rootPc: c.root, tones: [0, c.quality === 'maj' ? 4 : 3, 7] });
+        }
+        return out;
+      }
+      const degs = PATTERN_PROGRESSIONS[cfg.prog] || PATTERN_PROGRESSIONS['1-6-3-7'];
+      return [0, 1, 2, 3].map(i => patChordFromDegree(degs[i % degs.length], info.root, info.scale));
+    }
+    function patGenerate(cfg, info) {
+      const rng = patMulberry32((cfg.seed >>> 0) || 1);
+      const chords = patBuildChords(cfg, info);
+      const chordAt = s => chords[Math.floor(s / 8) % chords.length];
+      const m1 = patMask(cfg.rhythm, rng);
+      const m2 = m1.slice();
+      if (/^(euclid|random)/.test(cfg.rhythm)) for (let k = 0; k < 2; k++) { const i = 1 + Math.floor(rng() * 15); m2[i] = m2[i] ? 0 : 1; }
+      const hits = [];
+      for (let s = 0; s < 32; s++) if ((s < 16 ? m1 : m2)[s % 16]) hits.push(s);
+      const humAmp = { off: 0, light: 6, strong: 14 }[cfg.human] ?? 6;
+      const clampP = p => { while (p > 71) p -= 12; while (p < 36) p += 12; return p; };
+      const velAt = s => Math.max(40, Math.min(127, (s % 4 === 0 ? 112 : (s % 2 === 0 ? 98 : 86)) + Math.round((rng() * 2 - 1) * humAmp)));
+      const notes = []; let id = Date.now();
+      const durFor = (i, base) => {
+        const gap = (hits[i + 1] !== undefined ? hits[i + 1] : 32) - hits[i];
+        const d = cfg.len === 'short' ? 1 : cfg.len === 'long' ? Math.min(8, gap) : Math.min(2, gap);
+        return Math.max(1, Math.min(d || base, 32 - hits[i]));
+      };
+      const pool = ch => { const b = 48 + ch.rootPc, p = []; for (let o = 0; o < cfg.oct; o++) ch.tones.forEach(t => p.push(b + t + 12 * o)); return p.filter(x => x <= 71).sort((a, b2) => a - b2); };
+      const iv7 = (SCALES[info.scale] && SCALES[info.scale].length === 7) ? SCALES[info.scale] : SCALES.minor;
+      const scalePcs = new Set(iv7.map(v => (v + info.root) % 12));
+      const melPool = []; for (let p = (cfg.style === 'bell' ? 60 : 53); p <= 71; p++) if (scalePcs.has(p % 12)) melPool.push(p);
+      let melIdx = Math.floor(melPool.length / 2), arpK = 0, lastChordI = -1;
+      hits.forEach((s, i) => {
+        const ci = Math.floor(s / 8) % chords.length, ch = chordAt(s);
+        if (ci !== lastChordI) { arpK = 0; lastChordI = ci; }
+        const P = pool(ch); if (!P.length) return;
+        const vel = velAt(s), dur = durFor(i, 1);
+        const push = (pitch, d) => { const p = clampP(pitch); if (!notes.some(n => n.start === s && n.pitch === p)) notes.push({ id: id++, pitch: p, start: s, dur: d || dur, vel }); };
+        if (cfg.style === 'arpUp') push(P[arpK++ % P.length]);
+        else if (cfg.style === 'arpDown') push(P[P.length - 1 - (arpK++ % P.length)]);
+        else if (cfg.style === 'arpUpDown') { const seq = P.length > 2 ? P.concat(P.slice(1, -1).reverse()) : P; push(seq[arpK++ % seq.length]); }
+        else if (cfg.style === 'arpRandom') push(P[Math.floor(rng() * P.length)]);
+        else if (cfg.style === 'stab') ch.tones.forEach(t => push(48 + ch.rootPc + t));
+        else if (cfg.style === 'bass') {
+          let p = 36 + ch.rootPc; const r = rng();
+          if (i % 4 === 3 && r < 0.6) p += 12; else if (s % 4 !== 0 && r < 0.3) p += 7;
+          push(p);
+        } else {
+          // Melodie / Glocken: Schritte in der Tonleiter, auf starken Zeiten zum Akkordton
+          const w = rng(); melIdx += w < 0.15 ? -2 : w < 0.45 ? -1 : w < 0.55 ? 0 : w < 0.85 ? 1 : 2;
+          melIdx = Math.max(0, Math.min(melPool.length - 1, melIdx));
+          if (s % 4 === 0) {
+            const pcs = ch.tones.map(t => (ch.rootPc + t) % 12); let bi = melIdx, bd = 99;
+            melPool.forEach((p, k) => { if (pcs.includes(p % 12) && Math.abs(k - melIdx) < bd) { bd = Math.abs(k - melIdx); bi = k; } });
+            melIdx = bi;
+          }
+          push(melPool[melIdx], cfg.style === 'bell' ? Math.min(32 - s, Math.max(dur, 2)) : dur);
+        }
+      });
+      return notes;
+    }
+    function patSummary(cfg) {
+      return `${PATTERN_STYLES[cfg.style]} · ${cfg.prog === 'audio' ? 'Akkorde aus Audio' : cfg.prog} · ${PATTERN_RHYTHMS[cfg.rhythm]}`;
+    }
+    function patApply(cfg) {
+      const info = { root: dawState.midiRoot, scale: dawState.midiScale, audioChords: dawState.detectedChords };
+      const notes = patGenerate(cfg, info);
+      if (!notes.length) { toast('Das Pattern ist leer – anderen Rhythmus oder Seed wählen.', 'warn'); return; }
+      if (!getActiveMidiTrack()) createTrack('midi', 'Pattern');
+      notes.forEach(n => { dawState.stepVelocities[n.start] = Math.max(dawState.stepVelocities[n.start] || 0, n.vel); });
+      dawState.midiNotes = notes;
+      syncActiveMidiTrackFromState();
+      drawPianoRoll();
+      drawVelocityLane();
+      renderMultiTrackLanes();
+      toast(`Pattern: ${patSummary(cfg)}`, 'success');
+    }
+    function patRandomize(cfg) {
+      const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+      cfg.style = pick(Object.keys(PATTERN_STYLES));
+      const progs = Object.keys(PATTERN_PROGRESSIONS); if (dawState.detectedChords && dawState.detectedChords.length) progs.push('audio', 'audio');
+      cfg.prog = pick(progs);
+      cfg.rhythm = pick(Object.keys(PATTERN_RHYTHMS));
+      cfg.oct = pick([1, 2, 2, 3]); cfg.len = pick(['short', 'normal', 'normal', 'long']);
+      cfg.seed = 1 + Math.floor(Math.random() * 99999);
+      return cfg;
+    }
+
+    function openPatternStudio() {
+      document.getElementById('pattern-studio-modal')?.remove();
+      const ov = document.createElement('div');
+      ov.id = 'pattern-studio-modal';
+      ov.className = 'fixed inset-0 z-[110] bg-black/80 flex items-end sm:items-center justify-center p-2 sm:p-5';
+      const opts = (obj, cur) => Object.entries(obj).map(([k, v]) => `<option value="${k}" ${k === cur ? 'selected' : ''}>${escapeText(v)}</option>`).join('');
+      const progObj = Object.fromEntries(Object.keys(PATTERN_PROGRESSIONS).map(k => [k, 'Stufen ' + k]));
+      if (dawState.detectedChords && dawState.detectedChords.length) {
+        progObj.audio = 'Aus Audio-Analyse: ' + dawState.detectedChords.map(c => A2M_NOTE_NAMES[c.root] + (c.quality === 'min' ? 'm' : '')).join(' – ');
+      }
+      if (PATTERN_CFG.prog === 'audio' && !progObj.audio) PATTERN_CFG.prog = '1-6-3-7';
+      const sel = (id, label, html) => `<label class="block text-[11px] text-slate-400">${label}<select id="${id}" class="mt-1 w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-xs text-slate-100">${html}</select></label>`;
+      ov.innerHTML = `<div class="w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-2xl border border-cyan-500/40 bg-slate-950 p-4 shadow-2xl text-slate-100">
+        <div class="flex items-center gap-3 mb-1"><div class="text-base font-black">✨ Pattern-Studio</div><button type="button" data-close class="ml-auto px-3 py-1 rounded-lg bg-slate-800 text-slate-300">✕</button></div>
+        <div class="text-[11px] text-slate-400 mb-3">Tonart: <b id="ps-key" class="text-cyan-300"></b> · erzeugt 2 Takte im Piano Roll der aktiven MIDI-Spur.</div>
+        <div class="grid grid-cols-2 gap-2">
+          ${sel('ps-style', 'Stil', opts(PATTERN_STYLES, PATTERN_CFG.style))}
+          ${sel('ps-prog', 'Akkord-Progression', opts(progObj, PATTERN_CFG.prog))}
+          ${sel('ps-rhythm', 'Rhythmus', opts(PATTERN_RHYTHMS, PATTERN_CFG.rhythm))}
+          ${sel('ps-oct', 'Oktaven (Arp)', opts({ 1: '1', 2: '2', 3: '3' }, String(PATTERN_CFG.oct)))}
+          ${sel('ps-len', 'Notenlänge', opts({ short: 'Kurz', normal: 'Normal', long: 'Lang (legato)' }, PATTERN_CFG.len))}
+          ${sel('ps-human', 'Humanize (Anschlag)', opts({ off: 'Aus', light: 'Leicht', strong: 'Stark' }, PATTERN_CFG.human))}
+        </div>
+        <div class="text-[10px] text-slate-500 mt-2">Seed: <span id="ps-seed" class="font-mono text-slate-300"></span> – gleicher Seed ergibt dasselbe Pattern.</div>
+        <div class="grid grid-cols-3 gap-2 mt-3">
+          <button type="button" data-ps="dice" class="px-2 py-2 rounded-lg bg-slate-800 border border-slate-600 text-xs font-bold">🎲 Variation</button>
+          <button type="button" data-ps="gen" class="px-2 py-2 rounded-lg bg-cyan-500 text-slate-950 text-xs font-black">Generieren</button>
+          <button type="button" data-ps="auto" class="px-2 py-2 rounded-lg bg-purple-500 text-white text-xs font-black">🎲 Vollautomatisch</button>
+        </div></div>`;
+      document.body.appendChild(ov);
+      const $q = s => ov.querySelector(s);
+      const readCfg = () => {
+        PATTERN_CFG.style = $q('#ps-style').value; PATTERN_CFG.prog = $q('#ps-prog').value; PATTERN_CFG.rhythm = $q('#ps-rhythm').value;
+        PATTERN_CFG.oct = parseInt($q('#ps-oct').value, 10) || 2; PATTERN_CFG.len = $q('#ps-len').value; PATTERN_CFG.human = $q('#ps-human').value;
+      };
+      const writeCfg = () => { $q('#ps-style').value = PATTERN_CFG.style; $q('#ps-prog').value = PATTERN_CFG.prog; $q('#ps-rhythm').value = PATTERN_CFG.rhythm; $q('#ps-oct').value = String(PATTERN_CFG.oct); $q('#ps-len').value = PATTERN_CFG.len; $q('#ps-human').value = PATTERN_CFG.human; $q('#ps-seed').textContent = PATTERN_CFG.seed; };
+      const keyLabel = () => A2M_NOTE_NAMES[dawState.midiRoot] + ' ' + ({ major: 'Dur', minor: 'Moll', harmonicMinor: 'Harm. Moll', phrygian: 'Phrygisch', pentatonic: 'Moll-Pentatonik', chromatic: 'Chromatisch' }[dawState.midiScale] || dawState.midiScale);
+      $q('#ps-key').textContent = keyLabel(); writeCfg();
+      ov.addEventListener('click', e => {
+        const t = e.target instanceof Element ? e.target : null; if (!t) return;
+        if (t === ov || t.closest('[data-close]')) { ov.remove(); return; }
+        const b = t.closest('[data-ps]'); if (!b) return;
+        try {
+          if (b.dataset.ps === 'dice') { readCfg(); PATTERN_CFG.seed = 1 + Math.floor(Math.random() * 99999); writeCfg(); patApply(PATTERN_CFG); }
+          else if (b.dataset.ps === 'gen') { readCfg(); patApply(PATTERN_CFG); }
+          else if (b.dataset.ps === 'auto') { patRandomize(PATTERN_CFG); writeCfg(); patApply(PATTERN_CFG); }
+        } catch (err) { console.error('[Pattern]', err); toast(`Pattern konnte nicht erzeugt werden: ${err.message}`, 'error'); }
+      });
+    }
+
+    /* Toolbar-Buttons „✨ Studio“ und „🎲 Auto“ (zentral, überleben jeden Neuaufbau) */
+    (function installPatternButtons() {
+      if (window.__patBtnInstalled) return; window.__patBtnInstalled = true;
+      document.addEventListener('click', e => {
+        const t = e.target instanceof Element ? e.target : null; if (!t) return;
+        if (t.closest('#btn-pattern-studio')) { try { openPatternStudio(); } catch (err) { console.error(err); toast(`Pattern-Studio: ${err.message}`, 'error'); } }
+        else if (t.closest('#btn-pattern-auto')) { try { patRandomize(PATTERN_CFG); patApply(PATTERN_CFG); } catch (err) { console.error(err); toast(`Auto-Pattern: ${err.message}`, 'error'); } }
+      });
+    })();
 
     function quantizeMidiNoteToScale(midi, root, scaleKey) {
       const intervals = SCALES[scaleKey] || SCALES.chromatic;
