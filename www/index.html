@@ -729,6 +729,78 @@ html[data-fx-full="eq"] #fx-canvas,html[data-fx-full="sparks"] #fx-canvas,html[d
 @media (prefers-reduced-motion:reduce){.fx-edge::after,.fx-win,#fx-aurora i{animation:none!important}}
 html[data-fx-pause="1"] #fx-aurora i,html[data-fx-pause="1"] .fx-edge::after{animation-play-state:paused}
 
+/* ===== Sunshine@R · Anleitung (Rundgang + Handbuch) ===== */
+#hp-tour,#hp-man{--hp-a:rgb(var(--fx-rgb,var(--daw-accent)));--hp-bg:rgba(12,14,32,.97);--hp-line:rgba(255,255,255,.14);--hp-txt:#eef1ff;--hp-dim:#a9b0d0;font-family:inherit;color:var(--hp-txt)}
+/* ---------- Rundgang ---------- */
+#hp-tour{position:fixed;inset:0;z-index:160;pointer-events:none}
+#hp-tour .hp-b{position:fixed;background:rgba(4,6,18,.76);pointer-events:auto;transition:all .22s ease}
+#hp-tour .hp-ring{position:fixed;border-radius:14px;pointer-events:none;border:2px solid var(--hp-a);box-shadow:0 0 0 4px rgb(var(--fx-rgb,var(--daw-accent))/.25),0 0 26px rgb(var(--fx-rgb,var(--daw-accent))/.55);transition:all .22s ease;animation:hp-pulse 1.8s ease-in-out infinite}
+#hp-tour .hp-ring[hidden]{display:none}
+@keyframes hp-pulse{0%,100%{box-shadow:0 0 0 3px rgb(var(--fx-rgb,var(--daw-accent))/.22),0 0 18px rgb(var(--fx-rgb,var(--daw-accent))/.4)}50%{box-shadow:0 0 0 7px rgb(var(--fx-rgb,var(--daw-accent))/.12),0 0 34px rgb(var(--fx-rgb,var(--daw-accent))/.7)}}
+#hp-tour .hp-card{position:fixed;left:50%;transform:translateX(-50%);width:min(92vw,390px);max-height:70vh;overflow:auto;padding:16px 16px 12px;border-radius:20px;background:var(--hp-bg);border:1px solid var(--hp-line);box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgb(var(--fx-rgb,var(--daw-accent))/.3);pointer-events:auto;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+#hp-tour .hp-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+#hp-tour .hp-h .ic-i{flex:none;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,rgb(var(--fx-rgb,var(--daw-accent))/.9),rgb(var(--fx-rgb2,124 61 255)/.9));color:#150a00}
+#hp-tour .hp-h .ic-i svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#hp-tour h3{margin:0;font-size:16px;font-weight:800;line-height:1.25;flex:1}
+#hp-tour .hp-x{flex:none;min-width:44px;min-height:44px;margin:-8px -8px -8px 0;border:0;background:transparent;color:var(--hp-dim);font-size:13px;font-weight:700;border-radius:12px}
+#hp-tour .hp-t{font-size:14px;line-height:1.5;color:#dfe4ff}
+#hp-tour .hp-t b{color:#fff}
+#hp-tour .hp-t kbd{padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.12);font-size:12px}
+#hp-tour .hp-tap{margin-top:8px;padding:8px 10px;border-radius:12px;background:rgb(var(--fx-rgb,var(--daw-accent))/.16);border:1px solid rgb(var(--fx-rgb,var(--daw-accent))/.5);font-size:13px;font-weight:700}
+#hp-tour .hp-nav{display:flex;align-items:center;gap:8px;margin-top:12px}
+#hp-tour .hp-bar{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden;min-width:30px}
+#hp-tour .hp-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--hp-a),rgb(var(--fx-rgb2,124 61 255)));transition:width .25s}
+#hp-tour .hp-cnt{font-size:11px;color:var(--hp-dim);font-family:ui-monospace,monospace;min-width:38px;text-align:right}
+#hp-tour .hp-btn{min-height:44px;padding:0 16px;border-radius:14px;border:1px solid var(--hp-line);background:rgba(255,255,255,.07);color:var(--hp-txt);font-weight:700;font-size:14px}
+#hp-tour .hp-btn.pri{background:linear-gradient(145deg,var(--hp-a),rgb(var(--fx-rgb2,255 200 80)));color:#190d00;border-color:transparent}
+#hp-tour .hp-btn[disabled]{opacity:.35}
+#hp-tour .hp-skip{margin-top:6px;text-align:center}
+#hp-tour .hp-skip button{border:0;background:transparent;color:var(--hp-dim);font-size:12px;min-height:36px;text-decoration:underline}
+/* ---------- Handbuch ---------- */
+#hp-man{position:fixed;inset:0;z-index:160;display:flex;flex-direction:column;background:rgba(8,10,26,.985);padding-left:var(--sal,0px);padding-right:var(--sar,0px)}
+#hp-man[hidden]{display:none}
+#hp-man .hp-top{display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 14px 8px;border-bottom:1px solid var(--hp-line)}
+#hp-man .hp-top h2{margin:0;font-size:18px;font-weight:900;flex:1;display:flex;align-items:center;gap:8px}
+#hp-man .hp-top h2 svg,#hp-man summary svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#hp-man .hp-close{min-width:44px;min-height:44px;border-radius:14px;border:1px solid var(--hp-line);background:rgba(255,255,255,.07);color:var(--hp-txt);font-size:14px;font-weight:700;padding:0 14px}
+#hp-man .hp-scroll{flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:12px 14px max(28px,env(safe-area-inset-bottom))}
+#hp-man .hp-wrap{max-width:720px;margin:0 auto}
+#hp-man .hp-hero{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+#hp-man .hp-go{flex:1 1 200px;display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 14px;border-radius:18px;border:1px solid rgb(var(--fx-rgb,var(--daw-accent))/.55);background:linear-gradient(145deg,rgb(var(--fx-rgb,var(--daw-accent))/.28),rgba(255,255,255,.05));color:var(--hp-txt);text-align:left}
+#hp-man .hp-go svg{width:26px;height:26px;fill:none;stroke:var(--hp-a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#hp-man .hp-go b{display:block;font-size:15px}#hp-man .hp-go span{font-size:12px;color:var(--hp-dim)}
+#hp-man .hp-q{width:100%;min-height:46px;border-radius:14px;border:1px solid var(--hp-line);background:rgba(255,255,255,.06);color:var(--hp-txt);padding:0 14px;font-size:15px;margin-bottom:12px;box-sizing:border-box}
+#hp-man details{border:1px solid var(--hp-line);border-radius:18px;background:rgba(255,255,255,.04);margin-bottom:9px;overflow:hidden}
+#hp-man details[open]{border-color:rgb(var(--fx-rgb,var(--daw-accent))/.45);background:rgba(255,255,255,.06)}
+#hp-man summary{display:flex;align-items:center;gap:12px;min-height:58px;padding:8px 14px;cursor:pointer;list-style:none}
+#hp-man summary::-webkit-details-marker{display:none}
+#hp-man summary .hp-ic{flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgb(var(--fx-rgb,var(--daw-accent))/.18);color:var(--hp-a)}
+#hp-man summary .hp-st{flex:1;min-width:0}#hp-man summary b{display:block;font-size:15px}#hp-man summary span.s{display:block;font-size:12px;color:var(--hp-dim)}
+#hp-man summary::after{content:"▾";color:var(--hp-dim);transition:transform .18s}
+#hp-man details[open] summary::after{transform:rotate(180deg)}
+#hp-man .hp-body{padding:2px 16px 16px;font-size:14px;line-height:1.55;color:#dfe4ff}
+#hp-man .hp-body h4{margin:14px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--hp-a)}
+#hp-man .hp-body p{margin:6px 0}
+#hp-man .hp-body ul,#hp-man .hp-body ol{margin:6px 0 6px 20px;padding:0}#hp-man .hp-body li{margin:3px 0}
+#hp-man .hp-body b{color:#fff}
+#hp-man .hp-body kbd{padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.12);font-size:12px}
+#hp-man .hp-tip{margin:10px 0;padding:10px 12px;border-radius:14px;background:rgb(var(--fx-rgb,var(--daw-accent))/.12);border:1px solid rgb(var(--fx-rgb,var(--daw-accent))/.4);display:flex;gap:10px;font-size:13px}
+#hp-man .hp-tip svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--hp-a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+#hp-man .hp-warn{border-color:rgba(255,120,120,.5);background:rgba(255,90,90,.1)}
+#hp-man .hp-warn svg{stroke:#ff9a9a}
+#hp-man .hp-show{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:6px 8px 0 0;padding:0 14px;border-radius:14px;border:1px solid rgb(var(--fx-rgb,var(--daw-accent))/.6);background:rgb(var(--fx-rgb,var(--daw-accent))/.16);color:var(--hp-txt);font-weight:700;font-size:13px}
+#hp-man .hp-show svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#hp-man mark{background:rgb(var(--fx-rgb,var(--daw-accent))/.45);color:#fff;border-radius:4px;padding:0 2px}
+#hp-man .hp-none{padding:24px 8px;text-align:center;color:var(--hp-dim)}
+#hp-man .hp-foot{margin:14px 0 0;text-align:center;font-size:12px;color:var(--hp-dim)}
+/* Startseite: Hilfe-Knopf & Neu-hier-Karte */
+#hm-help{margin-left:auto}
+#hm-newbie .hp-new{display:flex;gap:12px;align-items:center;padding:14px 16px;margin-bottom:10px;border-radius:var(--hm-r,22px);border:1px solid var(--hm-line,rgba(255,255,255,.16));background:var(--hm-glass,rgba(255,255,255,.08))}
+#hm-newbie .hp-new .tx{flex:1;min-width:0}#hm-newbie .hp-new b{display:block;font-size:15px}#hm-newbie .hp-new span.s{font-size:12px;opacity:.75}
+#hm-newbie .hp-new button{min-height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--hm-line,rgba(255,255,255,.2));background:var(--hm-a,#ff8a1a);color:#1b0f00;font-weight:800;font-size:13px}
+#hm-newbie .hp-new .no{background:transparent;color:inherit;font-weight:600;opacity:.7;padding:0 8px}
+@media (prefers-reduced-motion:reduce){#hp-tour .hp-ring{animation:none}#hp-tour .hp-b,#hp-tour .hp-ring{transition:none}}
+
 </style>
 </head>
 <body class="min-h-screen flex flex-col bg-daw-bg text-slate-200">
@@ -10950,9 +11022,10 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   root.style.setProperty('--hm-logo-url', `url("${LOGO}")`);
   root.innerHTML = `<div class="hm-bg" aria-hidden="true"><i class="hm-blob b1"></i><i class="hm-blob b2"></i><i class="hm-blob b3"></i><canvas id="hm-eq"></canvas></div>
   <div class="hm-scroll"><div class="hm-wrap">
-    <div class="hm-top"><button type="button" class="hm-pill" id="hm-back" hidden>← Zurück zum Projekt</button></div>
+    <div class="hm-top"><button type="button" class="hm-pill" id="hm-back" hidden>← Zurück zum Projekt</button><button type="button" class="hm-pill" id="hm-help">❓ Anleitung</button></div>
     <header class="hm-hero"><div class="hm-logo" id="hm-logo"><img src="${LOGO}" alt="Sunshine@R DAW Studio"><div class="hm-wm">${WM}<b>Sunshine@R</b><small>STEM DAW STUDIO</small></div></div>
       <p class="hm-tag">Stems importieren · mischen · veredeln</p></header>
+    <div id="hm-newbie"></div>
     <div id="hm-resume"></div>
     <button type="button" class="hm-cta" id="hm-new"><em>＋</em> Neues Projekt</button>
     <div class="hm-two"><button type="button" class="hm-card hm-tile" id="hm-import"><span>🎵</span>Stems laden</button><button type="button" class="hm-card hm-tile" id="hm-opts"><span>⚙️</span>Optionen</button></div>
@@ -11125,7 +11198,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     $('hm-back').hidden = !(hasContent() || dawState.project); $('hm-auto').checked = startEnabled();
     root.querySelector('.hm-scroll').scrollTop = 0;
     root.querySelectorAll('.hm-logo,.hm-tag,.hm-cta,.hm-two,.hm-sechead').forEach(e => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; });
-    renderResume(); eqStart(); refreshList();
+    renderResume(); eqStart(); refreshList(); safe(() => window.Help && Help.onHome($('hm-newbie')));
     if (hasContent() && isDirty()) persistCurrent().then(() => { renderResume(); if (!root.hidden) refreshList(); });
     safe(() => window.Autosave && Autosave._peek && !hasContent() && Autosave._peek().then(m => { if (m && m.state && !root.hidden && !hasContent()) { pendingSession = { name: m.name || (m.state.project && m.state.project.name) || '', savedAt: m.savedAt, tracks: (m.state.tracks || []).length }; renderResume(); } }));
   }
@@ -11136,6 +11209,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
 
   /* Events */
   $('hm-back').onclick = close;
+  $('hm-help').onclick = () => { if (window.Help) Help.openManual(); };
   $('hm-new').onclick = () => openForm('new');
   $('hm-import').onclick = () => openForm('new', { start: 'import' });
   $('hm-opts').onclick = () => { const b = $('btn-settings'); if (window.SunshineTheme && SunshineTheme.open) SunshineTheme.open(); else if (b) b.click(); };
@@ -11224,6 +11298,11 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     skipBack: '<path d="M5 4v16"/><path d="M19 20 9 12l10-8z"/>',
     pause: '<path d="M8 5v14M16 5v14"/>',
     leftRight: '<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+    play: '<path d="M6 4v16l14-8z"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+    bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
     hand: '<path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="m7 15-1.76-1.76a2 2 0 0 0-2.83 2.82l3.6 3.6C7.5 21.14 9.2 22 12 22h2a8 8 0 0 0 8-8V8a2 2 0 0 0-4 0v3"/>'
   };
   const MAP = {
@@ -11234,7 +11313,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     '⚙': 'gear', '⚙️': 'gear', '🗑': 'trash', '🗑️': 'trash', '←': 'back', '🔍': 'search', '♻': 'refresh', '♻️': 'refresh', '🔊': 'volume', '🔁': 'repeat',
     '🌐': 'globe', '🧹': 'eraser', '🎞': 'film', '🎞️': 'film', '🌀': 'shuffle', '📋': 'clipboard', '⏱': 'timer', '⏱️': 'timer',
     '↩': 'undo', '↪': 'redo', '↺': 'rotate', '✕': 'x', '✗': 'x', '✖': 'x', '✓': 'check', '✔': 'check', '✔️': 'check', '☑': 'check', '☑️': 'check',
-    '⏻': 'power', '⇤': 'skipBack', '❚': 'pause', '↔': 'leftRight', '↔️': 'leftRight', '☝': 'hand', '☝️': 'hand'
+    '⏻': 'power', '⇤': 'skipBack', '❚': 'pause', '↔': 'leftRight', '↔️': 'leftRight', '☝': 'hand', '☝️': 'hand', '❓': 'help', '📖': 'book', '💡': 'bulb'
   };
   const EMO = /^\s*((?:[\u{1F300}-\u{1FAFF}]|[☀-➿]|[⬀-⯿]|[←-⇿]|[⌀-⏿])️?)/u;
   const HOST = 'button,summary,a,label,h1,h2,h3,h4,[role="button"],[role="tab"],[role="menuitem"],.nv-ic,.hb-ic,.fm-item,.dock-win-head,.dock-tab-btn';
@@ -11300,7 +11379,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
    false = nichts mehr zu schließen → die App geht in den Hintergrund. Im Browser ohne Wirkung. */
 (function () {
   'use strict';
-  const OVERLAYS = '#settings-modal,#sf-picker-modal,#pattern-studio-modal,#chat-modal,#assistant-settings,#assistant-modal,#as-offer,.hm-sheet-bg,#lm-root,#ex-root,#kt-root,#bs-root,#mk-root,#ia-root,#ce-root,#file-menu';
+  const OVERLAYS = '#settings-modal,#sf-picker-modal,#pattern-studio-modal,#chat-modal,#assistant-settings,#assistant-modal,#as-offer,.hm-sheet-bg,#lm-root,#ex-root,#kt-root,#bs-root,#mk-root,#ia-root,#ce-root,#hp-tour,#hp-man,#file-menu';
   const shown = e => { if (!e || e.hidden || !e.isConnected) return false; const r = e.getBoundingClientRect(), c = getComputedStyle(e); return r.width > 0 && r.height > 0 && c.visibility !== 'hidden' && c.display !== 'none'; };
   const zOf = e => { let z = 0; for (let n = e; n && n !== document.body; n = n.parentElement) { const v = parseInt(getComputedStyle(n).zIndex, 10); if (!isNaN(v)) z = Math.max(z, v); } return z; };
   function topOverlay() {
@@ -11516,6 +11595,285 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
 
 </script>
 <script>
+/* ===== Sunshine@R · Anleitung =====
+   1) Rundgang: leuchtet echte Bedienelemente der App nacheinander an und erklärt sie.
+   2) Handbuch: durchsuchbare Kapitel; „Zeig es mir“ startet zu jedem Thema einen kurzen Mini-Rundgang.
+   Start: Optionen → Anleitung · ☰ → Anleitung · Startseite → Anleitung (beim ersten Start mit Hinweis-Karte). */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const LS = 'sunshine.help';
+  let HS = { seen: false }; try { Object.assign(HS, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (_) {}
+  const saveHS = () => { try { localStorage.setItem(LS, JSON.stringify(HS)); } catch (_) {} };
+  const say = (m, k) => { try { if (typeof toast === 'function') toast(m, k || 'info'); } catch (_) {} };
+  const ic = n => (window.Icons && Icons.paths[n]) ? `<svg viewBox="0 0 24 24" aria-hidden="true">${Icons.paths[n]}</svg>` : '';
+  const shown = e => { if (!e || !e.isConnected || e.hidden) return false; const r = e.getBoundingClientRect(), c = getComputedStyle(e); return r.width > 2 && r.height > 2 && c.display !== 'none' && c.visibility !== 'hidden'; };
+  const q1 = s => { try { return document.querySelector(s); } catch (_) { return null; } };
+  const firstShown = (...sels) => { for (const s of sels) { let e = null; try { e = typeof s === 'function' ? s() : document.querySelector(s); } catch (_) {} if (shown(e)) return e; } return null; };
+
+  /* ================================================================== Helfer für Schritte */
+  const menuEl = () => $('file-menu'), menuBtn = () => $('btn-menu');
+  const openMenu = () => { const m = menuEl(), b = menuBtn(); if (m && b && m.hidden) b.click(); };
+  const closeMenu = () => { const m = menuEl(), b = menuBtn(); if (m && b && !m.hidden) b.click(); };
+  const openWin = k => { try { if (window.DockWin && DockWin.mode === 'windows') DockWin.setOpen(k, true, false); else if (typeof switchBottomTab === 'function') switchBottomTab(k); } catch (_) {} };
+  const winTarget = k => firstShown(`.dock-win[data-win="${k}"] > .dock-win-head`, `.dock-tab-btn[data-tab="${k}"]`);
+  const transportBox = () => { const b = $('btn-play'); return b && b.parentElement; };
+  const lcdBox = () => { const l = $('lcd-position'); return l && l.closest('.font-mono'); };
+  const brand = () => firstShown('header .brand-banner', '#brand-icon', 'header .brand-mark');
+
+  /* ================================================================== Schritte */
+  const S = {
+    welcome: { icon: 'sparkles', title: 'Willkommen bei Sunshine@R', text: 'Hier lädst du <b>Suno-Stems</b> (ZIP, WAV, MP3, MIDI), mischst sie, baust Beats und MIDI dazu und exportierst am Ende deinen Song.<br><br>Der Rundgang dauert etwa zwei Minuten und leuchtet die wichtigsten Stellen echt in der App an. Mit <b>Weiter</b> geht es voran, mit <b>Überspringen</b> beendest du ihn jederzeit.' },
+    logo: { icon: 'home', title: 'Logo = Startseite', sel: brand, text: 'Ein Tipp aufs Logo bringt dich zur <b>Startseite</b>: Projekte laden, umbenennen, duplizieren oder löschen und ein <b>neues Projekt</b> mit Name, Tempo und Tonart anlegen.' },
+    transport: { icon: 'play', title: 'Abspielen', sel: transportBox, text: '<b>Play</b> startet und pausiert (auch mit der <kbd>Leertaste</kbd>), <b>Stopp</b> springt an den Anfang. <b>Loop</b> wiederholt den Loop-Bereich bzw. das Arrangement, <b>Klick</b> schaltet das Metronom dazu.' },
+    lcd: { icon: 'timer', title: 'Position, Zeit und Tempo', sel: lcdBox, text: 'Links siehst du die Position als <b>Takt : Schlag : Step</b>, daneben die Zeit und die Gesamtlänge. Rechts steht das <b>Tempo (BPM)</b> – eintippen oder mit <b>TAP</b> im Rhythmus mehrfach antippen.' },
+    bar: { icon: 'slidersH', title: 'Werkzeugleiste', sel: '#hdr-actions', text: '<b>Zurück / Vor</b> machen Schritte rückgängig. Daneben: Dateien <b>laden</b>, Projekt <b>speichern</b>, <b>Projekte</b> öffnen, der große <b>Master-WAV</b>-Knopf und das <b>Menü ☰</b>.' },
+    load: { icon: 'folderOpen', title: 'Stems laden', sel: '#btn-import-files', text: 'Hier lädst du ein <b>Suno-ZIP</b>, einzelne Audiodateien oder MIDI. Danach schlägt der <b>Import-Assistent</b> vor, wie die Spuren heißen, welche Farbe sie bekommen und wie sie zum Tempo passen.' },
+    save: { icon: 'save', title: 'Speichern', sel: '#btn-save-project', text: 'Speichert still unter dem aktuellen Projektnamen (ohne Namen fragt die App einmal nach). Beim Wechsel zur Startseite oder in ein anderes Projekt wird automatisch mitgesichert.' },
+    master: { icon: 'download', title: 'Master exportieren', sel: '#btn-export-wav', text: 'Rechnet das ganze Projekt zu einer <b>WAV-Datei</b> zusammen. Stems einzeln, einen Bereich oder Opus findest du im Menü unter <b>Export</b>.' },
+    menuBtn: { icon: 'menu', title: 'Das Menü', sel: '#btn-menu', tap: true, tapText: 'Tippe jetzt auf ☰ – oder auf „Weiter“.', text: 'Im Menü liegen die Werkzeuge, die nicht ständig im Weg sein sollen.' },
+    menuAll: { icon: 'menu', title: 'Alles Weitere im Menü', sel: '#file-menu', before: openMenu, text: '<b>Startseite</b> · <b>Projekt-Einstellungen</b> · <b>.MID-Export</b> · <b>Export</b> (Stems, Bereich, Format) · <b>Lautheit &amp; Spektrum</b> · <b>Tonart &amp; Tempo</b> · <b>Beat-Slicer</b> · <b>Strukturmarker</b> · <b>Import-Assistent</b> · <b>KI-Assistent</b> · <b>Assistent</b> (Chat) · <b>Optionen</b> · <b>Anleitung</b>.' },
+    settings: { icon: 'gear', title: 'Optionen', sel: '#btn-settings', before: openMenu, text: 'Hier stellst du <b>Design</b>, <b>Rundung</b>, <b>Akzentfarbe</b>, <b>Effekte</b> und <b>Icon-Stil</b> ein, richtest KI-Modelle ein und schaltest Autosave sowie Sprachsteuerung. Auch diese Anleitung startest du von dort.' },
+    assist: { icon: 'compass', title: 'Import-Assistent', sel: '#btn-import-assist', before: openMenu, text: 'Nach dem Laden führt er dich durch: <b>Tempo</b> übernehmen, <b>Takt 1</b> ausrichten, <b>Tonart</b> erkennen, <b>Farben nach Rolle</b> und eine <b>Start-Mischung</b>. Du kannst jeden Vorschlag annehmen oder „Später“ wählen.' },
+    exportAll: { icon: 'pack', title: 'Export: Stems, Bereich, Format', sel: '#btn-export-all', before: openMenu, text: 'Hier exportierst du alle Stems als <b>ZIP</b>, nur einen <b>Bereich</b> oder im Format <b>Opus</b>. MP3 ist im Browser/der App nicht möglich – Opus ist der kleine, moderne Ersatz.' },
+    keytempo: { icon: 'wave', title: 'Tonart &amp; Tempo', sel: '#btn-key-tempo', before: openMenu, text: '<b>Tonart erkennen</b>, Spuren <b>transponieren</b> und das <b>Tempo angleichen</b> (die Tonhöhe bleibt dabei gleich) – praktisch, wenn Stems aus verschiedenen Songs zusammenpassen sollen.' },
+    slicer: { icon: 'scissors', title: 'Beat-Slicer', sel: '#btn-slicer', before: openMenu, text: 'Schneidet eine Spur an ihren Schlägen in Pads. Daraus baust du ein neues <b>Pattern</b> (Zufall, rückwärts, Swing) und fügst es als neue Audio-Spur ein.' },
+    markers: { icon: 'flag', title: 'Strukturmarker', sel: '#btn-markers', before: openMenu, text: 'Setze Marker (Intro, Drop, …) oder lass die Struktur <b>erkennen</b>. Die Marker erscheinen als Chips über den Spuren und springen beim Antippen dorthin.' },
+    loud: { icon: 'chart', title: 'Lautheit &amp; Spektrum', sel: '#btn-loudness', before: openMenu, text: 'Misst die <b>Lautheit (LUFS)</b>, zeigt das <b>Spektrum</b> und hilft dir, den Master mit dem <b>Limiter</b> auf ein Ziel zu bringen.' },
+    lanes: { icon: 'slidersV', title: 'Spuren &amp; Arrangement', sel: '#drop-zone-wrapper > .bg-daw-panel', before: closeMenu, text: 'Oben die <b>Arrangement-Leiste</b> mit den Abschnitten (Intro, Verse, Drop …; 4T/8T = Taktlänge, ✎ = bearbeiten). Darunter jede <b>Spur</b> mit ihren Clips. Der orange Strich ist die Abspielposition.' },
+    addTrack: { icon: 'plus', title: 'Neue Spur', sel: '#btn-add-track', text: 'Legt eine leere <b>Audio-</b> oder <b>MIDI-Spur</b> an – oder du lädst eine Audiodatei direkt in eine neue Spur.' },
+    laneRow: { icon: 'slidersH', title: 'Eine Spur im Detail', sel: () => firstShown('#multitrack-lanes > *'), fallbackCenter: true, text: '<b>M</b> = stumm, <b>S</b> = Solo, Regler = Lautstärke (in dB), <b>FX</b> = Effekt-Rack der Spur, <b>Edit</b> = Clip-Editor (Clips schneiden, verschieben, ein-/ausblenden, Automation), Auswahl = Instrument/Klang, <b>✕</b> löscht die Spur.<br><br><i>Noch keine Spur? Sobald du Stems geladen hast, siehst du das hier an echten Spuren.</i>' },
+    win_midi: { icon: 'piano', title: 'MIDI-Editor &amp; Piano Roll', sel: () => winTarget('midi'), before: () => openWin('midi'), text: 'Noten zeichnen, <b>Raster</b> (1/8 – 1/32) und <b>Transponieren</b>, Tonart/Skala mit <b>Quantize Scale</b>, der <b>Arp-/Pattern-Generator</b> (🎲 Auto, ✨ Studio, 🧬 Variation) und der <b>Audio-to-MIDI-Extraktor</b>, der Melodien aus Audio in Noten verwandelt.' },
+    win_drums: { icon: 'drum', title: 'Drums, 808 &amp; FX', sel: () => winTarget('drums'), before: () => openWin('drums'), text: '16-Step-Sequencer mit Presets (Techno, Trance, Boom-Bap, Trap), Kick-Synthesizer, <b>Bass/808</b>-Engine sowie <b>FX &amp; Transitions</b> wie Noise Riser, Sub Impact und Rev Crash.' },
+    win_vocals: { icon: 'mic', title: 'Vocal-Cleanup &amp; Mikrofon', sel: () => winTarget('vocals'), before: () => openWin('vocals'), text: 'Das <b>Vocal-Rack</b> poliert Suno-Stimmen (an/aus über „Rack“), darunter nimmst du mit dem <b>Mikrofon</b> auf – mit Vorzähler.' },
+    win_mixer: { icon: 'slidersV', title: 'Mixer &amp; Master', sel: () => winTarget('mixer'), before: () => openWin('mixer'), text: 'Alle Kanäle als Fader mit Pegel, dazu <b>Busse</b> und der <b>Master-Ausgang</b> mit Spitzenpegel.' },
+    nav: { icon: 'menu', title: 'Untere Leiste', sel: () => firstShown('#bottom-nav'), text: 'Am Handy springst du hier zwischen <b>Spuren</b>, <b>Editor</b>, <b>Drums</b>, <b>Vocal</b> und <b>Mixer</b>.', skipIfMissing: true },
+    done: { icon: 'check', title: 'Geschafft!', text: 'Du kennst jetzt die wichtigsten Stellen. Mehr Details, Tipps und Hilfe bei Problemen findest du im <b>Handbuch</b>: <b>☰ → Anleitung</b> oder <b>Optionen → Anleitung</b>. Dort startet jedes Kapitel auf Wunsch einen kurzen Mini-Rundgang.', last: true }
+  };
+  const TOURS = {
+    rundgang: ['welcome', 'logo', 'transport', 'lcd', 'bar', 'load', 'save', 'master', 'menuBtn', 'menuAll', 'settings', 'lanes', 'addTrack', 'laneRow', 'nav', 'win_midi', 'win_drums', 'win_vocals', 'win_mixer', 'done'],
+    import: ['load', 'assist'], projects: ['logo', 'save'], lanes: ['lanes', 'addTrack', 'laneRow'], midi: ['win_midi'], drums: ['win_drums'], vocals: ['win_vocals'], mixer: ['win_mixer', 'loud'],
+    tools: ['keytempo', 'slicer', 'markers'], export: ['master', 'exportAll'], design: ['settings'], transport: ['transport', 'lcd']
+  };
+
+  /* ================================================================== Rundgang-Motor */
+  const T = { open: false, steps: [], i: 0, root: null, snap: null, menuWasOpen: false, raf: 0, tapOff: null, mini: false };
+  function startTour(id) {
+    const ids = Array.isArray(id) ? id : (TOURS[id] || TOURS.rundgang);
+    closeManual(true);
+    try { document.getElementById('settings-modal') && document.getElementById('settings-modal').remove(); } catch (_) {}
+    try { if (window.Home && Home.isOpen && Home.isOpen()) Home.close(); } catch (_) {}
+    if (T.open) endTour(true);
+    T.steps = ids.map(k => Object.assign({ key: k }, S[k])).filter(Boolean); T.i = 0; T.open = true; T.mini = !(ids === TOURS.rundgang);
+    T.menuWasOpen = !!(menuEl() && !menuEl().hidden);
+    try { T.snap = (window.DockWin && DockWin.state) ? JSON.parse(JSON.stringify(DockWin.state.open)) : null; } catch (_) { T.snap = null; }
+    build(); HS.seen = true; saveHS();
+    window.scrollTo(0, 0);
+    go(0);
+  }
+  function build() {
+    const r = document.createElement('div'); r.id = 'hp-tour'; r.setAttribute('role', 'dialog'); r.setAttribute('aria-label', 'Rundgang');
+    r.innerHTML = `<div class="hp-b" data-b="t"></div><div class="hp-b" data-b="b"></div><div class="hp-b" data-b="l"></div><div class="hp-b" data-b="r"></div><div class="hp-b" data-b="h"></div><div class="hp-ring" hidden></div>
+      <div class="hp-card" aria-live="polite"><div class="hp-h"><span class="ic-i"></span><h3></h3><button type="button" class="hp-x" data-act="skip" aria-label="Rundgang beenden">✕</button></div><div class="hp-t"></div><div class="hp-tap" hidden></div>
+      <div class="hp-nav"><button type="button" class="hp-btn" data-act="back">←</button><div class="hp-bar"><i></i></div><span class="hp-cnt"></span><button type="button" class="hp-btn pri" data-act="next">Weiter</button></div></div>`;
+    r.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (!b) return; const a = b.dataset.act; if (a === 'next') next(); else if (a === 'back') back(); else if (a === 'skip') endTour(false); });
+    document.body.appendChild(r); T.root = r;
+    window.addEventListener('resize', relayout); window.addEventListener('orientationchange', relayout); window.addEventListener('scroll', relayout, true);
+  }
+  function relayout() { if (!T.open) return; cancelAnimationFrame(T.raf); T.raf = requestAnimationFrame(place); }
+  function next() { if (T.i >= T.steps.length - 1) endTour(true); else go(T.i + 1); }
+  function back() { if (T.i > 0) go(T.i - 1, -1); }
+  function go(i, dir) {
+    if (T.tapOff) { T.tapOff(); T.tapOff = null; }
+    T.i = i; const st = T.steps[i];
+    /* before() erst nach dem aktuellen Klick ausführen – sonst schließt der „Klick außerhalb“-Handler des Menüs es sofort wieder */
+    setTimeout(() => {
+      if (!T.open || T.i !== i) return;
+      try { if (st.before) st.before(); else if (!/menu|settings|assist|exportAll|keytempo|slicer|markers|loud/i.test(st.key)) closeMenu(); } catch (_) {}
+      setTimeout(() => {
+        if (!T.open || T.i !== i) return;
+        const el = resolve(st);
+        if (!el && st.skipIfMissing && T.steps[i + (dir || 1)]) { go(i + (dir || 1), dir); return; }
+        fill(st); place(); armTap(st, el);
+      }, st.before ? 140 : 30);
+    }, 0);
+  }
+  const resolve = st => { if (!st.sel) return null; if (typeof st.sel === 'function') { try { const e = st.sel(); return shown(e) ? e : null; } catch (_) { return null; } } const e = q1(st.sel); return shown(e) ? e : null; };
+  function fill(st) {
+    const c = T.root.querySelector('.hp-card');
+    c.querySelector('.ic-i').innerHTML = ic(st.icon || 'sparkles');
+    c.querySelector('h3').innerHTML = st.title; c.querySelector('.hp-t').innerHTML = st.text;
+    const tp = c.querySelector('.hp-tap'); tp.hidden = !st.tap; if (st.tap) tp.textContent = st.tapText || 'Tippe auf das markierte Element.';
+    c.querySelector('[data-act="back"]').disabled = T.i === 0;
+    const nx = c.querySelector('[data-act="next"]'); nx.textContent = st.last || T.i === T.steps.length - 1 ? 'Fertig' : 'Weiter';
+    c.querySelector('.hp-bar i').style.width = ((T.i + 1) / T.steps.length * 100) + '%'; c.querySelector('.hp-cnt').textContent = (T.i + 1) + '/' + T.steps.length;
+    c.scrollTop = 0;
+  }
+  function place() {
+    if (!T.open) return; const st = T.steps[T.i]; let el = resolve(st);
+    const vw = window.innerWidth, vh = window.innerHeight, card = T.root.querySelector('.hp-card'), ring = T.root.querySelector('.hp-ring');
+    const B = k => T.root.querySelector(`[data-b="${k}"]`); const setB = (k, x, y, w, h) => { const b = B(k); b.style.left = x + 'px'; b.style.top = y + 'px'; b.style.width = Math.max(0, w) + 'px'; b.style.height = Math.max(0, h) + 'px'; };
+    if (el) {
+      const r0 = el.getBoundingClientRect(); const tall = r0.height > vh * .55;
+      if (r0.top < 8 || r0.bottom > vh - 8) { try { el.scrollIntoView({ block: tall ? 'start' : 'center' }); } catch (_) {} }
+    }
+    if (!el) { ring.hidden = true; setB('t', 0, 0, vw, vh); ['b', 'l', 'r', 'h'].forEach(k => setB(k, 0, 0, 0, 0)); card.style.top = Math.max(16, (vh - card.offsetHeight) / 2) + 'px'; card.style.bottom = 'auto'; return; }
+    const r = el.getBoundingClientRect(), pad = 6, x = Math.max(0, r.left - pad), y = Math.max(0, r.top - pad), w = Math.min(vw - x, r.width + pad * 2), h = Math.min(vh - y, r.height + pad * 2);
+    ring.hidden = false; ring.style.left = x + 'px'; ring.style.top = y + 'px'; ring.style.width = w + 'px'; ring.style.height = h + 'px';
+    try { ring.style.borderRadius = Math.min(26, parseFloat(getComputedStyle(el).borderTopLeftRadius) + pad || 14) + 'px'; } catch (_) {}
+    setB('t', 0, 0, vw, y); setB('b', 0, y + h, vw, vh - y - h); setB('l', 0, y, x, h); setB('r', x + w, y, vw - x - w, h);
+    const hole = B('h'); if (st.tap) setB('h', 0, 0, 0, 0); else setB('h', x, y, w, h); hole.style.background = 'transparent';
+    const ch = card.offsetHeight, below = vh - (y + h), above = y;
+    card.style.bottom = 'auto';
+    if (below >= ch + 14) card.style.top = (y + h + 12) + 'px';
+    else if (above >= ch + 14) card.style.top = (y - ch - 12) + 'px';
+    else card.style.top = Math.max(10, vh - ch - 12) + 'px';
+  }
+  function armTap(st, el) {
+    if (!st.tap || !el) return;
+    const f = () => setTimeout(() => { if (T.open && T.steps[T.i] === st) next(); }, 380);
+    el.addEventListener('click', f, true); T.tapOff = () => el.removeEventListener('click', f, true);
+  }
+  function endTour(finished) {
+    if (!T.open) return; T.open = false; if (T.tapOff) { T.tapOff(); T.tapOff = null; }
+    window.removeEventListener('resize', relayout); window.removeEventListener('orientationchange', relayout); window.removeEventListener('scroll', relayout, true);
+    if (T.root) { T.root.remove(); T.root = null; }
+    if (!T.menuWasOpen) closeMenu();
+    try { if (T.snap && window.DockWin) Object.keys(T.snap).forEach(k => DockWin.setOpen(k, !!T.snap[k], false)); } catch (_) {}
+    try { window.scrollTo(0, 0); } catch (_) {}
+    if (finished) say(T.mini ? 'Fertig.' : 'Rundgang abgeschlossen – das Handbuch findest du unter ☰ → Anleitung.', 'success');
+  }
+
+  /* ================================================================== Handbuch */
+  const tip = t => `<div class="hp-tip">${ic('bulb')}<div>${t}</div></div>`;
+  const warn = t => `<div class="hp-tip hp-warn">${ic('alert')}<div>${t}</div></div>`;
+  const show = (label, tour) => `<button type="button" class="hp-show" data-tour="${tour}">${ic('play')}${label || 'Zeig es mir'}</button>`;
+  const CH = [
+    { id: 'start', icon: 'play', title: 'Schnellstart', sum: 'Vom Stem zum fertigen Song in sechs Schritten', body: `
+      <ol><li><b>Projekt anlegen:</b> Startseite → <b>Neues Projekt</b>. Name, Tempo und Tonart kannst du gleich setzen – und später ändern.</li>
+      <li><b>Stems laden:</b> <b>ZIP / Audio / MIDI</b> antippen und dein Suno-ZIP oder einzelne Dateien wählen. Der <b>Import-Assistent</b> schlägt Tempo, Tonart, Farben und eine Start-Mischung vor.</li>
+      <li><b>Anhören:</b> <b>Play</b> (oder <kbd>Leertaste</kbd>). Mit <b>Loop</b> hörst du einen Abschnitt wiederholt.</li>
+      <li><b>Mischen:</b> pro Spur <b>M</b> (stumm), <b>S</b> (Solo) und Lautstärke; feiner im <b>Mixer</b>.</li>
+      <li><b>Speichern:</b> 💾 sichert unter dem Projektnamen.</li>
+      <li><b>Exportieren:</b> <b>Master WAV</b> oben rechts.</li></ol>
+      ${tip('Fehler passiert? <b>Zurück</b> (links oben) macht fast alles rückgängig, <b>Vor</b> stellt es wieder her.')}${show('Rundgang starten', 'rundgang')}` },
+    { id: 'projekte', icon: 'folder', title: 'Startseite &amp; Projekte', sum: 'Anlegen, laden, umbenennen, duplizieren, löschen', body: `
+      <h4>Neues Projekt</h4><p>Name, Tempo (BPM), Tonart und Skala, MIDI-Raster, Arrangement (kurz 16, normal 24 oder lang 48 Takte), Klick, Loop, Design und eine Notiz. Als Start wählst du „leer“, „Stems laden“ oder „MIDI-Spur“.</p>
+      <h4>Später ändern</h4><p><b>☰ → Projekt-Einstellungen</b> öffnet dieselben Felder. Dort gibt es auch <b>Speichern unter …</b>.</p>
+      <h4>Die Projektliste</h4><ul><li>Tippen öffnet das Projekt.</li><li><b>⋯</b> an der Karte: <b>Umbenennen</b>, <b>Duplizieren</b>, <b>Löschen</b> (mit Rückfrage).</li><li>Oben steht <b>Weiter: …</b> bzw. <b>Letzte Sitzung fortsetzen</b>.</li></ul>
+      <h4>Speichern</h4><p>💾 speichert still. Beim Wechsel zur Startseite, in ein anderes oder neues Projekt wird automatisch gesichert. Zusätzlich sichert der <b>Autosave</b> zwischendurch.</p>
+      <p>Die Startseite kannst du mit <b>„Beim Start anzeigen“</b> ausschalten; du erreichst sie immer über das <b>Logo</b> oder <b>☰ → Startseite</b>.</p>
+      ${warn('Jedes Projekt speichert seine Audiodaten auf dem Gerät. Viele große Projekte können den Speicher füllen – lösche nicht mehr benötigte.')}${show('Zeig es mir', 'projects')}` },
+    { id: 'import', icon: 'inbox', title: 'Laden &amp; Import', sum: 'ZIP, Audio, MIDI und der Import-Assistent', body: `
+      <p><b>ZIP / Audio / MIDI</b> nimmt Suno-ZIPs, einzelne Audiodateien und MIDI-Dateien. Jede Datei wird eine Spur; ZIPs werden entpackt.</p>
+      <h4>Import-Assistent</h4><p>Erscheint nach dem Laden (oder über <b>☰ → Import-Assistent</b>). Er zeigt <b>Tempo</b>, hilft bei <b>Takt 1</b>, erkennt die <b>Tonart</b>, färbt Spuren <b>nach Rolle</b> und kann eine <b>Start-Mischung</b> setzen. Mit <b>Übernehmen</b> wendest du es an, mit <b>Später</b> lässt du es.</p>
+      ${tip('Klingt das Tempo nicht passend, probiere <b>☰ → Tonart &amp; Tempo</b>: Tempo erkennen oder angleichen, ohne dass die Tonhöhe kippt.')}${show('Zeig es mir', 'import')}` },
+    { id: 'spuren', icon: 'slidersH', title: 'Spuren, Clips &amp; Arrangement', sum: 'Spurzeile, Arrangement-Leiste, Loop', body: `
+      <h4>Spurzeile</h4><ul><li><b>M / S</b>: stumm / Solo.</li><li><b>Regler</b>: Lautstärke in dB (im Querformat auch Pan).</li><li><b>FX</b>: Effekt-Rack der Spur; die Zahl zeigt, wie viele Effekte aktiv sind.</li><li><b>Edit</b>: Clip-Editor.</li><li>Auswahl rechts: Instrument bzw. Klang; <b>Aktiv</b> schaltet die Spur ein/aus.</li><li><b>✕</b>: Spur löschen (mit Zurück rückgängig zu machen).</li></ul>
+      <h4>Arrangement-Leiste</h4><p>Abschnitte wie Intro, Verse, Drop, Break, Outro. <b>4T / 8T</b> schaltet die Länge eines Abschnitts um, <b>✎</b> bearbeitet sie. <b>Loop: AN</b> folgt dem Arrangement bzw. dem Loop-Bereich.</p>
+      <h4>Clip-Editor (Edit)</h4><p>Zwei Modi: <b>Clips</b> und <b>Automation</b>.</p><ul><li><b>Verschieben</b>: Clip antippen, ziehen; zwei Finger zoomen.</li><li><b>Zuschneiden</b>: Rand ziehen – der Clip wird nur verdeckt, nicht gelöscht.</li><li><b>Teilen</b>: auf den Clip tippen.</li><li><b>Schleife</b>: rechten Rand über das Ende ziehen.</li><li>Pegel, Ein- und Ausblenden (Fades) pro Clip über die Regler.</li><li><b>Automation</b>: Lautstärke, Pan und Filter als Kurve; Punkte setzen, ziehen, löschen.</li></ul>
+      <p>Die Hinweiszeile unten im Editor erklärt immer das gerade aktive Werkzeug.</p>${show('Zeig es mir', 'lanes')}` },
+    { id: 'transport', icon: 'timer', title: 'Abspielen, Tempo &amp; Klick', sum: 'Play, Loop, Metronom, BPM, TAP', body: `
+      <ul><li><b>Play / Pause</b> auch mit <kbd>Leertaste</kbd>; <b>Stopp</b> springt zum Anfang.</li><li><b>Loop</b> wiederholt Arrangement bzw. Loop-Bereich.</li><li><b>Klick</b> = Metronom.</li><li><b>BPM</b> (60–180) eintippen oder mit <b>TAP</b> mehrfach im Takt tippen.</li><li>Die Anzeige zeigt Takt : Schlag : Step sowie Zeit und Länge.</li><li><kbd>Strg</kbd>+<kbd>Z</kbd> / <kbd>Strg</kbd>+<kbd>Y</kbd> machen rückgängig/wiederherstellen (Tastatur).</li></ul>${show('Zeig es mir', 'transport')}` },
+    { id: 'midi', icon: 'piano', title: 'MIDI-Editor &amp; Piano Roll', sum: 'Noten, Skalen, Generatoren, Audio-to-MIDI', body: `
+      <ul><li><b>Raster</b> 1/8, 1/16, 1/32; <b>Transponieren</b> −12 / −1 / +1 / +12.</li><li><b>Tonart und Skala</b> wählen und mit <b>Quantize Scale</b> alle Noten einrasten.</li><li><b>Arp / Pattern-Generator</b> wählen und <b>Generieren</b>; dazu 🎲 <b>Auto</b>, ✨ <b>Studio</b>, 🧬 <b>Variation</b>; <b>Leeren</b> löscht die Noten der Spur.</li><li><b>● MIDI Rec</b> nimmt von einem angeschlossenen MIDI-Keyboard auf (WebMIDI, z. B. per USB).</li><li><b>Klangfarbe / Oszillator-Preset</b> für die eingebaute Synth-Engine; über SoundFonts sind echte Instrumente möglich.</li></ul>
+      <h4>Audio-to-MIDI</h4><p><b>Analysieren &amp; extrahieren</b> macht aus einer Audiospur Noten (Tonhöhen-Erkennung). <b>Ab Takt</b> legt den Startpunkt fest, <b>Tonart auto + einrasten</b> korrigiert auf die erkannte Tonart. Für mehrstimmiges Material gibt es unter <b>Optionen → KI · Audio → MIDI</b> das Modell „Basic Pitch“ (polyphon, einmal laden).</p>${show('Zeig es mir', 'midi')}` },
+    { id: 'drums', icon: 'drum', title: 'Drums, 808 &amp; FX', sum: '16-Step-Sequencer, Bass, Transitions', body: `
+      <ul><li><b>Presets</b>: Techno 4/4 + Offbeat, Hard Trance Gallop, Hip-Hop Boom-Bap, Trap 808 Bounce; <b>Leeren</b> setzt zurück.</li><li>Steps antippen = Schlag an/aus; Zeilen für Kick, Snare/Clap, Hi-Hat u. a.</li><li><b>Kick-Synthesizer</b> und <b>Bass / 808</b>-Engine (<b>Rolling</b> oder <b>808 Sub</b>, <b>Glide</b> an/aus).</li><li><b>FX &amp; Transitions</b>: <b>Noise Riser</b>, <b>Sub Impact</b>, <b>Rev Crash</b>; <b>Auto-Drop FX</b> setzt sie automatisch an Übergängen.</li></ul>${show('Zeig es mir', 'drums')}` },
+    { id: 'vocal', icon: 'mic', title: 'Vocal-Cleanup &amp; Aufnahme', sum: 'Suno-Stimmen polieren, eigenes Mikrofon', body: `
+      <ul><li><b>Vocal-Cleanup &amp; KI-Artefakt-Rack</b>: poliert Suno-Vocals; <b>Rack: AKTIV</b> / Bypass zum Vergleichen.</li><li><b>Own Mic / Vocal Recorder</b>: <b>Aufnahme starten</b>, <b>Vorzähler</b> an/aus, <b>Take löschen</b>.</li></ul>
+      ${tip('Beim ersten Aufnehmen fragt Android nach der <b>Mikrofon-Berechtigung</b>. Mit Kopfhörern aufnehmen, sonst nimmt das Mikrofon die Wiedergabe mit auf.')}${show('Zeig es mir', 'vocals')}` },
+    { id: 'mixer', icon: 'slidersV', title: 'Mixer, Lautheit &amp; Master', sum: 'Fader, Busse, LUFS, Limiter, Spektrum', body: `
+      <ul><li><b>Mixer</b>: Fader pro Kanal mit Pegel, dazu <b>Busse</b> und <b>Master Out</b> (Spitzenpegel in dB).</li><li><b>☰ → Lautheit &amp; Spektrum</b>: <b>LUFS</b> messen, <b>Limiter</b> und <b>Spektrum</b> ansehen.</li><li><b>KI-Assistent</b> (☰) kann eine <b>Mix-Empfehlung</b> vorschlagen, die du prüfst und übernimmst.</li></ul>${tip('Faustregel: Master-Spitzen unter 0 dB halten. Für Streaming-Plattformen wird oft um etwa −14 LUFS gearbeitet – das ist ein Richtwert, kein Zwang.')}${show('Zeig es mir', 'mixer')}` },
+    { id: 'tools', icon: 'scissors', title: 'Tonart, Slicer &amp; Marker', sum: 'Kreativ-Werkzeuge im Menü', body: `
+      <h4>Tonart &amp; Tempo</h4><p>1 · <b>Tonart erkennen</b> (mit Sicherheit in %), 2 · <b>Transponieren</b> auf eine Zieltonart oder um Halbtöne, 3 · <b>Tempo angleichen</b> (Tonhöhe bleibt). Mit <b>Als Projekt-Tonart setzen</b> übernimmst du das Ergebnis.</p>
+      <h4>Beat-Slicer</h4><p>1 · Quelle &amp; Slices (<b>Slices finden</b>: nach Anschlägen oder im Raster), 2 · <b>Pads</b> antippen zum Vorhören (bis 16), 3 · <b>Pattern</b>: Pad wählen und Steps antippen; <b>Zufall</b>, <b>Pad rückwärts</b>, <b>Swing</b>; 4 · <b>Pattern anhören</b> und <b>Als neue Audio-Spur</b> einfügen.</p>
+      <h4>Strukturmarker</h4><p><b>＋ Marker an Abspielposition</b>, <b>Aus Arrangement</b> oder <b>Struktur erkennen</b>. Alle Marker erscheinen als Chips über den Spuren und werden mit dem Projekt gespeichert.</p>
+      ${warn('Tonart- und Tempo-Erkennung sind Schätzungen. Bei starken Tempoänderungen können hörbare Artefakte entstehen – im Zweifel nach Gehör prüfen.')}${show('Zeig es mir', 'tools')}` },
+    { id: 'export', icon: 'download', title: 'Exportieren', sum: 'Master, Stems, Bereich, MIDI', body: `
+      <ul><li><b>Master WAV</b>: das gesamte Projekt als Stereo-WAV.</li><li><b>☰ → Export: Stems, Bereich, Format</b>: alle Stems als ZIP, nur einen Bereich, oder als <b>Opus</b>.</li><li><b>☰ → .MID Export</b>: die MIDI-Spuren als MIDI-Datei.</li></ul>
+      ${warn('<b>MP3</b> kann die App nicht erzeugen (Browser-Grenze). Nimm Opus oder WAV und wandle bei Bedarf extern um. Stems werden einzeln gerechnet – bei langen Projekten dauert das am Handy.')}${show('Zeig es mir', 'export')}` },
+    { id: 'ki', icon: 'bot', title: 'KI-Assistent &amp; Sprache', sum: 'Mix-Hilfe, Chat, Sprachbefehle', body: `
+      <ul><li><b>✨ KI-Assistent</b> (☰): analysiert die Spuren und macht Vorschläge für Rollen, Mix und Pattern – du entscheidest.</li><li><b>💬 Assistent</b> (☰): Chat zum Bedienen und Fragen. In den Chat-Einstellungen wählst du ein <b>lokales Modell</b> (Download nötig, braucht viel Speicher) oder einen <b>Online-Dienst</b> mit deinem eigenen Schlüssel.</li><li><b>Sprachsteuerung (Test)</b> (Optionen → Experimentell): Befehle wie „Play“, „Tempo 120“, „Spur 2 stumm“. Löschen und Zurücksetzen sind aus Sicherheitsgründen gesperrt.</li></ul>
+      ${tip('Online-Dienste und die Spracherkennung können je nach Gerät Daten an Dritte senden. Alles andere in der App bleibt lokal auf dem Gerät.')}` },
+    { id: 'design', icon: 'gear', title: 'Design, Icons &amp; Effekte', sum: 'Optionen: Aussehen anpassen', body: `
+      <ul><li><b>Design</b>: Aurora Glass, Studio Matt, Neon Spektrum, Liquid Matt, Klassisch.</li><li><b>Darstellung</b>: Glas-Effekte, Leuchteffekte, große Bedienelemente, <b>einheitliche Linien-Icons</b> (oder Emoji).</li><li><b>Effekte</b>: Rand-Effekte (Glühen, Lichtstrahl, Linie) und vollflächig (Aurora, Equalizer, Funken, Wellen) mit Stärke und Musik-Reaktion – oder alles aus.</li><li><b>Anpassen</b>: Akzentfarbe, Transparenz, Unschärfe, Rundung (eckig bis extra rund).</li><li><b>Fenster untereinander</b>: Editor, Drums, Vocal und Mixer als einklappbare Fenster – oder klassisch als Reiter.</li></ul>
+      ${tip('Ruckelt es auf einem älteren Gerät: Glas-Effekte und Effekte ausschalten. Das spart Akku und Rechenleistung.')}${show('Zeig es mir', 'design')}` },
+    { id: 'hilfe', icon: 'help', title: 'Hilfe bei Problemen', sum: 'Kein Ton, Speicher, offline, Zurück-Taste', body: `
+      <h4>Kein Ton</h4><ul><li>Ist die Spur auf <b>M</b> (stumm) oder ist ein anderer Kanal auf <b>S</b> (Solo)?</li><li>Lautstärke der Spur, des Masters und des Handys prüfen.</li><li>Ist die Spur <b>Aktiv</b>?</li></ul>
+      <h4>Es ruckelt</h4><ul><li>Optionen → <b>Effekte</b> und <b>Glas-Effekte</b> ausschalten.</li><li>Andere Apps schließen; sehr viele Spuren mit vielen FX belasten das Gerät.</li></ul>
+      <h4>Speichern geht nicht</h4><ul><li>Der Gerätespeicher oder die Browser-Quote ist voll: alte Projekte löschen, Stems als ZIP exportieren.</li></ul>
+      <h4>Offline</h4><ul><li>Die App läuft ohne Internet. Nur Online-Assistent, Modell-Download und Spracherkennung brauchen Netz.</li></ul>
+      <h4>Zurück-Taste (Android)</h4><ul><li>Schließt zuerst Dialoge und Menüs, dann führt sie zur Startseite, danach geht die App in den Hintergrund.</li></ul>
+      ${tip('Nichts gefunden? Nutze die Suche oben im Handbuch – sie durchsucht alle Kapitel.')}` }
+  ];
+
+  let MAN = null;
+  function openManual(chId) {
+    if (MAN) return;
+    try { if (T.open) endTour(false); } catch (_) {}
+    const r = document.createElement('div'); r.id = 'hp-man'; r.setAttribute('role', 'dialog'); r.setAttribute('aria-modal', 'true'); r.setAttribute('aria-label', 'Anleitung');
+    r.innerHTML = `<div class="hp-top"><h2>${ic('book')}Anleitung</h2><button type="button" class="hp-close" data-act="close">Schließen</button></div>
+      <div class="hp-scroll"><div class="hp-wrap">
+        <div class="hp-hero"><button type="button" class="hp-go" data-tour="rundgang">${ic('play')}<span><b>Rundgang starten</b><span>Die App Schritt für Schritt – ca. 2 Minuten</span></span></button></div>
+        <input class="hp-q" type="search" placeholder="Im Handbuch suchen …" aria-label="Im Handbuch suchen">
+        <div class="hp-list">${CH.map(c => `<details data-id="${c.id}"><summary><span class="hp-ic">${ic(c.icon)}</span><span class="hp-st"><b>${c.title}</b><span class="s">${c.sum}</span></span></summary><div class="hp-body" data-o="">${c.body}</div></details>`).join('')}</div>
+        <div class="hp-none" hidden>Dazu habe ich nichts gefunden. Versuche ein anderes Stichwort, z. B. „Export“, „Tempo“ oder „Mikrofon“.</div>
+        <div class="hp-foot">Sunshine@R Stem DAW Studio · Anleitung</div></div></div>`;
+    r.querySelectorAll('.hp-body').forEach(b => b.dataset.o = b.innerHTML);
+    document.body.appendChild(r); MAN = r;
+    r.addEventListener('click', e => {
+      const t = e.target.closest('[data-tour]'); if (t) { startTour(t.dataset.tour); return; }
+      if (e.target.closest('[data-act="close"]')) closeManual();
+    });
+    const qEl = r.querySelector('.hp-q'); qEl.addEventListener('input', () => filter(qEl.value));
+    if (chId) { const d = r.querySelector(`details[data-id="${chId}"]`); if (d) { d.open = true; setTimeout(() => d.scrollIntoView({ block: 'start' }), 60); } }
+  }
+  function filter(v) {
+    if (!MAN) return; const s = (v || '').trim().toLowerCase(); let n = 0;
+    MAN.querySelectorAll('details').forEach(d => {
+      const b = d.querySelector('.hp-body'); b.innerHTML = b.dataset.o;
+      if (s.length < 2) { d.hidden = false; return; }
+      const hit = (d.textContent || '').toLowerCase().includes(s); d.hidden = !hit; if (hit) { n++; d.open = true; mark(b, s); }
+    });
+    MAN.querySelector('.hp-none').hidden = s.length < 2 || n > 0;
+  }
+  function mark(root, s) {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), list = []; let x; while (x = w.nextNode()) if (x.nodeValue.toLowerCase().includes(s) && !x.parentElement.closest('button')) list.push(x);
+    list.forEach(tn => { const t = tn.nodeValue, lo = t.toLowerCase(), f = document.createDocumentFragment(); let p = 0, k; while ((k = lo.indexOf(s, p)) >= 0) { f.appendChild(document.createTextNode(t.slice(p, k))); const m = document.createElement('mark'); m.textContent = t.slice(k, k + s.length); f.appendChild(m); p = k + s.length; } f.appendChild(document.createTextNode(t.slice(p))); tn.parentNode.replaceChild(f, tn); });
+  }
+  function closeManual(silent) { if (!MAN) return; MAN.remove(); MAN = null; }
+
+  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (T.open) { e.stopPropagation(); endTour(false); } else if (MAN) closeManual(); }, true);
+
+  /* ================================================================== Einstiege */
+  function wireMenu() {
+    const m = menuEl(); if (!m || $('btn-help')) return;
+    const b = document.createElement('button'); b.type = 'button'; b.id = 'btn-help'; b.className = 'fm-item'; b.setAttribute('role', 'menuitem'); b.innerHTML = '❓ Anleitung';
+    b.addEventListener('click', () => setTimeout(() => openManual(), 60));
+    const s = $('btn-settings'); if (s && s.nextSibling) m.insertBefore(b, s.nextSibling); else m.appendChild(b);
+  }
+  function optionsSection(ph) {
+    ph.innerHTML = `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-3 mb-2">Anleitung &amp; Hilfe</div>
+      <div class="grid grid-cols-2 gap-2.5"><button type="button" data-hp="tour" class="text-left rounded-2xl p-3 border border-slate-700 bg-slate-900"><div class="text-sm font-bold">🧭 Rundgang</div><div class="text-[11px] text-slate-400 mt-0.5">Die App Schritt für Schritt, ca. 2 Min.</div></button>
+      <button type="button" data-hp="man" class="text-left rounded-2xl p-3 border border-slate-700 bg-slate-900"><div class="text-sm font-bold">📖 Handbuch</div><div class="text-[11px] text-slate-400 mt-0.5">Alle Funktionen, durchsuchbar</div></button></div>`;
+    ph.addEventListener('click', e => { const b = e.target.closest('[data-hp]'); if (!b) return; const ov = ph.closest('#settings-modal'); if (ov) ov.remove(); if (b.dataset.hp === 'tour') startTour('rundgang'); else openManual(); });
+  }
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; const ph = n.id === 'hp-sec' ? n : (n.querySelector && n.querySelector('#hp-sec')); if (ph && !ph.dataset.done) { ph.dataset.done = '1'; optionsSection(ph); } }); }).observe(document.body, { childList: true, subtree: true });
+
+  function onHome(el) { // Startseite: „Neu hier?“-Karte beim ersten Start
+    if (!el) return; el.innerHTML = '';
+    if (HS.seen || HS.hideCard) return;
+    el.innerHTML = `<div class="hp-new"><span class="tx"><b>Neu hier?</b><span class="s">Ein kurzer Rundgang zeigt dir die App – ca. 2 Minuten.</span></span><button type="button" data-hp="tour">Los</button><button type="button" class="no" data-hp="no">Nein, danke</button></div>`;
+    el.onclick = e => { const b = e.target.closest('[data-hp]'); if (!b) return; if (b.dataset.hp === 'tour') startTour('rundgang'); else { HS.hideCard = true; saveHS(); el.innerHTML = ''; } };
+  }
+  function boot() { try { if (window.Home && Home.isOpen && Home.isOpen()) onHome($('hm-newbie')); } catch (_) {} wireMenu(); setTimeout(wireMenu, 700); setTimeout(wireMenu, 2500); }
+  window.Help = { startTour, openManual, closeManual, endTour, onHome, tours: () => Object.keys(TOURS), chapters: () => CH.map(c => c.id), isOpen: () => T.open || !!MAN, tourOpen: () => T.open, manualOpen: () => !!MAN, _state: () => ({ i: T.i, n: T.steps.length, key: T.steps[T.i] && T.steps[T.i].key }), _seen: () => HS.seen, _reset: () => { HS = { seen: false }; saveHS(); } };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+</script>
+<script>
 /* ===== Sunshine@R · Design-Auswahl & Optionen ===== */
 (function () {
   'use strict';
@@ -11569,6 +11927,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     const toggle = (key, label, hint, on) => `<label class="flex items-start gap-3 py-2 cursor-pointer"><input type="checkbox" data-ui="${key}" ${on ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">${label}</span><span class="block text-[11px] text-slate-400">${hint}</span></span></label>`;
     ov.innerHTML = `<div class="w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-2xl border border-purple-500/40 bg-slate-950 p-4 shadow-2xl text-slate-100" role="dialog" aria-label="Optionen">
       <div class="flex items-center gap-3 mb-1"><div class="text-base font-black">⚙️ Optionen</div><button type="button" data-close class="ml-auto px-3 py-2 rounded-lg bg-slate-800 text-slate-300" aria-label="Schließen">✕</button></div>
+      <div id="hp-sec"></div>
       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-3 mb-2">Design</div>
       <div id="theme-grid" class="grid grid-cols-2 gap-2.5">
         ${THEMES.map(t => `<button type="button" data-theme-id="${t.id}" aria-pressed="${t.id === cur}" class="theme-card text-left rounded-2xl p-2 border ${t.id === cur ? 'border-amber-400 ring-2 ring-amber-400/60 bg-slate-800' : 'border-slate-700 bg-slate-900'}">${previewHtml(t)}<div class="px-1 pt-2 pb-0.5"><div class="text-sm font-bold flex items-center gap-1.5">${t.name}${t.id === cur ? '<span class="text-[10px] font-mono text-amber-300">✓ aktiv</span>' : ''}</div><div class="text-[11px] text-slate-400 leading-snug">${t.desc}</div></div></button>`).join('')}
