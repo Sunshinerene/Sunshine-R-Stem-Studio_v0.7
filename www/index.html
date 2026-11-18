@@ -8,6 +8,11 @@
   <meta name="theme-color" content="#090c12" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2338bdf8%27/%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%238b5cf6%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2310b981%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2728%27%20fill%3D%27%23090c12%27/%3E%3Crect%20x%3D%277%27%20y%3D%277%27%20width%3D%27114%27%20height%3D%27114%27%20rx%3D%2724%27%20fill%3D%27url%28%23g%29%27/%3E%3Cpath%20d%3D%27M48%2088V34l48-10v53M48%2088c0%208-10%2014-22%2014S4%2096%204%2088s10-14%2022-14%2022%206%2022%2014zm48-11c0%208-10%2014-22%2014s-22-6-22-14%2010-14%2022-14%2022%206%2022%2014z%27%20transform%3D%27translate%2813%200%29%20scale%28.9%29%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2338bdf8%27/%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%238b5cf6%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2310b981%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2728%27%20fill%3D%27%23090c12%27/%3E%3Crect%20x%3D%277%27%20y%3D%277%27%20width%3D%27114%27%20height%3D%27114%27%20rx%3D%2724%27%20fill%3D%27url%28%23g%29%27/%3E%3Cpath%20d%3D%27M48%2088V34l48-10v53M48%2088c0%208-10%2014-22%2014S4%2096%204%2088s10-14%2022-14%2022%206%2022%2014zm48-11c0%208-10%2014-22%2014s-22-6-22-14%2010-14%2022-14%2022%206%2022%2014z%27%20transform%3D%27translate%2813%200%29%20scale%28.9%29%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
+  <script>/* Design vor dem ersten Zeichnen setzen (kein Aufblitzen) */
+    (function(){try{var t=localStorage.getItem('sunshine.theme');if(['aurora','studio','neon','classic'].indexOf(t)<0)t='aurora';var d=document.documentElement;d.setAttribute('data-theme',t);
+    var u=JSON.parse(localStorage.getItem('sunshine.ui')||'{}');d.setAttribute('data-glass',u.glass===false?'off':'on');d.setAttribute('data-glow',u.glow===false?'off':'on');d.setAttribute('data-large',u.large?'1':'0');
+    var m={aurora:'#0B0E27',studio:'#14161A',neon:'#05060B',classic:'#090c12'}[t];document.addEventListener('DOMContentLoaded',function(){var x=document.querySelector('meta[name="theme-color"]');if(x)x.setAttribute('content',m)});}catch(e){document.documentElement.setAttribute('data-theme','aurora')}})();
+  </script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <!-- JSZip für ZIP-Stem-Import -->
@@ -28,12 +33,12 @@
           },
           colors: {
             daw: {
-              bg: '#090c12',
-              panel: '#111622',
-              surface: '#171e2e',
-              elevated: '#1e273b',
-              border: '#28334a',
-              accent: '#38bdf8',
+              bg: 'rgb(var(--daw-bg) / <alpha-value>)',
+              panel: 'rgb(var(--daw-panel) / <alpha-value>)',
+              surface: 'rgb(var(--daw-surface) / <alpha-value>)',
+              elevated: 'rgb(var(--daw-elevated) / <alpha-value>)',
+              border: 'rgb(var(--daw-border) / <alpha-value>)',
+              accent: 'rgb(var(--daw-accent) / <alpha-value>)',
             }
           }
         }
@@ -201,6 +206,114 @@
     .track-is-collapsed { display:none !important; }
 
   </style>
+  <style id="sunshine-themes">
+/* ===== Sunshine@R Design-Themes (Auswahl unter ⚙ Optionen) =====
+   classic = bisheriges Design (keine Überschreibungen). Themes setzen CSS-Variablen + Skin-Regeln. */
+:root{--daw-bg:9 12 18;--daw-panel:17 22 34;--daw-surface:23 30 46;--daw-elevated:30 39 59;--daw-border:40 51 74;--daw-accent:56 189 248;--blur:blur(22px) saturate(150%)}
+html[data-glass="off"]{--blur:none}
+html[data-theme="aurora"]{background-color:#070817}html[data-theme="studio"]{background-color:#14161A}html[data-theme="neon"]{background-color:#05060B}html[data-theme="classic"]{background-color:#090c12}
+.brand-banner{display:none}
+.theme-card{transition:transform .12s,box-shadow .12s}
+.theme-card:active{transform:scale(.98)}
+
+/* ---------- gemeinsam für Glas-Themes (aurora, neon) ---------- */
+html[data-theme="aurora"],html[data-theme="neon"]{--daw-panel:255 255 255;--daw-surface:255 255 255;--daw-elevated:255 255 255;--daw-border:255 255 255}
+html[data-theme="aurora"] .bg-daw-panel,html[data-theme="neon"] .bg-daw-panel{--tw-bg-opacity:.06;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);background-image:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0))}
+html[data-theme="aurora"] .bg-daw-panel\/80,html[data-theme="aurora"] .bg-daw-panel\/90,html[data-theme="aurora"] .bg-daw-panel\/95,
+html[data-theme="neon"] .bg-daw-panel\/80,html[data-theme="neon"] .bg-daw-panel\/90,html[data-theme="neon"] .bg-daw-panel\/95{background-color:rgba(10,12,36,.62);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+html[data-theme="aurora"] .bg-daw-surface,html[data-theme="neon"] .bg-daw-surface{--tw-bg-opacity:.07}
+html[data-theme="aurora"] .bg-daw-surface\/80,html[data-theme="aurora"] .bg-daw-surface\/90,html[data-theme="neon"] .bg-daw-surface\/80,html[data-theme="neon"] .bg-daw-surface\/90{background-color:rgba(255,255,255,.06)}
+html[data-theme="aurora"] .bg-daw-bg:not(body),html[data-theme="neon"] .bg-daw-bg:not(body){--tw-bg-opacity:.5}
+html[data-theme="aurora"] .bg-daw-bg\/60,html[data-theme="aurora"] .bg-daw-bg\/80,html[data-theme="aurora"] .bg-daw-bg\/90,
+html[data-theme="neon"] .bg-daw-bg\/60,html[data-theme="neon"] .bg-daw-bg\/80,html[data-theme="neon"] .bg-daw-bg\/90{background-color:rgba(4,5,20,.45)}
+html[data-theme="aurora"] .hover\:bg-daw-elevated:hover,html[data-theme="neon"] .hover\:bg-daw-elevated:hover{--tw-bg-opacity:.16}
+html[data-theme="aurora"] .hover\:bg-daw-elevated\/70:hover,html[data-theme="neon"] .hover\:bg-daw-elevated\/70:hover,
+html[data-theme="aurora"] .hover\:bg-daw-surface\/30:hover,html[data-theme="neon"] .hover\:bg-daw-surface\/30:hover{background-color:rgba(255,255,255,.12)}
+html[data-theme="aurora"] .rounded{border-radius:9px}
+html[data-theme="aurora"] .rounded-md,html[data-theme="neon"] .rounded-md{border-radius:12px}
+html[data-theme="aurora"] .rounded-lg,html[data-theme="neon"] .rounded-lg{border-radius:14px}
+html[data-theme="aurora"] .rounded-xl,html[data-theme="neon"] .rounded-xl{border-radius:18px}
+html[data-theme="aurora"] .rounded-2xl,html[data-theme="neon"] .rounded-2xl{border-radius:26px}
+html[data-theme="neon"] .rounded{border-radius:9px}
+html[data-theme="aurora"] select option,html[data-theme="neon"] select option{background:#12123a;color:#F3F5FF}
+html[data-theme="aurora"] .bg-slate-950,html[data-theme="neon"] .bg-slate-950{background:linear-gradient(180deg,rgba(40,36,92,.86),rgba(12,12,36,.94))!important;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+html[data-theme="aurora"] .bg-slate-900,html[data-theme="neon"] .bg-slate-900{background-color:rgba(255,255,255,.05)}
+html[data-theme="aurora"] .bg-slate-900\/80,html[data-theme="aurora"] .bg-slate-900\/60,html[data-theme="neon"] .bg-slate-900\/80,html[data-theme="neon"] .bg-slate-900\/60{background-color:rgba(255,255,255,.05)}
+html[data-theme="aurora"] .bg-slate-800,html[data-theme="neon"] .bg-slate-800{background-color:rgba(255,255,255,.09)}
+html[data-theme="aurora"] .dock-tab-btn,html[data-theme="neon"] .dock-tab-btn{border-radius:999px;min-height:44px}
+html[data-theme="aurora"] header.sticky,html[data-theme="neon"] header.sticky{border-radius:0 0 26px 26px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.14),0 14px 40px rgba(0,0,0,.4)}
+
+/* ---------- A · AURORA GLASS ---------- */
+html[data-theme="aurora"]{--daw-bg:6 8 26;--daw-accent:255 138 26}
+html[data-theme="aurora"] body.bg-daw-bg{background:radial-gradient(520px 380px at 104% -4%,rgba(255,138,26,.36),transparent 70%),radial-gradient(480px 460px at -14% 38%,rgba(124,61,255,.36),transparent 70%),radial-gradient(520px 380px at 92% 102%,rgba(25,195,255,.26),transparent 70%),linear-gradient(180deg,#0B0E27,#070817);background-attachment:fixed}
+html[data-theme="aurora"] .border-daw-border{--tw-border-opacity:.13}
+html[data-theme="aurora"] .border-daw-border\/60{border-color:rgba(255,255,255,.09)}
+html[data-theme="aurora"] .divide-daw-border>:not([hidden])~:not([hidden]){--tw-divide-opacity:.10}
+html[data-theme="aurora"] .divide-daw-border\/80>:not([hidden])~:not([hidden]){border-color:rgba(255,255,255,.09)}
+html[data-theme="aurora"] .bg-daw-panel{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 12px 32px rgba(0,0,0,.28)}
+html[data-theme="aurora"] .bg-black\/70{background-color:rgba(5,6,22,.5);border-color:rgba(255,255,255,.12)}
+html[data-theme="aurora"] #btn-play{background:linear-gradient(145deg,#FFD23F,#FF8A1A)!important;color:#2A1300!important;border-color:transparent!important;border-radius:999px;min-height:40px;padding-left:18px;padding-right:18px;box-shadow:0 8px 24px rgba(255,138,26,.5),inset 0 1px 0 rgba(255,255,255,.55)!important}
+html[data-theme="aurora"] .dock-tab-btn.font-bold{background:linear-gradient(180deg,rgba(255,138,26,.30),rgba(255,138,26,.10))!important;color:#FFC27A!important;border-color:rgba(255,138,26,.5)!important;box-shadow:0 6px 20px rgba(255,138,26,.2)}
+html[data-theme="aurora"] #brand-icon{box-shadow:0 0 0 1px rgba(255,255,255,.16),0 6px 24px rgba(255,140,20,.5)}
+html[data-theme="aurora"] input[type="range"].daw-slider{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.14)}
+html[data-theme="aurora"] input[type="range"].daw-slider:not(.amber-thumb):not(.emerald-thumb):not(.purple-thumb)::-webkit-slider-thumb{background:#fff;border-color:rgba(255,138,26,.8);box-shadow:0 0 10px rgba(255,138,26,.6)}
+html[data-theme="aurora"] ::-webkit-scrollbar-track{background:transparent}
+html[data-theme="aurora"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}
+html[data-theme="aurora"] #btn-export-wav{box-shadow:0 8px 26px rgba(255,138,26,.45)}
+
+/* ---------- B · STUDIO MATT ---------- */
+html[data-theme="studio"]{--daw-bg:20 22 26;--daw-panel:30 33 39;--daw-surface:38 42 50;--daw-elevated:48 53 62;--daw-border:54 59 69;--daw-accent:255 178 30}
+html[data-theme="studio"] body.bg-daw-bg{background:#14161A}
+html[data-theme="studio"] .rounded-lg{border-radius:11px}
+html[data-theme="studio"] .rounded-xl{border-radius:14px}
+html[data-theme="studio"] .rounded-2xl{border-radius:18px}
+html[data-theme="studio"] .bg-daw-panel{box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+html[data-theme="studio"] button.bg-daw-surface,
+html[data-theme="studio"] button[class*="bg-cyan-500/"],html[data-theme="studio"] button[class*="bg-purple-500/"],html[data-theme="studio"] button[class*="bg-emerald-500/"],
+html[data-theme="studio"] button[class*="bg-sky-500/"],html[data-theme="studio"] button[class*="bg-fuchsia-500/"],html[data-theme="studio"] button[class*="bg-pink-500/"]{background-color:#262A32!important;border-color:#363B45!important;color:#E7E9EE!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 0 #0E1013}
+html[data-theme="studio"] button[class*="bg-rose-500/"]{background-color:#2A2226!important;border-color:#4A3238!important;color:#FF9DB0!important}
+html[data-theme="studio"] #btn-loop[class*="bg-cyan-500/"]{background-color:#2B2619!important;border-color:#6A5220!important;color:#FFD27A!important}
+html[data-theme="studio"] .bg-purple-500,html[data-theme="studio"] .bg-emerald-500,html[data-theme="studio"] .bg-cyan-500{background-color:#FFB21E!important;color:#241800!important;border-color:#FFCD6B!important}
+html[data-theme="studio"] .hover\:bg-purple-400:hover,html[data-theme="studio"] .hover\:bg-emerald-400:hover,html[data-theme="studio"] .hover\:bg-cyan-400:hover{background-color:#FFC24D!important}
+html[data-theme="studio"] #btn-play{box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 0 #7A5410!important}
+html[data-theme="studio"] .dock-tab-btn{border-radius:0;min-height:44px;background:transparent!important;border:0!important;border-bottom:2px solid transparent!important;color:#A9AEB8!important}
+html[data-theme="studio"] .dock-tab-btn.font-bold{border-bottom-color:#FFB21E!important;color:#FFD27A!important}
+html[data-theme="studio"] .bg-black\/70{background-color:#08090B;border-color:#2D323B;box-shadow:inset 0 2px 8px rgba(0,0,0,.7)}
+html[data-theme="studio"] #lcd-position,html[data-theme="studio"] #lcd-time{color:#FFB21E!important;text-shadow:0 0 12px rgba(255,178,30,.3)}
+html[data-theme="studio"] input[type="range"].daw-slider{background:#0E1013;border-color:#2D323B;box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+html[data-theme="studio"] input[type="range"].daw-slider:not(.amber-thumb):not(.emerald-thumb):not(.purple-thumb)::-webkit-slider-thumb{width:14px;height:18px;border-radius:5px;border:0;background:linear-gradient(180deg,#F2F3F5,#BFC3CB);box-shadow:0 2px 4px rgba(0,0,0,.6)}
+html[data-theme="studio"] #btn-export-wav{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 0 #7A5410}
+
+/* ---------- C · NEON SPEKTRUM ---------- */
+html[data-theme="neon"]{--daw-bg:5 6 11;--daw-accent:25 195 255;--daw-border:138 61 255}
+html[data-theme="neon"] body.bg-daw-bg{background:radial-gradient(420px 300px at 0% 0%,rgba(25,195,255,.20),transparent 70%),radial-gradient(420px 300px at 100% 35%,rgba(255,47,160,.18),transparent 70%),radial-gradient(460px 340px at 50% 100%,rgba(255,138,26,.20),transparent 70%),#05060B;background-attachment:fixed}
+html[data-theme="neon"] .border-daw-border{--tw-border-opacity:.30}
+html[data-theme="neon"] .border-daw-border\/60{border-color:rgba(138,61,255,.22)}
+html[data-theme="neon"] .divide-daw-border>:not([hidden])~:not([hidden]){--tw-divide-opacity:.22}
+html[data-theme="neon"] .divide-daw-border\/80>:not([hidden])~:not([hidden]){border-color:rgba(138,61,255,.2)}
+html[data-theme="neon"] .bg-daw-panel{box-shadow:0 0 24px rgba(138,61,255,.14),inset 0 1px 0 rgba(255,255,255,.08)}
+html[data-theme="neon"] .bg-black\/70{background-color:rgba(3,4,12,.7);border-color:rgba(138,61,255,.35)}
+html[data-theme="neon"] header.sticky{border-bottom:0;box-shadow:0 14px 40px rgba(0,0,0,.45),0 1px 0 rgba(138,61,255,.5),0 6px 30px rgba(138,61,255,.18)}
+html[data-theme="neon"] .brand-banner{display:block;width:100%;height:92px;object-fit:cover;object-position:50% 46%;border-radius:22px;margin:0 0 10px;box-shadow:0 0 0 1px rgba(255,255,255,.14),0 10px 36px rgba(138,61,255,.4)}
+html[data-theme="neon"] #btn-play{background:linear-gradient(120deg,#19C3FF,#8A3DFF 50%,#FF2FA0)!important;color:#fff!important;border-color:transparent!important;border-radius:999px;min-height:40px;padding-left:18px;padding-right:18px;box-shadow:0 0 26px rgba(255,47,160,.55)!important}
+html[data-theme="neon"] #lcd-position{color:#5FD8FF!important;text-shadow:0 0 14px rgba(25,195,255,.7)}
+html[data-theme="neon"] #lcd-time{color:#FF7AC6!important;text-shadow:0 0 14px rgba(255,47,160,.6)}
+html[data-theme="neon"] #input-bpm{text-shadow:0 0 14px rgba(255,138,26,.6)}
+html[data-theme="neon"] .dock-tab-btn.font-bold{background:linear-gradient(120deg,rgba(25,195,255,.30),rgba(138,61,255,.34),rgba(255,47,160,.30))!important;color:#fff!important;border-color:rgba(255,255,255,.22)!important;box-shadow:0 0 22px rgba(138,61,255,.5)}
+html[data-theme="neon"] button.bg-daw-surface{box-shadow:0 0 0 1px rgba(138,61,255,.35),0 0 14px rgba(138,61,255,.14)}
+html[data-theme="neon"] input[type="range"].daw-slider{background:rgba(255,255,255,.12);border-color:rgba(138,61,255,.4)}
+html[data-theme="neon"] input[type="range"].daw-slider:not(.amber-thumb):not(.emerald-thumb):not(.purple-thumb)::-webkit-slider-thumb{background:#fff;border-color:#19C3FF;box-shadow:0 0 12px #19C3FF}
+html[data-theme="neon"] ::-webkit-scrollbar-track{background:transparent}
+html[data-theme="neon"] ::-webkit-scrollbar-thumb{background:rgba(138,61,255,.55)}
+html[data-theme="neon"] #btn-export-wav{box-shadow:0 0 26px rgba(255,138,26,.5)}
+
+/* ---------- Optionen: Leuchteffekte / große Bedienelemente ---------- */
+html[data-glow="off"] *{text-shadow:none!important}
+html[data-glow="off"] #btn-play,html[data-glow="off"] #btn-export-wav,html[data-glow="off"] .dock-tab-btn,html[data-glow="off"] #brand-icon,html[data-glow="off"] .bg-daw-panel,html[data-glow="off"] button.bg-daw-surface{box-shadow:none!important}
+html[data-large="1"] button,html[data-large="1"] select{min-height:44px}
+html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40px}
+
+  </style>
 </head>
 <body class="min-h-screen flex flex-col bg-daw-bg text-slate-200">
 
@@ -214,6 +327,7 @@
        BEREICH 1 (OBEN): FIXIERTE TRANSPORT-, PRESET- & DATEI-STEUERUNGSLEISTE
        ========================================================================= -->
   <header class="sticky top-0 z-40 bg-daw-panel/95 backdrop-blur-md border-b border-daw-border px-3 py-2 shadow-2xl">
+    <img class="brand-banner" src="assets/sunshine-r-daw-studio-logo.png" alt="Sunshine@R DAW Studio" onerror="this.remove()">
     <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
 
       <!-- Left: App Title & Transport Controls -->
@@ -289,6 +403,8 @@
         <button id="btn-open-projects" class="project-action-btn px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition">📁 Projekte</button>
 
         <button id="btn-auto-trim" type="button" hidden aria-hidden="true" tabindex="-1" style="display:none"></button>
+
+        <button id="btn-settings" type="button" title="Optionen &amp; Design" class="project-action-btn px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition">⚙️ Optionen</button>
 
         <button id="btn-export-midi" title="MIDI-Spur 07 als .mid Datei herunterladen" class="px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-semibold transition">
           🎹 .MID Export
@@ -1463,7 +1579,8 @@
         }
         pos = body + size + (size & 1);
       }
-      if (major >= 3) throw new Error('SF3 (komprimierte SoundFont) wird nicht unterstützt – bitte eine .sf2-Datei verwenden.');
+      const isSf3 = major >= 3;
+      if (isSf3 && !SpessaEngine.sf3Supported()) throw new Error('SF3 (komprimierte SoundFont) braucht das erweiterte SpessaSynth-Paket (mit stb-vorbis). Anleitung: spessa-build-kit/README.md – oder eine .sf2-Datei verwenden.');
       if (smplOff < 0) throw new Error('Die SoundFont enthält keine Sample-Daten (smpl).');
       for (const k of ['phdr', 'pbag', 'pgen', 'inst', 'ibag', 'igen', 'shdr']) if (!pd[k]) throw new Error(`SoundFont unvollständig (${k} fehlt).`);
       const recs = (c, size, fn) => { const n = Math.floor(pd[c].len / size), out = new Array(n); for (let i = 0; i < n; i++) out[i] = fn(pd[c].off + i * size); return out; };
@@ -1475,7 +1592,7 @@
       const igen = recs('igen', 4, o => ({ op: u16(o), v: s16(o + 2), lo: dv.getUint8(o + 2), hi: dv.getUint8(o + 3) }));
       const shdr = recs('shdr', 46, o => ({ name: str(o, 20), start: u32(o + 20), end: u32(o + 24), sl: u32(o + 28), el: u32(o + 32), rate: u32(o + 36), pitch: dv.getUint8(o + 40), corr: dv.getInt8(o + 41), type: u16(o + 44) }));
       if (phdr.length < 2) throw new Error('Die SoundFont enthält keine Presets.');
-      const pcm = new Int16Array(buf, smplOff, Math.floor(smplLen / 2));
+      const pcm = isSf3 ? new Int16Array(0) : new Int16Array(buf, smplOff, Math.floor(smplLen / 2));
       const presets = [], presetMap = {};
       for (let i = 0; i < phdr.length - 1; i++) {
         const ph = phdr[i];
@@ -1483,7 +1600,7 @@
         presetMap[ph.bank + ':' + ph.preset] = i;
       }
       presets.sort((a, b) => a.bank - b.bank || a.preset - b.preset);
-      return { phdr, pbag, pgen, inst, ibag, igen, shdr, pcm, presets, presetMap, layerCache: {}, bufCache: {} };
+      return { phdr, pbag, pgen, inst, ibag, igen, shdr, pcm, presets, presetMap, sf3: isSf3, layerCache: {}, bufCache: {} };
     }
 
     function sfZones(bags, gens, from, to) {
@@ -1633,6 +1750,7 @@
         return null;
       }
       if (!font.parsed) { sfLoadFont(sf.font).catch(() => {}); return null; }
+      if (font.parsed.sf3) return null; // SF3 spielt nur SpessaSynth
       const idx = font.parsed.presetMap[sf.bank + ':' + sf.preset];
       if (idx === undefined) return null;
       return { font: font.parsed, presetIdx: idx, bank: sf.bank };
@@ -1656,7 +1774,7 @@
       const buf = await file.arrayBuffer();
       const parsed = sfParse(buf);
       const id = `${file.name}|${file.size}`;
-      const meta = { id, name: file.name.replace(/\.sf2$/i, ''), size: file.size, addedAt: Date.now(), presets: parsed.presets.length };
+      const meta = { id, name: file.name.replace(/\.(sf2|sf3)$/i, ''), size: file.size, addedAt: Date.now(), presets: parsed.presets.length };
       await sfSaveFont(meta, buf);
       SF_LIB.fonts[id] = { meta, parsed, loading: null };
       SF_LIB.listPromise = null;
@@ -1689,15 +1807,15 @@
       ov.innerHTML = `<div class="w-full max-w-xl max-h-[92vh] flex flex-col rounded-2xl border border-purple-500/40 bg-slate-950 p-4 shadow-2xl text-slate-100">
         <div class="flex items-center gap-3 mb-2"><div class="text-base font-black">🎼 SoundFont · ${escapeText(track.name)}</div><button type="button" data-close class="ml-auto px-3 py-1 rounded-lg bg-slate-800 text-slate-300">✕</button></div>
         <div class="flex gap-2 mb-2"><select id="sf-font" class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm"></select><button type="button" data-sf-del class="px-3 rounded-lg border border-rose-500/40 text-rose-300 text-xs" title="SoundFont vom Gerät entfernen">🗑</button></div>
-        <button type="button" data-sf-load class="mb-2 px-3 py-2 rounded-lg bg-purple-500 text-white font-bold text-xs">📂 SoundFont laden (.sf2)</button>
+        <button type="button" data-sf-load class="mb-2 px-3 py-2 rounded-lg bg-purple-500 text-white font-bold text-xs">📂 SoundFont laden (.sf2 / .sf3)</button>
         <details class="mb-2 rounded-lg border border-slate-800 bg-slate-900/60">
           <summary class="px-3 py-2 text-xs font-bold text-cyan-300 cursor-pointer">🌐 Kostenlose SoundFonts herunterladen</summary>
           <div class="px-3 pb-2 space-y-1">
             ${SF_FREE_SOURCES.map(x => `<button type="button" data-ext="${escapeText(x.url)}" class="w-full text-left rounded-lg px-2 py-1.5 hover:bg-slate-800"><span class="text-xs font-semibold text-slate-100">${escapeText(x.name)}</span> <span class="text-[10px] text-slate-400">– ${escapeText(x.note)}</span><div class="text-[10px] text-cyan-400/80 break-all">${escapeText(x.url)}</div></button>`).join('')}
-            <div class="text-[10px] text-slate-500 pt-1">Nach dem Download hier über „SoundFont laden“ auswählen. Nur .sf2 (SF3 und DLS gehen in dieser Version nicht). Lizenz und Dateigröße vor dem Download prüfen – auf dem Handy am besten unter ca. 60 MB bleiben.</div>
+            <div class="text-[10px] text-slate-500 pt-1">Nach dem Download hier über „SoundFont laden“ auswählen. SF2 funktioniert immer; SF3 nur mit dem erweiterten SpessaSynth-Paket (siehe spessa-build-kit), DLS geht nicht. Lizenz und Dateigröße vor dem Download prüfen – auf dem Handy am besten unter ca. 60 MB bleiben.</div>
           </div>
         </details>
-        <div id="sf-status" class="text-[11px] text-slate-400 mb-2">Lade eine .sf2-Datei (SF3 wird nicht unterstützt). Sie bleibt auf diesem Gerät gespeichert.</div>
+        <div id="sf-status" class="text-[11px] text-slate-400 mb-2">Lade eine .sf2-Datei (SF3 nur mit erweitertem Paket). Sie bleibt auf diesem Gerät gespeichert.</div>
         <label class="flex flex-wrap items-center gap-x-2 text-[11px] text-slate-300 mb-2 cursor-pointer"><input id="sf-engine" type="checkbox"> <span>SpessaSynth-Engine (empfohlen: volle SoundFont-Unterstützung)</span> <span id="sf-engine-status" class="text-slate-500"></span></label>
         <input id="sf-search" type="search" placeholder="Preset suchen …" class="mb-2 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm w-full" />
         <div id="sf-list" class="flex-1 min-h-[120px] overflow-y-auto rounded-lg border border-slate-800 divide-y divide-slate-800"></div>
@@ -1798,7 +1916,7 @@
     }
 
     /* ===== SpessaSynth-Engine (hochwertige SoundFont-Wiedergabe) =====
-       Der SpessaSynth-Core steckt inline in dieser Datei (<script type="text/plain" id="spessa-core-src">).
+       Der SpessaSynth-Core steckt inline in dieser Datei (Block #spessa-core-src am Dateiende).
        Live: ein AudioWorklet pro SoundFont (16 Stereo-Ausgänge, MIDI-Kanal ↔ DAW-Spur) → jede Spur behält
        FX-Rack, Fader, Pan und Section-Gate. Export: derselbe Renderer läuft offline im Hauptthread.
        Fallback-Kette: SpessaSynth → eigener einfacher SF2-Player (sfPlay) → globaler Synth. */
@@ -2057,7 +2175,8 @@
         try { localStorage.setItem(LS_KEY, enabled ? '1' : '0'); } catch (_) {}
         if (!enabled) panic();
       }
-      return { play, panic, prepare, prepareAll, isReady, whenReady, status, setEnabled, dispose, renderOffline, get enabled() { return enabled; }, hasBundle };
+      const sf3Supported = () => /^\/\*SPESSA_BUILD[^*]*vorbis=true/.test(srcOf('spessa-core-src').slice(0, 160));
+      return { play, panic, prepare, prepareAll, isReady, whenReady, status, setEnabled, dispose, renderOffline, sf3Supported, get enabled() { return enabled; }, hasBundle };
     })();
 
     /* Instrument-Auswahl pro MIDI-Spur (zentral per change-Event, überlebt jeden Neuaufbau der Spurliste). */
@@ -6868,6 +6987,88 @@
 })();
 </script>
 <!-- SpessaSynth (spessasynth_core, (c) spessasus, Apache License 2.0, https://github.com/spessasus/spessasynth_core) – Quellcode der Bibliothek ist dort verfügbar; Lizenztext unten. -->
+<script>
+/* ===== Sunshine@R · Design-Auswahl & Optionen ===== */
+(function () {
+  'use strict';
+  const THEMES = [
+    { id: 'aurora', name: 'Aurora Glass', desc: 'Milchglas, Sonnen-Farbverläufe, orange Akzente', meta: '#0B0E27',
+      pv: { bg: 'radial-gradient(90px 60px at 100% 0,rgba(255,138,26,.55),transparent),radial-gradient(90px 70px at 0 60%,rgba(124,61,255,.5),transparent),#0B0E27', bar: 'background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)', play: 'background:linear-gradient(145deg,#FFD23F,#FF8A1A)', card: 'background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16)', r: 9 } },
+    { id: 'studio', name: 'Studio Matt', desc: 'Ruhig wie Hardware, Amber-LCD, kaum Glas', meta: '#14161A',
+      pv: { bg: '#14161A', bar: 'background:#08090B;border:1px solid #2D323B', play: 'background:#FFB21E', card: 'background:#1E2127;border:1px solid #2D323B', r: 6 } },
+    { id: 'neon', name: 'Neon Spektrum', desc: 'Schwarz mit Equalizer-Farben und Leuchten', meta: '#05060B',
+      pv: { bg: 'radial-gradient(90px 60px at 0 0,rgba(25,195,255,.4),transparent),radial-gradient(90px 70px at 100% 60%,rgba(255,47,160,.35),transparent),#05060B', bar: 'background:rgba(255,255,255,.06);border:1px solid rgba(138,61,255,.6)', play: 'background:linear-gradient(120deg,#19C3FF,#8A3DFF,#FF2FA0)', card: 'background:rgba(255,255,255,.05);border:1px solid rgba(138,61,255,.5)', r: 9 } },
+    { id: 'classic', name: 'Klassisch', desc: 'Das bisherige Design', meta: '#090c12',
+      pv: { bg: '#090c12', bar: 'background:#111622;border:1px solid #28334a', play: 'background:#10b981', card: 'background:#171e2e;border:1px solid #28334a', r: 6 } }
+  ];
+  const LS_THEME = 'sunshine.theme', LS_UI = 'sunshine.ui';
+  const html = document.documentElement;
+  const getTheme = () => { const t = html.getAttribute('data-theme'); return THEMES.some(x => x.id === t) ? t : 'aurora'; };
+  const readUi = () => { try { return Object.assign({ glass: true, glow: true, large: false }, JSON.parse(localStorage.getItem(LS_UI) || '{}')); } catch (_) { return { glass: true, glow: true, large: false }; } };
+  function applyUi(p) {
+    html.setAttribute('data-glass', p.glass ? 'on' : 'off');
+    html.setAttribute('data-glow', p.glow ? 'on' : 'off');
+    html.setAttribute('data-large', p.large ? '1' : '0');
+  }
+  function applyTheme(id, persist) {
+    const t = THEMES.find(x => x.id === id) || THEMES[0];
+    html.setAttribute('data-theme', t.id);
+    const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t.meta);
+    if (persist !== false) { try { localStorage.setItem(LS_THEME, t.id); } catch (_) {} }
+  }
+  function saveUi(p) { try { localStorage.setItem(LS_UI, JSON.stringify(p)); } catch (_) {} applyUi(p); }
+
+  function previewHtml(t) {
+    const p = t.pv;
+    return `<div style="background:${p.bg};border-radius:12px;padding:7px;height:62px;display:flex;flex-direction:column;gap:6px;overflow:hidden">
+      <div style="${p.bar};height:22px;border-radius:${p.r + 2}px;display:flex;align-items:center;gap:5px;padding:0 5px"><i style="width:15px;height:15px;border-radius:50%;${p.play}"></i><i style="width:22px;height:8px;border-radius:4px;background:rgba(255,255,255,.3)"></i><i style="width:30px;height:8px;border-radius:4px;background:rgba(255,255,255,.18)"></i></div>
+      <div style="display:flex;gap:5px"><i style="flex:1;height:22px;border-radius:${p.r}px;${p.card}"></i><i style="flex:1;height:22px;border-radius:${p.r}px;${p.card}"></i><i style="flex:1;height:22px;border-radius:${p.r}px;${p.card}"></i></div></div>`;
+  }
+
+  function openSettings() {
+    document.getElementById('settings-modal')?.remove();
+    const ui = readUi(), cur = getTheme();
+    const spessaOk = typeof SpessaEngine === 'object' && SpessaEngine.hasBundle && SpessaEngine.hasBundle();
+    const ov = document.createElement('div');
+    ov.id = 'settings-modal';
+    ov.className = 'fixed inset-0 z-[120] bg-black/80 flex items-end sm:items-center justify-center p-2 sm:p-5';
+    const toggle = (key, label, hint, on) => `<label class="flex items-start gap-3 py-2 cursor-pointer"><input type="checkbox" data-ui="${key}" ${on ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">${label}</span><span class="block text-[11px] text-slate-400">${hint}</span></span></label>`;
+    ov.innerHTML = `<div class="w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-2xl border border-purple-500/40 bg-slate-950 p-4 shadow-2xl text-slate-100" role="dialog" aria-label="Optionen">
+      <div class="flex items-center gap-3 mb-1"><div class="text-base font-black">⚙️ Optionen</div><button type="button" data-close class="ml-auto px-3 py-2 rounded-lg bg-slate-800 text-slate-300" aria-label="Schließen">✕</button></div>
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-3 mb-2">Design</div>
+      <div id="theme-grid" class="grid grid-cols-2 gap-2.5">
+        ${THEMES.map(t => `<button type="button" data-theme-id="${t.id}" aria-pressed="${t.id === cur}" class="theme-card text-left rounded-2xl p-2 border ${t.id === cur ? 'border-amber-400 ring-2 ring-amber-400/60 bg-slate-800' : 'border-slate-700 bg-slate-900'}">${previewHtml(t)}<div class="px-1 pt-2 pb-0.5"><div class="text-sm font-bold flex items-center gap-1.5">${t.name}${t.id === cur ? '<span class="text-[10px] font-mono text-amber-300">✓ aktiv</span>' : ''}</div><div class="text-[11px] text-slate-400 leading-snug">${t.desc}</div></div></button>`).join('')}
+      </div>
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Darstellung</div>
+      <div class="divide-y divide-slate-800">
+        ${toggle('glass', 'Glas-Effekte (Unschärfe)', 'Weiche Milchglas-Flächen. Bei Ruckeln auf älteren Geräten ausschalten.', ui.glass)}
+        ${toggle('glow', 'Leuchteffekte', 'Glühende Zahlen, Buttons und Schatten.', ui.glow)}
+        ${toggle('large', 'Große Bedienelemente', 'Alle Buttons mindestens 44 px hoch – leichter zu treffen.', ui.large)}
+      </div>
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Klang</div>
+      <label class="flex items-start gap-3 py-2 cursor-pointer ${spessaOk ? '' : 'opacity-50'}"><input type="checkbox" data-spessa ${spessaOk && SpessaEngine.enabled ? 'checked' : ''} ${spessaOk ? '' : 'disabled'} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">SpessaSynth-Engine für SoundFonts</span><span class="block text-[11px] text-slate-400">Volle SoundFont-Unterstützung (Zonen, Filter, Drums). Aus = einfacher Ersatz-Player.</span></span></label>
+      <div class="flex items-center gap-3 mt-4 pt-3 border-t border-slate-800"><img src="assets/sunshine-r-app-icon.png" alt="" class="w-10 h-10 rounded-xl" onerror="this.remove()"><div class="min-w-0"><div class="text-sm font-bold">Sunshine@R Stem DAW Studio <span class="text-[10px] font-mono text-cyan-300">PRO</span></div><div class="text-[11px] text-slate-400">Design wird auf diesem Gerät gespeichert.</div></div><button type="button" data-close class="ml-auto px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-sm">Fertig</button></div>
+    </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e => {
+      const t = e.target;
+      if (t === ov || t.closest('[data-close]')) { ov.remove(); return; }
+      const card = t.closest('[data-theme-id]');
+      if (card) { applyTheme(card.dataset.themeId); openSettings(); const sc = document.querySelector('#settings-modal > div'); return; }
+    });
+    ov.addEventListener('change', e => {
+      const t = e.target;
+      if (t.dataset && t.dataset.ui) { const p = readUi(); p[t.dataset.ui] = t.checked; saveUi(p); }
+      else if (t.dataset && 'spessa' in t.dataset) { try { SpessaEngine.setEnabled(t.checked); } catch (_) {} }
+    });
+  }
+
+  window.SunshineTheme = { apply: applyTheme, get: getTheme, open: openSettings, themes: THEMES };
+  applyUi(readUi());
+  document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#btn-settings')) { e.preventDefault(); try { openSettings(); } catch (err) { console.error('[Optionen]', err); if (typeof toast === 'function') toast('Optionen konnten nicht geöffnet werden: ' + err.message, 'error'); } } });
+})();
+
+</script>
 <script type="text/plain" id="spessa-license">
 
                                  Apache License
