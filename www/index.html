@@ -1062,6 +1062,67 @@
       return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
 
+    /* ===== Instrumente (eingebauter Synth pro MIDI-Spur) ===== */
+    const INSTRUMENT_CATALOG = {
+      global:     { name: 'Standard (globaler Synth)', group: 'Allgemein' },
+      subBass:    { name: 'Sub Bass',   group: 'Bass' },
+      acid303:    { name: 'Acid 303',   group: 'Bass' },
+      supersaw:   { name: 'Supersaw',   group: 'Lead' },
+      sawLead:    { name: 'Saw Lead',   group: 'Lead' },
+      squareLead: { name: 'Square Lead', group: 'Lead' },
+      pluck:      { name: 'Pluck',      group: 'Lead' },
+      rapBell:    { name: 'Rap Bell',   group: 'Keys' },
+      epiano:     { name: 'E-Piano',    group: 'Keys' },
+      organ:      { name: 'Orgel',      group: 'Keys' },
+      pad:        { name: 'Warm Pad',   group: 'Flächen' },
+      strings:    { name: 'Strings',    group: 'Flächen' }
+    };
+    // Klangvorgaben je Instrument (gelten nur, wenn es pro Spur gewählt wurde)
+    const INSTRUMENT_DEFAULTS = {
+      subBass:    { cutoff: 900,  res: 1,   attackMs: 5,   releaseMs: 180 },
+      acid303:    { cutoff: 1800, res: 9,   attackMs: 3,   releaseMs: 90 },
+      supersaw:   { cutoff: 4200, res: 1.5, attackMs: 12,  releaseMs: 260, detune: 25 },
+      sawLead:    { cutoff: 5000, res: 2,   attackMs: 8,   releaseMs: 160, detune: 8 },
+      squareLead: { cutoff: 4500, res: 1.5, attackMs: 5,   releaseMs: 140 },
+      pluck:      { cutoff: 3200, res: 3,   attackMs: 3,   releaseMs: 200, detune: 20 },
+      rapBell:    { cutoff: 9000, res: 0.7, attackMs: 3,   releaseMs: 500 },
+      epiano:     { cutoff: 6000, res: 0.8, attackMs: 4,   releaseMs: 420 },
+      organ:      { cutoff: 7000, res: 0.7, attackMs: 12,  releaseMs: 90 },
+      pad:        { cutoff: 2600, res: 0.9, attackMs: 380, releaseMs: 900, detune: 14 },
+      strings:    { cutoff: 5200, res: 0.8, attackMs: 220, releaseMs: 520, detune: 12 }
+    };
+    const INSTRUMENT_PEAK = { supersaw: 0.22, pad: 0.14, strings: 0.14, organ: 0.15, epiano: 0.30, sawLead: 0.24, squareLead: 0.18 };
+    const INSTRUMENT_VIBRATO_CENTS = { strings: 7 };
+
+    function instrumentOptionsHtml(selected) {
+      const sel = selected || 'global';
+      const groups = {};
+      Object.entries(INSTRUMENT_CATALOG).forEach(([id, m]) => { (groups[m.group] = groups[m.group] || []).push([id, m.name]); });
+      return Object.entries(groups).map(([g, items]) =>
+        `<optgroup label="${escapeText(g)}">${items.map(([id, n]) => `<option value="${id}" ${id === sel ? 'selected' : ''}>${escapeText(n)}</option>`).join('')}</optgroup>`
+      ).join('');
+    }
+
+    /* Optionen für synthMidiVoice: globale Synth-Regler + (falls gewählt) Instrument der Spur */
+    function midiVoiceOpts(track, extra) {
+      const inst = track && track.instrument && track.instrument !== 'global' && INSTRUMENT_CATALOG[track.instrument] ? track.instrument : null;
+      const o = {
+        preset: inst || dawState.synthPreset,
+        cutoff: dawState.synthCutoff, res: dawState.synthRes, detune: dawState.synthDetune,
+        attackMs: dawState.synthAttackMs, releaseMs: dawState.synthReleaseMs
+      };
+      if (inst && INSTRUMENT_DEFAULTS[inst]) Object.assign(o, INSTRUMENT_DEFAULTS[inst]);
+      return Object.assign(o, extra || {});
+    }
+
+    /* Hörprobe einer Note mit dem Instrument der (aktiven) MIDI-Spur */
+    function auditionMidiNote(pitch, durSec, vel, track) {
+      const tr = track || dawState.tracks.find(t => t.id === dawState.activeMidiTrackId);
+      const dest = (tr && audioEngine.channelNodes[tr.id] && audioEngine.channelNodes[tr.id].input) || audioEngine.masterGain;
+      if (!audioEngine.ctx || !dest) return;
+      synthMidiVoice(audioEngine.ctx, dest, audioEngine.ctx.currentTime, midiVoiceOpts(tr, { midiNote: pitch, durationSec: durSec, velocity: vel }));
+    }
+
     const FX_CATALOG = {
       eq: { name: '3-Band EQ', group: 'Klang', defaults: { low: 0, mid: 0, high: 0 } },
       compressor: { name: 'Compressor', group: 'Dynamik', defaults: { threshold: -18, ratio: 3, attack: 10, release: 120 } },
@@ -1070,18 +1131,40 @@
       filter: { name: 'Filter', group: 'Klang', defaults: { cutoff: 8000, resonance: 1.2, mode: 'lowpass' } },
       saturation: { name: 'Saturation', group: 'Farbe', defaults: { drive: 18, mix: 25 } },
       chorus: { name: 'Chorus', group: 'Modulation', defaults: { rate: 0.8, depth: 12, mix: 25 } },
-      deesser: { name: 'De-Esser', group: 'Vocal', defaults: { frequency: 6800, reduction: 5 } }
+      deesser: { name: 'De-Esser', group: 'Vocal', defaults: { frequency: 6800, reduction: 5 } },
+      phaser: { name: 'Phaser', group: 'Modulation', defaults: { rate: 0.5, depth: 60, mix: 50 } },
+      flanger: { name: 'Flanger', group: 'Modulation', defaults: { rate: 0.25, depth: 60, feedback: 40, mix: 50 } },
+      tremolo: { name: 'Tremolo', group: 'Modulation', defaults: { rate: 5, depth: 50 } },
+      autopan: { name: 'Auto-Pan', group: 'Modulation', defaults: { rate: 0.8, depth: 60 } },
+      bitcrusher: { name: 'Bitcrusher', group: 'Farbe', defaults: { bits: 8, mix: 70 } },
+      limiter: { name: 'Limiter', group: 'Dynamik', defaults: { threshold: -3, release: 80 } }
     };
-
-    function suggestedFxForTrack(track) {
-      if (track.type === 'midi') return ['eq','filter','chorus','reverb','delay','compressor','saturation'];
-      if (track.type === 'mic') return ['eq','deesser','compressor','reverb','delay','filter','saturation'];
-      if (track.type === 'audio' || track.type === 'stem') return ['eq','compressor','deesser','filter','reverb','delay','saturation'];
-      if (track.type === 'kick' || track.type === 'bass') return ['eq','compressor','saturation','filter','delay'];
-      return ['eq','filter','reverb','delay','saturation','compressor'];
+    const PARAM_META = {
+      low: { label: 'Bass (dB)', min: -12, max: 12, step: 1 }, mid: { label: 'Mitten (dB)', min: -12, max: 12, step: 1 }, high: { label: 'Höhen (dB)', min: -12, max: 12, step: 1 },
+      threshold: { label: 'Threshold (dB)', min: -60, max: 0, step: 1 }, ratio: { label: 'Ratio', min: 1, max: 20, step: 1 },
+      attack: { label: 'Attack (ms)', min: 1, max: 100, step: 1 }, release: { label: 'Release (ms)', min: 10, max: 1000, step: 1 },
+      mix: { label: 'Wet (%)', min: 0, max: 100, step: 1 }, time: { label: 'Zeit (ms)', min: 1, max: 1200, step: 1 },
+      feedback: { label: 'Feedback (%)', min: 0, max: 100, step: 1 }, cutoff: { label: 'Cutoff (Hz)', min: 80, max: 18000, step: 1 },
+      resonance: { label: 'Resonanz', min: 0.1, max: 18, step: 0.1 }, drive: { label: 'Drive (%)', min: 0, max: 100, step: 1 },
+      rate: { label: 'Rate (Hz)', min: 0.1, max: 12, step: 0.1 }, depth: { label: 'Tiefe (%)', min: 0, max: 100, step: 1 },
+      frequency: { label: 'Frequenz (Hz)', min: 80, max: 18000, step: 1 }, reduction: { label: 'Absenkung (dB)', min: 0, max: 18, step: 1 },
+      bits: { label: 'Bit-Tiefe', min: 2, max: 16, step: 1 }
+    };
+    function fxOptionsHtml(options) {
+      const groups = {};
+      options.forEach(k => { const g = FX_CATALOG[k].group; (groups[g] = groups[g] || []).push(k); });
+      return Object.entries(groups).map(([g, ks]) => `<optgroup label="${escapeText(g)}">${ks.map(k => `<option value="${k}">${escapeText(FX_CATALOG[k].name)}</option>`).join('')}</optgroup>`).join('');
     }
 
-    function buildTrackEffect(ctx, effect) {
+    function suggestedFxForTrack(track) {
+      if (track.type === 'midi') return ['eq','filter','chorus','phaser','flanger','tremolo','autopan','reverb','delay','compressor','saturation','bitcrusher','limiter'];
+      if (track.type === 'mic') return ['eq','deesser','compressor','reverb','delay','filter','saturation','limiter'];
+      if (track.type === 'audio' || track.type === 'stem') return ['eq','compressor','deesser','filter','chorus','phaser','flanger','tremolo','autopan','reverb','delay','saturation','bitcrusher','limiter'];
+      if (track.type === 'kick' || track.type === 'bass') return ['eq','compressor','saturation','filter','delay','bitcrusher','limiter'];
+      return ['eq','filter','chorus','phaser','flanger','tremolo','autopan','reverb','delay','saturation','bitcrusher','compressor','limiter'];
+    }
+
+    function buildTrackEffect(ctx, effect, reverbTarget) {
       const p = effect.params || {};
       const input = ctx.createGain(), output = ctx.createGain();
       let node = null;
@@ -1109,10 +1192,45 @@
         input.connect(dry); dry.connect(output); input.connect(delay); delay.connect(wet); wet.connect(output); delay.connect(feedback); feedback.connect(delay);
         if(effect.type==='chorus') { const lfo=ctx.createOscillator(), depth=ctx.createGain(); lfo.frequency.value=p.rate ?? 0.8; depth.gain.value=(p.depth ?? 12)/1000; lfo.connect(depth); depth.connect(delay.delayTime); lfo.start(); return {input,output,nodes:{delay,feedback,wet,dry,lfo,depth}}; }
         return {input,output,nodes:{delay,feedback,wet,dry}};
+      } else if (effect.type === 'tremolo') {
+        const depth=Math.min(1,Math.max(0,(p.depth ?? 50)/100));
+        const amp=ctx.createGain(); amp.gain.value=1-depth/2;
+        const lfo=ctx.createOscillator(), lg=ctx.createGain(); lfo.type='sine'; lfo.frequency.value=p.rate ?? 5; lg.gain.value=depth/2;
+        lfo.connect(lg); lg.connect(amp.gain); lfo.start(); input.connect(amp); amp.connect(output);
+        return {input,output,nodes:{amp,lfo,lg}};
+      } else if (effect.type === 'autopan') {
+        const pan=ctx.createStereoPanner(); pan.pan.value=0;
+        const lfo=ctx.createOscillator(), lg=ctx.createGain(); lfo.type='sine'; lfo.frequency.value=p.rate ?? 0.8; lg.gain.value=Math.min(1,(p.depth ?? 60)/100);
+        lfo.connect(lg); lg.connect(pan.pan); lfo.start(); input.connect(pan); pan.connect(output);
+        return {input,output,nodes:{pan,lfo,lg}};
+      } else if (effect.type === 'phaser') {
+        const mix=Math.min(1,Math.max(0,(p.mix ?? 50)/100)); const dry=ctx.createGain(), wet=ctx.createGain(); dry.gain.value=1-mix*0.5; wet.gain.value=mix;
+        const lfo=ctx.createOscillator(), lg=ctx.createGain(); lfo.type='sine'; lfo.frequency.value=p.rate ?? 0.5; lg.gain.value=(p.depth ?? 60)/100*600; lfo.start();
+        lfo.connect(lg);
+        const stages=[]; let prev=input;
+        for(let i=0;i<4;i++){ const ap=ctx.createBiquadFilter(); ap.type='allpass'; ap.frequency.value=700+i*350; ap.Q.value=0.8; lg.connect(ap.frequency); prev.connect(ap); prev=ap; stages.push(ap); }
+        prev.connect(wet); input.connect(dry); dry.connect(output); wet.connect(output);
+        return {input,output,nodes:{dry,wet,lfo,lg,...Object.fromEntries(stages.map((n,i)=>['ap'+i,n]))}};
+      } else if (effect.type === 'flanger') {
+        const mix=Math.min(1,Math.max(0,(p.mix ?? 50)/100)); const dry=ctx.createGain(), wet=ctx.createGain(), fb=ctx.createGain(); dry.gain.value=1-mix*0.5; wet.gain.value=mix;
+        const delay=ctx.createDelay(0.05); delay.delayTime.value=0.004; fb.gain.value=Math.min(0.85,(p.feedback ?? 40)/100);
+        const lfo=ctx.createOscillator(), lg=ctx.createGain(); lfo.type='sine'; lfo.frequency.value=p.rate ?? 0.25; lg.gain.value=(p.depth ?? 60)/100*0.003; lfo.connect(lg); lg.connect(delay.delayTime); lfo.start();
+        input.connect(dry); dry.connect(output); input.connect(delay); delay.connect(wet); wet.connect(output); delay.connect(fb); fb.connect(delay);
+        return {input,output,nodes:{dry,wet,fb,delay,lfo,lg}};
+      } else if (effect.type === 'bitcrusher') {
+        const bits=Math.min(16,Math.max(2,Math.round(p.bits ?? 8))); const levels=Math.pow(2,bits-1);
+        const shaper=ctx.createWaveShaper(); const curve=new Float32Array(4096);
+        for(let i=0;i<curve.length;i++){ const x=i*2/(curve.length-1)-1; curve[i]=Math.round(x*levels)/levels; }
+        shaper.curve=curve;
+        const mix=Math.min(1,Math.max(0,(p.mix ?? 70)/100)); const dry=ctx.createGain(), wet=ctx.createGain(); dry.gain.value=1-mix; wet.gain.value=mix;
+        input.connect(dry); dry.connect(output); input.connect(shaper); shaper.connect(wet); wet.connect(output);
+        return {input,output,nodes:{shaper,dry,wet}};
+      } else if (effect.type === 'limiter') {
+        node=ctx.createDynamicsCompressor(); node.threshold.value=p.threshold ?? -3; node.ratio.value=20; node.knee.value=0; node.attack.value=0.001; node.release.value=(p.release ?? 80)/1000;
       } else if (effect.type === 'reverb') {
         // Eigener Send in den vorhandenen Stereo-Hallbus; das trockene Signal bleibt erhalten.
         const send=ctx.createGain(); send.gain.value=(p.mix ?? 22)/100; input.connect(output); input.connect(send);
-        if(audioEngine.reverbConvolver && audioEngine.masterGain){send.connect(audioEngine.reverbConvolver);}
+        const rvTarget=reverbTarget || (audioEngine.masterGain ? audioEngine.reverbConvolver : null); if(rvTarget){send.connect(rvTarget);}
         return {input,output,nodes:{send}};
       }
       if (!node) return null;
@@ -1120,14 +1238,40 @@
       return {input,output,node,nodes:{node}};
     }
 
+    /* Baut NUR die FX-Kette einer Spur neu (fxInput → Effekte → scGain).
+       Der Kanal selbst (input, Filter, Fader, Master-Anbindung) bleibt bestehen. Dadurch hängen
+       bereits laufende Audio-Quellen weiter am gleichen Eingang und der Ton bleibt beim Ändern
+       der FX hörbar. Früher wurde der ganze Kanal ersetzt: laufende Quellen speisten dann einen
+       abgetrennten alten Knoten, bis Pause/Play sie neu startete. */
     function rebuildTrackAudioGraph(track) {
       if (!audioEngine.ctx) return;
-      const old=audioEngine.channelNodes[track.id];
-      if(old){
-        try { old.input.disconnect(); old.lowCut.disconnect(); old.fxInput?.disconnect(); old.scGain.disconnect(); old.sectionGate.disconnect(); old.panner.disconnect(); old.fader.disconnect(); old.analyser.disconnect(); old.vocalChain && Object.values(old.vocalChain).forEach(n=>n.disconnect()); old.fxNodes?.forEach(e=>{[e.input,e.output,...Object.values(e.nodes||{})].forEach(n=>{try{n?.disconnect();}catch(_){}})}); } catch(_){}
-        delete audioEngine.channelNodes[track.id];
+      const ctx = audioEngine.ctx;
+      const ch = audioEngine.channelNodes[track.id];
+      if (!ch || !ch.fxInput || !ch.scGain) {
+        audioEngine.ensureTrackNode(track);
+        audioEngine.syncAudioParams();
+        return;
       }
-      audioEngine.ensureTrackNode(track);
+      // 1) alte Effektkette abbauen (inkl. Chorus-LFOs)
+      try { ch.fxInput.disconnect(); } catch (_) {}
+      (ch.fxNodes || []).forEach(e => {
+        try { e.nodes?.lfo?.stop(); } catch (_) {}
+        [e.input, e.output, ...Object.values(e.nodes || {})].forEach(n => { try { n?.disconnect(); } catch (_) {} });
+      });
+      // 2) neue Kette aufbauen und direkt wieder an scGain hängen
+      const list = [];
+      let tail = ch.fxInput;
+      (track.fx || []).forEach(effect => {
+        if (!effect.enabled) return;
+        let built = null;
+        try { built = buildTrackEffect(ctx, effect); } catch (err) { console.error('[FX]', effect.type, err); }
+        if (!built) return;
+        tail.connect(built.input || built.node);
+        tail = built.output || built.node;
+        list.push({ id: effect.id, ...built });
+      });
+      tail.connect(ch.scGain);
+      ch.fxNodes = list;
       audioEngine.syncAudioParams();
     }
 
@@ -1142,14 +1286,12 @@
         const p=fx.params||{};
         const fields=Object.entries(meta.defaults).map(([key,def])=>{
           if(key==='mode') return `<label class="text-xs text-slate-300">Filtertyp<select data-param="mode" data-index="${i}" class="w-full mt-1 bg-slate-900 border border-slate-600 rounded p-2"><option value="lowpass" ${p.mode==='lowpass'?'selected':''}>Low-pass</option><option value="highpass" ${p.mode==='highpass'?'selected':''}>High-pass</option><option value="bandpass" ${p.mode==='bandpass'?'selected':''}>Band-pass</option></select></label>`;
-          const min=key==='threshold'?-60:key==='time'?1:key==='frequency'||key==='cutoff'?80:key==='ratio'?1:key==='attack'?1:key==='release'?10:key==='feedback'||key==='mix'||key==='drive'||key==='depth'||key==='reduction'?0:key==='rate'?0.1:-12;
-          const max=key==='threshold'?0:key==='time'?1200:key==='frequency'||key==='cutoff'?18000:key==='ratio'?20:key==='attack'?100:key==='release'?1000:key==='feedback'||key==='mix'||key==='drive'||key==='depth'?100:key==='rate'?8:key==='reduction'?18:12;
-          const step=key==='rate'||key==='resonance'?0.1:key==='time'||key==='frequency'||key==='cutoff'?1:1;
-          return `<label class="block text-[11px] text-slate-300">${({low:'Bass (dB)',mid:'Mitten (dB)',high:'Höhen (dB)',threshold:'Threshold (dB)',ratio:'Ratio',attack:'Attack (ms)',release:'Release (ms)',mix:'Wet (%)',time:'Zeit (ms)',feedback:'Feedback (%)',cutoff:'Cutoff (Hz)',resonance:'Resonanz',drive:'Drive (%)',rate:'Rate (Hz)',depth:'Tiefe',frequency:'Frequenz (Hz)',reduction:'Absenkung (dB)'})[key]||key}<span class="float-right text-cyan-300" data-value="${i}-${key}">${p[key] ?? def}</span><input data-param="${key}" data-index="${i}" type="range" min="${min}" max="${max}" step="${step}" value="${p[key] ?? def}" class="w-full accent-cyan-400" /></label>`;
+          const pm=PARAM_META[key]||{}; const min=pm.min ?? -12, max=pm.max ?? 12, step=pm.step ?? 1;
+          return `<label class="block text-[11px] text-slate-300">${escapeText((PARAM_META[key]||{}).label||key)}<span class="float-right text-cyan-300" data-value="${i}-${key}">${p[key] ?? def}</span><input data-param="${key}" data-index="${i}" type="range" min="${min}" max="${max}" step="${step}" value="${p[key] ?? def}" class="w-full accent-cyan-400" /></label>`;
         }).join('');
         return `<section class="rounded-xl border border-slate-700 bg-slate-900/80 p-3"><div class="flex items-center gap-2 mb-3"><strong class="text-sm">${meta.name}</strong><label class="ml-auto text-xs"><input data-enabled="${i}" type="checkbox" ${fx.enabled?'checked':''}/> Aktiv</label><button data-remove="${i}" class="text-rose-300 text-xs px-2">Entfernen</button></div><div class="grid grid-cols-2 gap-x-4 gap-y-3">${fields}</div></section>`;
       }).join('');
-      overlay.innerHTML=`<div class="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl border border-cyan-500/40 bg-slate-950 p-4 shadow-2xl"><div class="flex items-center gap-3 mb-1"><div class="text-lg font-black text-white">FX-Rack · ${escapeText(track.name)}</div><button data-close class="ml-auto px-3 py-1 rounded-lg bg-slate-800 text-slate-300">✕</button></div><p class="text-xs text-slate-400 mb-4">${escapeText(String(track.type||'').toUpperCase())} · Effekte werden nur auf diese Spur angewendet.</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">${cards || '<p class="text-xs text-slate-500">Noch keine Effekte eingefügt.</p>'}</div><div class="border-t border-slate-700 pt-3"><label class="text-xs text-slate-300">Effekt hinzufügen</label><div class="flex gap-2 mt-2"><select id="fx-add-select" class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm">${options.map(k=>`<option value="${k}">${FX_CATALOG[k].name}</option>`).join('')}</select><button data-add class="px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">＋ Hinzufügen</button></div><div class="flex flex-wrap gap-2 mt-3">${options.map(k=>`<button data-quickadd="${k}" class="px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300">＋ ${FX_CATALOG[k].name}</button>`).join('')}</div></div><div class="flex justify-end mt-4"><button data-close class="px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">Fertig</button></div></div>`;
+      overlay.innerHTML=`<div class="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl border border-cyan-500/40 bg-slate-950 p-4 shadow-2xl"><div class="flex items-center gap-3 mb-1"><div class="text-lg font-black text-white">FX-Rack · ${escapeText(track.name)}</div><button data-close class="ml-auto px-3 py-1 rounded-lg bg-slate-800 text-slate-300">✕</button></div><p class="text-xs text-slate-400 mb-4">${escapeText(String(track.type||'').toUpperCase())} · Effekte werden nur auf diese Spur angewendet.</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">${cards || '<p class="text-xs text-slate-500">Noch keine Effekte eingefügt.</p>'}</div><div class="border-t border-slate-700 pt-3"><label class="text-xs text-slate-300">Effekt hinzufügen</label><div class="flex gap-2 mt-2"><select id="fx-add-select" class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm">${fxOptionsHtml(options)}</select><button data-add class="px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">＋ Hinzufügen</button></div><div class="flex flex-wrap gap-2 mt-3">${options.map(k=>`<button data-quickadd="${k}" class="px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300">＋ ${FX_CATALOG[k].name}</button>`).join('')}</div></div><div class="flex justify-end mt-4"><button data-close class="px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">Fertig</button></div></div>`;
       document.body.appendChild(overlay);
       const redraw=()=>{rebuildTrackAudioGraph(track); document.querySelectorAll('.tr-fx-btn').forEach(b=>{if(b.dataset.fx===track.id)b.textContent=`FX ${track.fx.filter(x=>x.enabled).length}`;});};
       const add=(type)=>{const meta=FX_CATALOG[type]; if(!meta)return; track.fx.push({id:`fx_${Date.now()}_${Math.random().toString(36).slice(2,5)}`,type,enabled:true,params:{...meta.defaults}}); redraw(); openTrackFxRack(track.id);};
@@ -1215,6 +1357,30 @@
         if (Date.now() - lastOpenAt < 600) return; // wurde bereits per pointerup behandelt
         lastOpenAt = Date.now();
         safeOpenTrackFxRack(btn.dataset.fx);
+      }, true);
+    })();
+
+    /* Instrument-Auswahl pro MIDI-Spur (zentral per change-Event, überlebt jeden Neuaufbau der Spurliste). */
+    (function installInstrumentSelect() {
+      if (window.__instSelectInstalled) return;
+      window.__instSelectInstalled = true;
+      document.addEventListener('change', async e => {
+        const sel = e.target instanceof Element ? e.target.closest('.tr-inst-select') : null;
+        if (!sel) return;
+        try {
+          const tr = dawState.tracks.find(t => t.id === sel.dataset.inst);
+          if (!tr) throw new Error('Spur nicht gefunden.');
+          if (!INSTRUMENT_CATALOG[sel.value]) throw new Error('Unbekanntes Instrument.');
+          if (window.__dawPushUndo) window.__dawPushUndo();
+          tr.instrument = sel.value;
+          toast(`Instrument für „${tr.name}“: ${INSTRUMENT_CATALOG[sel.value].name}`, 'info');
+          await audioEngine.ensureCtx();
+          audioEngine.ensureTrackNode(tr);
+          auditionMidiNote(60, 0.55, 0.85, tr); // Hörprobe (C4)
+        } catch (err) {
+          console.error('[Instrument]', err);
+          toast(`Instrument konnte nicht gesetzt werden: ${err && err.message ? err.message : err}`, 'error');
+        }
       }, true);
     })();
 
@@ -1726,17 +1892,7 @@
           notes.filter(n => n.start === step32).forEach(note => {
             const vel = (vels[step32] || note.vel || 105) / 127;
             const durSec = Math.max(0.06, note.dur * secPer16th * 0.95);
-            synthMidiVoice(this.ctx, node.input, time, {
-              midiNote: note.pitch,
-              durationSec: durSec,
-              velocity: vel,
-              preset: dawState.synthPreset,
-              cutoff: dawState.synthCutoff,
-              res: dawState.synthRes,
-              detune: dawState.synthDetune,
-              attackMs: dawState.synthAttackMs,
-              releaseMs: dawState.synthReleaseMs
-            });
+            synthMidiVoice(this.ctx, node.input, time, midiVoiceOpts(mtr, { midiNote: note.pitch, durationSec: durSec, velocity: vel }));
           });
         });
 
@@ -2014,10 +2170,10 @@
     // Polyphonic Multi-Preset MIDI Voice Synthesizer
     function synthMidiVoice(ctx, dest, time, opts) {
       const freq = midiToFreq(opts.midiNote);
-      const attSec = Math.max(0.003, (opts.attackMs || 10) / 1000);
-      const relSec = Math.max(0.03, (opts.releaseMs || 220) / 1000);
       const dur = opts.durationSec || 0.25;
       const vel = opts.velocity || 0.85;
+      const relSec = Math.max(0.03, (opts.releaseMs || 220) / 1000);
+      const attSec = Math.min(Math.max(0.003, (opts.attackMs || 10) / 1000), Math.max(0.003, dur * 0.8));
 
       const filter = ctx.createBiquadFilter();
       filter.type = 'lowpass';
@@ -2032,11 +2188,11 @@
       }
 
       const env = ctx.createGain();
-      const peak = vel * (opts.preset === 'supersaw' ? 0.22 : 0.34);
+      const peak = vel * (INSTRUMENT_PEAK[opts.preset] ?? 0.34);
       env.gain.setValueAtTime(0.0008, time);
       env.gain.linearRampToValueAtTime(peak, time + attSec);
-      env.gain.setValueAtTime(peak * 0.85, time + dur);
-      env.gain.exponentialRampToValueAtTime(0.0008, time + dur + relSec);
+      env.gain.setValueAtTime(peak * 0.85, time + Math.max(dur, attSec));
+      env.gain.exponentialRampToValueAtTime(0.0008, time + Math.max(dur, attSec) + relSec);
 
       filter.connect(env);
       env.connect(dest);
@@ -2065,6 +2221,45 @@
           { type: 'triangle', detune: 6,  mult: 2 },
           { type: 'sine',     detune: -6, mult: 3 }
         ];
+      } else if (opts.preset === 'sawLead') {
+        oscConfigs = [
+          { type: 'sawtooth', detune: -dt, mult: 1 },
+          { type: 'sawtooth', detune: dt, mult: 1 },
+          { type: 'square',   detune: 0, mult: 0.5, gain: 0.4 }
+        ];
+      } else if (opts.preset === 'squareLead') {
+        oscConfigs = [
+          { type: 'square', detune: 0, mult: 1 },
+          { type: 'square', detune: 7, mult: 1, gain: 0.7 }
+        ];
+      } else if (opts.preset === 'epiano') {
+        oscConfigs = [
+          { type: 'sine',     detune: 0, mult: 1 },
+          { type: 'triangle', detune: 3, mult: 1, gain: 0.4 },
+          { type: 'sine',     detune: 0, mult: 2, gain: 0.25, decay: 0.5 },
+          { type: 'sine',     detune: 0, mult: 4, gain: 0.25, decay: 0.18 }
+        ];
+      } else if (opts.preset === 'organ') {
+        oscConfigs = [
+          { type: 'sine', detune: 0, mult: 0.5, gain: 0.5 },
+          { type: 'sine', detune: 0, mult: 1,   gain: 0.9 },
+          { type: 'sine', detune: 0, mult: 2,   gain: 0.55 },
+          { type: 'sine', detune: 0, mult: 3,   gain: 0.3 }
+        ];
+      } else if (opts.preset === 'pad') {
+        oscConfigs = [
+          { type: 'sawtooth', detune: -dt, mult: 1, gain: 0.6 },
+          { type: 'sawtooth', detune: dt,  mult: 1, gain: 0.6 },
+          { type: 'triangle', detune: 0,   mult: 1, gain: 0.8 },
+          { type: 'sine',     detune: 0,   mult: 0.5, gain: 0.5 }
+        ];
+      } else if (opts.preset === 'strings') {
+        oscConfigs = [
+          { type: 'sawtooth', detune: -dt, mult: 1, gain: 0.55 },
+          { type: 'sawtooth', detune: -dt * 0.4, mult: 1, gain: 0.55 },
+          { type: 'sawtooth', detune: dt * 0.4, mult: 1, gain: 0.55 },
+          { type: 'sawtooth', detune: dt, mult: 1, gain: 0.55 }
+        ];
       } else {
         // subBass
         oscConfigs = [
@@ -2073,14 +2268,37 @@
         ];
       }
 
+      const endTime = time + Math.max(dur, attSec) + relSec + 0.03;
+      let vibGain = null;
+      const vibCents = INSTRUMENT_VIBRATO_CENTS[opts.preset];
+      if (vibCents) {
+        const lfo = ctx.createOscillator();
+        lfo.frequency.value = 5.4;
+        vibGain = ctx.createGain();
+        vibGain.gain.value = vibCents;
+        lfo.connect(vibGain);
+        lfo.start(time);
+        lfo.stop(endTime);
+      }
+
       oscConfigs.forEach(cfg => {
         const osc = ctx.createOscillator();
         osc.type = cfg.type;
         osc.frequency.setValueAtTime(freq * cfg.mult, time);
         osc.detune.setValueAtTime(cfg.detune, time);
-        osc.connect(filter);
+        if (vibGain) vibGain.connect(osc.detune);
+        if (cfg.gain != null || cfg.decay) {
+          const g = ctx.createGain();
+          const g0 = cfg.gain ?? 1;
+          g.gain.setValueAtTime(g0, time);
+          if (cfg.decay) g.gain.exponentialRampToValueAtTime(Math.max(0.001, g0 * 0.05), time + cfg.decay);
+          osc.connect(g);
+          g.connect(filter);
+        } else {
+          osc.connect(filter);
+        }
         osc.start(time);
-        osc.stop(time + dur + relSec + 0.03);
+        osc.stop(endTime);
       });
     }
 
@@ -2563,17 +2781,7 @@
               // Live audition
               const activeMidi = getActiveMidiTrack();
               const dest = (activeMidi && audioEngine.channelNodes[activeMidi.id]?.input) || audioEngine.masterGain;
-              synthMidiVoice(audioEngine.ctx, dest, audioEngine.ctx.currentTime, {
-                midiNote: clampedNote,
-                durationSec: 0.35,
-                velocity: velocity / 127,
-                preset: dawState.synthPreset,
-                cutoff: dawState.synthCutoff,
-                res: dawState.synthRes,
-                detune: dawState.synthDetune,
-                attackMs: dawState.synthAttackMs,
-                releaseMs: dawState.synthReleaseMs
-              });
+              synthMidiVoice(audioEngine.ctx, dest, audioEngine.ctx.currentTime, midiVoiceOpts(activeMidi, { midiNote: clampedNote, durationSec: 0.35, velocity: velocity / 127 }));
 
               // Record into Piano Roll if armed
               if (dawState.midiRecArmed && activeMidi) {
@@ -2945,6 +3153,15 @@
           fader.gain.value = audible ? tr.vol : 0;
 
           input.connect(lowCut);
+          // Spur-FX (FX-Rack) auch im Export berücksichtigen
+          (tr.fx || []).forEach(effect => {
+            if (!effect.enabled) return;
+            let built = null;
+            try { built = buildTrackEffect(offCtx, effect, revConv); } catch (err) { console.warn('[Export-FX]', effect.type, err); }
+            if (!built) return;
+            tail.connect(built.input || built.node);
+            tail = built.output || built.node;
+          });
           tail.connect(scGain);
           scGain.connect(secGate);
           secGate.connect(panner);
@@ -3045,12 +3262,7 @@
             const vels = midiTr.id === dawState.activeMidiTrackId ? dawState.stepVelocities : (midiTr.stepVelocities || dawState.stepVelocities);
             notes.filter(n => n.start === step32).forEach(note => {
               const vel = (vels[step32] || note.vel || 105) / 127;
-              synthMidiVoice(offCtx, offNodes[midiTr.id].input, t, {
-                midiNote: note.pitch, durationSec: Math.max(0.06, note.dur * secPer16th * 0.95),
-                velocity: vel, preset: dawState.synthPreset, cutoff: dawState.synthCutoff,
-                res: dawState.synthRes, detune: dawState.synthDetune,
-                attackMs: dawState.synthAttackMs, releaseMs: dawState.synthReleaseMs
-              });
+              synthMidiVoice(offCtx, offNodes[midiTr.id].input, t, midiVoiceOpts(midiTr, { midiNote: note.pitch, durationSec: Math.max(0.06, note.dur * secPer16th * 0.95), velocity: vel }));
             });
           });
 
@@ -3280,7 +3492,7 @@
           quickActionHtml = `<button data-micrec="${tr.id}" class="tr-mic-arm-btn px-1.5 py-0.5 rounded ${isThisRec ? 'bg-rose-500 text-white animate-pulse' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'} text-[9px] font-mono font-bold">● Rec</button>`;
         } else if (tr.type === 'midi') {
           const isActiveMidi = tr.id === dawState.activeMidiTrackId;
-          quickActionHtml = `<button data-selmidi="${tr.id}" class="tr-selmidi-btn px-1.5 py-0.5 rounded ${isActiveMidi ? 'bg-purple-500 text-white border-purple-300' : 'bg-purple-500/20 text-purple-200 border-purple-500/40'} border text-[9px] font-mono font-bold">${isActiveMidi ? 'Aktiv' : 'Piano Roll'}</button>`;
+          quickActionHtml = `<select data-inst="${tr.id}" title="Instrument dieser Spur" aria-label="Instrument" style="touch-action:manipulation" class="tr-inst-select max-w-[88px] px-1 py-0.5 rounded bg-daw-surface text-purple-200 border border-daw-border text-[9px] font-mono font-bold">${instrumentOptionsHtml(tr.instrument)}</select><button data-selmidi="${tr.id}" class="tr-selmidi-btn px-1.5 py-0.5 rounded ${isActiveMidi ? 'bg-purple-500 text-white border-purple-300' : 'bg-purple-500/20 text-purple-200 border-purple-500/40'} border text-[9px] font-mono font-bold">${isActiveMidi ? 'Aktiv' : 'Piano Roll'}</button>`;
         }
 
         const headerDiv = document.createElement('div');
@@ -3791,12 +4003,7 @@
 
         if (x < KEYBOARD_WIDTH) {
           await audioEngine.ensureCtx();
-          synthMidiVoice(audioEngine.ctx, audioEngine.channelNodes.midiSynth.input, audioEngine.ctx.currentTime, {
-            midiNote: pitch, durationSec: 0.35, velocity: 0.85,
-            preset: dawState.synthPreset, cutoff: dawState.synthCutoff,
-            res: dawState.synthRes, detune: dawState.synthDetune,
-            attackMs: dawState.synthAttackMs, releaseMs: dawState.synthReleaseMs
-          });
+          auditionMidiNote(pitch, 0.35, 0.85);
           return;
         }
 
@@ -3840,12 +4047,7 @@
         pianoDragState = { mode: 'resize', note: newNote };
 
         await audioEngine.ensureCtx();
-        synthMidiVoice(audioEngine.ctx, audioEngine.channelNodes.midiSynth.input, audioEngine.ctx.currentTime, {
-          midiNote: finalPitch, durationSec: 0.22, velocity: 0.85,
-          preset: dawState.synthPreset, cutoff: dawState.synthCutoff,
-          res: dawState.synthRes, detune: dawState.synthDetune,
-          attackMs: dawState.synthAttackMs, releaseMs: dawState.synthReleaseMs
-        });
+        auditionMidiNote(finalPitch, 0.22, 0.85);
 
         drawPianoRoll();
         drawVelocityLane();
