@@ -652,6 +652,7 @@ div:has(>#mt-collapse){flex-wrap:wrap;row-gap:4px}
 <script>try{if(localStorage.getItem('sunshine.home')!=='off'){document.documentElement.classList.add('home-pending');setTimeout(function(){document.documentElement.classList.remove('home-pending')},6000)}}catch(e){}</script>
 <style>html.home-pending body>*:not(#home-root){visibility:hidden}</style>
 <script>try{if(window.Capacitor||/; wv\)/.test(navigator.userAgent))document.documentElement.classList.add('android-app')}catch(e){}</script>
+<script>try{var f=JSON.parse(localStorage.getItem('sunshine.fx')||'{}'),d=document.documentElement,E=['off','glow','beam','line'],F=['off','aurora','eq','sparks','waves'];d.setAttribute('data-fx',f.on===false?'off':'on');d.setAttribute('data-fx-edge',E.indexOf(f.edge)<0?'glow':f.edge);d.setAttribute('data-fx-full',F.indexOf(f.full)<0?'aurora':f.full);d.style.setProperty('--fx-k',String(Math.max(10,Math.min(100,+f.k||50))/100))}catch(e){}</script>
 <style id="sunshine-polish">
 /* ===== Sunshine@R · Feinschliff: Icons, Vollbild/Querformat ===== */
 /* --- einheitliche Linien-Icons (Strichstärke je Design) --- */
@@ -681,6 +682,52 @@ html,body{background-color:rgb(var(--daw-bg,9 12 18));margin:0;overscroll-behavi
 body{padding-left:var(--sal);padding-right:var(--sar)}
 @media (max-width:900px){#bottom-nav{left:calc(12px + var(--sal))!important;right:calc(12px + var(--sar))!important}}
 #home-root,.hm-sheet-bg{padding-left:var(--sal);padding-right:var(--sar)}
+
+/* ===== Sunshine@R · Effekte (Rand & vollflächig) – Optionen → Effekte ===== */
+@property --fx-angle{syntax:'<angle>';inherits:false;initial-value:0deg}
+html{--fx-rgb:var(--daw-accent);--fx-rgb2:124 61 255;--fx-rgb3:25 195 255;--fx-k:.5}
+html[data-theme="aurora"]{--fx-rgb2:124 61 255;--fx-rgb3:25 195 255}
+html[data-theme="neon"]{--fx-rgb2:255 47 160;--fx-rgb3:138 61 255}
+html[data-theme="liquid"]{--fx-rgb2:176 160 255;--fx-rgb3:150 226 205}
+html[data-theme="studio"]{--fx-rgb2:255 210 120;--fx-rgb3:255 140 40}
+html[data-theme="classic"]{--fx-rgb2:139 92 246;--fx-rgb3:16 185 129}
+
+/* --- Rand-Effekte: Panels (nicht scrollend) bekommen einen Ring/Glühen über ::after --- */
+.fx-rel{position:relative}
+html[data-fx="on"]:not([data-fx-edge="off"]) .fx-edge::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3}
+/* Glühen: weicher, atmender Innenschein */
+html[data-fx="on"][data-fx-edge="glow"] .fx-edge::after{box-shadow:inset 0 0 0 1px rgb(var(--fx-rgb)/.85),inset 0 0 28px rgb(var(--fx-rgb)/.55),inset 0 0 70px rgb(var(--fx-rgb2)/.22);opacity:calc(.28 + .5*var(--fx-k));animation:fx-breathe 4.4s ease-in-out infinite}
+@keyframes fx-breathe{0%,100%{opacity:calc(.18 + .38*var(--fx-k))}50%{opacity:calc(.4 + .6*var(--fx-k))}}
+/* Lichtstrahl: ein Lichtpunkt läuft um den Rand */
+html[data-fx="on"][data-fx-edge="beam"] .fx-edge::after{padding:1.5px;background:conic-gradient(from var(--fx-angle),transparent 0 58%,rgb(var(--fx-rgb2)/.9) 76%,rgb(var(--fx-rgb)) 90%,transparent 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;opacity:calc(.4 + .6*var(--fx-k));animation:fx-spin 7s linear infinite}
+@keyframes fx-spin{to{--fx-angle:360deg}}
+/* Linie: schmale Lichtlinie wandert am oberen Rand (bei Kopfleiste unten) */
+html[data-fx="on"][data-fx-edge="line"] .fx-edge::after{inset:0 0 auto 0;height:2px;border-radius:0;background:linear-gradient(90deg,transparent,rgb(var(--fx-rgb)),rgb(var(--fx-rgb2)),transparent) -60% 0/55% 100% no-repeat;opacity:calc(.45 + .55*var(--fx-k));animation:fx-sweep 3.6s linear infinite}
+html[data-fx="on"][data-fx-edge="line"] header.fx-edge::after,html[data-fx="on"][data-fx-edge="line"] #bottom-nav.fx-edge::after{top:auto;bottom:0}
+@keyframes fx-sweep{to{background-position:165% 0}}
+
+/* --- Fenster (Dialoge, scrollend): Schein über box-shadow --- */
+html[data-fx="on"]:not([data-fx-edge="off"]) .fx-win{animation:fx-win 4.4s ease-in-out infinite}
+html[data-fx="on"][data-fx-edge="beam"] .fx-win{animation-name:fx-win-beam;animation-duration:7s}
+html[data-fx="on"][data-fx-edge="line"] .fx-win{box-shadow:inset 0 2px 0 rgb(var(--fx-rgb)/calc(.5 + .5*var(--fx-k))),0 24px 60px rgba(0,0,0,.55)!important;animation:none}
+@keyframes fx-win{0%,100%{box-shadow:0 0 0 1px rgb(var(--fx-rgb)/.35),0 0 18px rgb(var(--fx-rgb)/.18),0 24px 60px rgba(0,0,0,.55)}50%{box-shadow:0 0 0 1px rgb(var(--fx-rgb)/.8),0 0 40px rgb(var(--fx-rgb)/.5),0 24px 60px rgba(0,0,0,.55)}}
+@keyframes fx-win-beam{0%,100%{box-shadow:0 0 0 1px rgb(var(--fx-rgb)/.7),0 0 34px rgb(var(--fx-rgb)/.45),0 24px 60px rgba(0,0,0,.55)}50%{box-shadow:0 0 0 1px rgb(var(--fx-rgb2)/.7),0 0 34px rgb(var(--fx-rgb2)/.45),0 24px 60px rgba(0,0,0,.55)}}
+
+/* --- Vollflächig: Overlay über der App (unter Dialogen), blendet Licht dazu --- */
+#fx-root{position:fixed;inset:0;z-index:46;pointer-events:none;overflow:hidden;mix-blend-mode:screen;display:none;opacity:calc(.14 + .5*var(--fx-k))}
+html[data-fx="on"]:not([data-fx-full="off"]) #fx-root{display:block}
+#fx-aurora,#fx-canvas{display:none;position:absolute;inset:0;width:100%;height:100%}
+html[data-fx-full="aurora"] #fx-aurora{display:block}
+html[data-fx-full="eq"] #fx-canvas,html[data-fx-full="sparks"] #fx-canvas,html[data-fx-full="waves"] #fx-canvas{display:block}
+#fx-aurora i{position:absolute;left:50%;top:50%;width:120vmax;height:120vmax;margin:-60vmax 0 0 -60vmax;border-radius:50%;will-change:transform}
+#fx-aurora i:nth-child(1){background:radial-gradient(circle,rgb(var(--fx-rgb)) 0,transparent 54%);animation:fx-a1 26s ease-in-out infinite alternate}
+#fx-aurora i:nth-child(2){background:radial-gradient(circle,rgb(var(--fx-rgb2)) 0,transparent 54%);animation:fx-a2 31s ease-in-out infinite alternate}
+#fx-aurora i:nth-child(3){background:radial-gradient(circle,rgb(var(--fx-rgb3)) 0,transparent 54%);animation:fx-a3 37s ease-in-out infinite alternate}
+@keyframes fx-a1{from{transform:translate3d(-34%,-44%,0) scale(.7)}to{transform:translate3d(30%,-8%,0) scale(1)}}
+@keyframes fx-a2{from{transform:translate3d(38%,30%,0) scale(.8)}to{transform:translate3d(-26%,6%,0) scale(1.05)}}
+@keyframes fx-a3{from{transform:translate3d(-20%,46%,0) scale(.65)}to{transform:translate3d(24%,-30%,0) scale(.95)}}
+@media (prefers-reduced-motion:reduce){.fx-edge::after,.fx-win,#fx-aurora i{animation:none!important}}
+html[data-fx-pause="1"] #fx-aurora i,html[data-fx-pause="1"] .fx-edge::after{animation-play-state:paused}
 
 </style>
 </head>
@@ -11284,6 +11331,191 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
 
 </script>
 <script>
+/* ===== Sunshine@R · Effekte =====
+   Rand-Effekte (Glühen · Lichtstrahl · Linie) an Kopfleiste, Bereichen, Navigation und Dialogen
+   + vollflächige Effekte (Aurora · Equalizer · Funken · Wellen) als Licht-Overlay über der App.
+   Alles in Optionen → Effekte wählbar oder komplett abschaltbar. Equalizer/Funken/Wellen reagieren auf die Musik. */
+(function () {
+  'use strict';
+  const LS = 'sunshine.fx';
+  const DEF = { on: true, edge: 'glow', full: 'aurora', k: 50, react: true };
+  const EDGES = [['off', 'Aus'], ['glow', 'Glühen'], ['beam', 'Lichtstrahl'], ['line', 'Linie']];
+  const FULLS = [['off', 'Aus'], ['aurora', 'Aurora'], ['eq', 'Equalizer'], ['sparks', 'Funken'], ['waves', 'Wellen']];
+  const CANVAS_STYLES = ['eq', 'sparks', 'waves'];
+  const html = document.documentElement;
+  const mq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  let st = Object.assign({}, DEF);
+  try { Object.assign(st, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (_) {}
+  const clean = () => { if (!EDGES.some(e => e[0] === st.edge)) st.edge = DEF.edge; if (!FULLS.some(f => f[0] === st.full)) st.full = DEF.full; st.k = Math.max(10, Math.min(100, +st.k || DEF.k)); st.on = st.on !== false; st.react = st.react !== false; };
+  clean();
+  const save = () => { try { localStorage.setItem(LS, JSON.stringify(st)); } catch (_) {} };
+
+  // ---------- DOM ----------
+  let root, aur, cv, g;
+  function build() {
+    if (root) return;
+    root = document.createElement('div'); root.id = 'fx-root'; root.setAttribute('aria-hidden', 'true');
+    aur = document.createElement('div'); aur.id = 'fx-aurora'; aur.innerHTML = '<i></i><i></i><i></i>';
+    cv = document.createElement('canvas'); cv.id = 'fx-canvas';
+    root.appendChild(aur); root.appendChild(cv); document.body.appendChild(root);
+    g = cv.getContext('2d');
+  }
+
+  // ---------- Rand: Elemente markieren ----------
+  const EDGE_SEL = ['header.sticky', '#drop-zone-wrapper > .bg-daw-panel', 'section.pb-4 > .bg-daw-panel', '#bottom-nav'];
+  const WIN_IDS = /^(settings-modal|assistant-modal|chat-modal|assistant-settings|pattern-studio-modal|sf-picker-modal|as-offer|track-fx-modal)$/;
+  function mark(e) {
+    if (!e || e.classList.contains('fx-edge')) return;
+    e.classList.add('fx-edge');
+    try { if (getComputedStyle(e).position === 'static') e.classList.add('fx-rel'); } catch (_) {}
+  }
+  function tagAll() { EDGE_SEL.forEach(s => document.querySelectorAll(s).forEach(mark)); }
+  function tagWin(n) {
+    if (n.nodeType !== 1) return;
+    if (WIN_IDS.test(n.id || '') && n.firstElementChild) n.firstElementChild.classList.add('fx-win');
+  }
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(tagWin); }).observe(document.documentElement, { childList: true, subtree: true });
+
+  // ---------- Farben ----------
+  let C1 = [255, 138, 26], C2 = [124, 61, 255], C3 = [25, 195, 255];
+  const trip = v => { const a = String(v || '').trim().split(/[\s,]+/).map(Number); return a.length >= 3 && a.every(x => !isNaN(x)) ? a.slice(0, 3) : null; };
+  function syncColors() {
+    const cs = getComputedStyle(html);
+    if (html.getAttribute('data-accent') === '1') { const t = trip(cs.getPropertyValue('--acc-rgb')); if (t) html.style.setProperty('--fx-rgb', t.join(' ')); }
+    else html.style.removeProperty('--fx-rgb');
+    C1 = trip(getComputedStyle(html).getPropertyValue('--fx-rgb')) || trip(cs.getPropertyValue('--daw-accent')) || C1;
+    C2 = trip(cs.getPropertyValue('--fx-rgb2')) || C2; C3 = trip(cs.getPropertyValue('--fx-rgb3')) || C3;
+  }
+
+  // ---------- Anwenden ----------
+  function apply() {
+    clean(); build();
+    html.setAttribute('data-fx', st.on ? 'on' : 'off');
+    html.setAttribute('data-fx-edge', st.edge);
+    html.setAttribute('data-fx-full', st.full);
+    html.style.setProperty('--fx-k', String(st.k / 100));
+    syncColors(); tagAll(); reconcile();
+  }
+  function set(p, persist) { Object.assign(st, p); clean(); if (persist !== false) save(); apply(); try { document.dispatchEvent(new CustomEvent('sunshine-fx', { detail: Object.assign({}, st) })); } catch (_) {} }
+
+  // ---------- Canvas-Effekte ----------
+  let running = false, raf = 0, last = 0, W = 0, H = 0, q = 0, lvl = 0, sb = null, bars = [], parts = [], draws = [], perfPaused = false;
+  const homeOpen = () => { try { return !!(window.Home && Home.isOpen && Home.isOpen()); } catch (_) { return false; } };
+  const wantCanvas = () => st.on && CANVAS_STYLES.includes(st.full) && !mq.matches && !document.hidden && !homeOpen() && !perfPaused;
+  function size() { const d = q ? 5 : 3; W = Math.max(64, Math.round(innerWidth / d)); H = Math.max(96, Math.round(innerHeight / d)); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; bars = []; parts = []; }
+  function reconcile() {
+    if (!root) return;
+    const want = wantCanvas();
+    if (want && !running) { size(); running = true; last = 0; raf = requestAnimationFrame(frame); }
+    else if (!want && running) { running = false; cancelAnimationFrame(raf); try { g.clearRect(0, 0, cv.width, cv.height); } catch (_) {} }
+    html.setAttribute('data-fx-pause', (st.on && !document.hidden && !homeOpen()) ? '0' : '1');
+  }
+  function audio() {
+    if (!st.react) return null;
+    try {
+      if (typeof dawState === 'undefined' || !dawState.isPlaying) return null;
+      const an = audioEngine && audioEngine.masterAnalyser; if (!an || !an.getByteFrequencyData) return null;
+      const n = an.frequencyBinCount; if (!sb || sb.length !== n) sb = new Uint8Array(n);
+      an.getByteFrequencyData(sb); return sb;
+    } catch (_) { return null; }
+  }
+  function band(a, i, n) { // logarithmische Bänder (≈ 40 Hz … 12 kHz)
+    const N = a.length, lo = Math.max(1, Math.floor(Math.pow(N * .5, i / n) )), hi = Math.max(lo + 1, Math.floor(Math.pow(N * .5, (i + 1) / n)));
+    let s = 0, c = 0; for (let b = lo; b < hi && b < N; b++) { s += a[b]; c++; } return c ? s / c / 255 : 0;
+  }
+  const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  function drawEq(t, spec) {
+    const n = W < 110 ? 18 : 26, bw = W / n; if (bars.length !== n) bars = new Array(n).fill(.1);
+    for (let i = 0; i < n; i++) {
+      const tgt = spec ? Math.min(1, band(spec, i, n) * 1.35) : (.1 + .07 * Math.sin(t * 1.3 + i * .7) + .04 * Math.sin(t * 2.1 + i * 1.9));
+      bars[i] += (tgt - bars[i]) * (tgt > bars[i] ? .55 : .16);
+      const h = bars[i] * H * .6, x = i * bw, gr = g.createLinearGradient(0, H, 0, H - h);
+      gr.addColorStop(0, rgba(C1, .95)); gr.addColorStop(.6, rgba(C2, .6)); gr.addColorStop(1, rgba(C3, 0));
+      g.fillStyle = gr; g.fillRect(x + bw * .12, H - h, bw * .76, h);
+    }
+  }
+  function drawSparks(t, dt) {
+    const n = 46; while (parts.length < n) parts.push({ x: Math.random() * W, y: Math.random() * H, v: .04 + Math.random() * .08, r: .7 + Math.random() * 1.5, ph: Math.random() * 6.28, c: Math.random() });
+    g.globalCompositeOperation = 'lighter';
+    for (const p of parts) {
+      p.y -= p.v * H * dt * (1 + lvl * 4); p.x += Math.sin(t * .8 + p.ph) * W * .02 * dt * 6;
+      if (p.y < -4) { p.y = H + 4; p.x = Math.random() * W; }
+      const tw = .45 + .55 * Math.sin(t * 2.4 + p.ph), col = p.c < .5 ? C1 : (p.c < .8 ? C2 : C3), r = p.r * (1 + lvl * 1.6);
+      g.fillStyle = rgba(col, .16 * tw); g.beginPath(); g.arc(p.x, p.y, r * 3.2, 0, 6.283); g.fill();
+      g.fillStyle = rgba(col, .85 * tw); g.beginPath(); g.arc(p.x, p.y, r, 0, 6.283); g.fill();
+    }
+    g.globalCompositeOperation = 'source-over';
+  }
+  function drawWaves(t) {
+    for (let L = 0; L < 4; L++) {
+      const base = H * (.58 + L * .09), amp = H * (.035 + .012 * L) * (1 + lvl * 2.6), f = (2.2 + L * .7) * 6.283 / W, sp = .5 + L * .25;
+      const gr = g.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, rgba(C1, .9)); gr.addColorStop(.5, rgba(C2, .9)); gr.addColorStop(1, rgba(C3, .9));
+      g.beginPath();
+      for (let x = 0; x <= W; x += 3) { const y = base + Math.sin(x * f + t * sp + L) * amp + Math.sin(x * f * .43 - t * sp * .8) * amp * .6; x ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.strokeStyle = gr; g.globalAlpha = .75 - L * .13; g.lineWidth = Math.max(1, H / 140); g.stroke();
+      g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.globalAlpha = .06; g.fillStyle = gr; g.fill(); g.globalAlpha = 1;
+    }
+  }
+  function frame(ts) {
+    if (!running) return; raf = requestAnimationFrame(frame);
+    if (document.hidden) return;
+    const minDt = q ? 66 : 41; if (last && ts - last < minDt) return;
+    const dt = last ? Math.min(.1, (ts - last) / 1000) : .04; last = ts;
+    const t0 = performance.now(), t = ts / 1000, spec = audio();
+    let l = 0; if (spec) { let s = 0; for (let i = 1; i < 9; i++) s += spec[i]; l = Math.min(1, s / 8 / 255 * 1.5); }
+    lvl += (l - lvl) * (l > lvl ? .45 : .12);
+    g.clearRect(0, 0, W, H);
+    if (st.full === 'eq') drawEq(t, spec); else if (st.full === 'sparks') drawSparks(t, dt); else if (st.full === 'waves') drawWaves(t);
+    // Leistungs-Wächter: erst gröber rechnen, dann pausieren – Audio hat Vorrang
+    draws.push(performance.now() - t0); if (draws.length >= 45) {
+      const avg = draws.reduce((a, b) => a + b, 0) / draws.length; draws = [];
+      if (avg > 9) { if (!q) { q = 1; size(); } else { perfPaused = true; reconcile(); try { if (typeof toast === 'function') toast('Effekt pausiert: Das Gerät kommt nicht hinterher. Aurora oder Rand-Effekte laufen sparsamer.', 'info'); } catch (_) {} } }
+    }
+  }
+  document.addEventListener('visibilitychange', reconcile);
+  window.addEventListener('resize', () => { if (running) size(); });
+  window.addEventListener('orientationchange', () => setTimeout(() => { if (running) size(); }, 250));
+  if (mq.addEventListener) mq.addEventListener('change', reconcile);
+  setInterval(reconcile, 900);
+  document.addEventListener('sunshine-ui', () => setTimeout(syncColors, 30));
+  new MutationObserver(() => syncColors()).observe(html, { attributes: true, attributeFilter: ['data-theme', 'data-accent'] });
+
+  // ---------- Optionen → Effekte ----------
+  const seg = (attr, items, cur) => items.map(([v, l]) => `<button type="button" data-${attr}="${v}" aria-pressed="${cur === v}" class="py-2.5 text-xs font-bold rounded-xl border ${cur === v ? 'border-amber-400 bg-slate-800 text-amber-200' : 'border-slate-700 bg-slate-900 text-slate-300'}">${l}</button>`).join('');
+  function section(ph) {
+    ph.innerHTML = `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Effekte</div>
+      <div class="rounded-xl border border-slate-800 p-3 space-y-3.5">
+        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-fx-on ${st.on ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Visuelle Effekte</span><span class="block text-[11px] text-slate-400">Hauptschalter. Aus = keine Animationen, schont den Akku.${mq.matches ? ' <b>Systemeinstellung „Bewegung reduzieren“ ist aktiv: Es laufen nur ruhige Effekte.</b>' : ''}</span></span></label>
+        <div><div class="text-sm font-semibold mb-1.5">Rand-Effekte <span class="text-[11px] font-normal text-slate-400">an Leisten, Bereichen &amp; Fenstern</span></div><div class="grid grid-cols-4 gap-2" id="fx-edge-row">${seg('fx-edge', EDGES, st.edge)}</div></div>
+        <div><div class="text-sm font-semibold mb-1.5">Vollflächig <span class="text-[11px] font-normal text-slate-400">über der ganzen App</span></div><div class="grid grid-cols-5 gap-1.5" id="fx-full-row">${seg('fx-full', FULLS, st.full)}</div></div>
+        <label class="block"><span class="flex justify-between text-sm font-semibold"><span>Stärke</span><span id="fx-k-v" class="text-slate-400 font-mono text-xs">${st.k}%</span></span><input type="range" data-fx-k min="10" max="100" step="5" value="${st.k}" class="w-full daw-slider mt-1"></label>
+        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-fx-react ${st.react ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Auf die Musik reagieren</span><span class="block text-[11px] text-slate-400">Equalizer, Funken und Wellen bewegen sich mit dem Abspielen. Beim Wechsel sieht man die Wirkung kurz durch den Dialog.</span></span></label>
+      </div>`;
+    const ov = ph.closest('#settings-modal');
+    const peek = ms => { if (!ov) return; ov.classList.add('peek'); clearTimeout(ov._fxp); ov._fxp = setTimeout(() => ov.classList.remove('peek'), ms); };
+    const pressed = (row, attr, v) => ph.querySelectorAll(`#${row} button`).forEach(b => { const on = b.dataset[attr] === v; b.setAttribute('aria-pressed', String(on)); b.className = 'py-2.5 text-xs font-bold rounded-xl border ' + (on ? 'border-amber-400 bg-slate-800 text-amber-200' : 'border-slate-700 bg-slate-900 text-slate-300'); });
+    ph.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.fxEdge) { set({ edge: b.dataset.fxEdge }); pressed('fx-edge-row', 'fxEdge', st.edge); peek(1800); }
+      else if (b.dataset.fxFull) { perfPaused = false; q = 0; set({ full: b.dataset.fxFull }); pressed('fx-full-row', 'fxFull', st.full); peek(1800); }
+    });
+    ph.addEventListener('change', e => {
+      const t = e.target;
+      if (t.matches('[data-fx-on]')) { perfPaused = false; set({ on: t.checked }); peek(1800); }
+      else if (t.matches('[data-fx-react]')) set({ react: t.checked });
+    });
+    ph.addEventListener('input', e => { const t = e.target; if (t.matches('[data-fx-k]')) { set({ k: +t.value }, false); ph.querySelector('#fx-k-v').textContent = st.k + '%'; if (ov) ov.classList.add('peek'); } });
+    ['pointerup', 'pointercancel', 'change'].forEach(ev => ph.addEventListener(ev, e => { if (e.target.matches && e.target.matches('[data-fx-k]')) { save(); if (ov) ov.classList.remove('peek'); } }));
+  }
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; const ph = n.id === 'fx-sec' ? n : (n.querySelector && n.querySelector('#fx-sec')); if (ph && !ph.dataset.done) { ph.dataset.done = '1'; section(ph); } }); }).observe(document.body, { childList: true, subtree: true });
+
+  window.FX = { get: () => Object.assign({}, st), set, apply, edges: EDGES.map(e => e[0]), fulls: FULLS.map(e => e[0]), _running: () => running, _quality: () => q, _perfPaused: () => perfPaused, _level: () => lvl, _colors: () => [C1, C2, C3] };
+  function boot() { apply(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+</script>
+<script>
 /* ===== Sunshine@R · Design-Auswahl & Optionen ===== */
 (function () {
   'use strict';
@@ -11349,6 +11581,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
         ${toggle('icons', 'Einheitliche Linien-Icons', 'Ein durchgehender Icon-Satz in der Textfarbe des Designs statt bunter Emoji. Ausschalten = Emoji.', ui.icons)}
         <label class="flex items-start gap-3 py-2 cursor-pointer"><input type="checkbox" data-dockwin ${window.DockWin && DockWin.mode === 'windows' ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Fenster untereinander (einklappbar)</span><span class="block text-[11px] text-slate-400">Editor, Drums, Vocal und Mixer als eigene Fenster mit Klapp-Pfeil. Aus = Reiter wie bisher.</span></span></label>
       </div>
+      <div id="fx-sec"></div>
       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Anpassen</div>
       <div class="rounded-xl border border-slate-800 p-3 space-y-3.5">
         <div>
