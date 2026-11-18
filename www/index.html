@@ -9,10 +9,19 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2338bdf8%27/%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%238b5cf6%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2310b981%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2728%27%20fill%3D%27%23090c12%27/%3E%3Crect%20x%3D%277%27%20y%3D%277%27%20width%3D%27114%27%20height%3D%27114%27%20rx%3D%2724%27%20fill%3D%27url%28%23g%29%27/%3E%3Cpath%20d%3D%27M48%2088V34l48-10v53M48%2088c0%208-10%2014-22%2014S4%2096%204%2088s10-14%2022-14%2022%206%2022%2014zm48-11c0%208-10%2014-22%2014s-22-6-22-14%2010-14%2022-14%2022%206%2022%2014z%27%20transform%3D%27translate%2813%200%29%20scale%28.9%29%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2338bdf8%27/%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%238b5cf6%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2310b981%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2728%27%20fill%3D%27%23090c12%27/%3E%3Crect%20x%3D%277%27%20y%3D%277%27%20width%3D%27114%27%20height%3D%27114%27%20rx%3D%2724%27%20fill%3D%27url%28%23g%29%27/%3E%3Cpath%20d%3D%27M48%2088V34l48-10v53M48%2088c0%208-10%2014-22%2014S4%2096%204%2088s10-14%2022-14%2022%206%2022%2014zm48-11c0%208-10%2014-22%2014s-22-6-22-14%2010-14%2022-14%2022%206%2022%2014z%27%20transform%3D%27translate%2813%200%29%20scale%28.9%29%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
   <script>/* Design vor dem ersten Zeichnen setzen (kein Aufblitzen) */
-    (function(){try{var t=localStorage.getItem('sunshine.theme');if(['aurora','studio','neon','classic'].indexOf(t)<0)t='aurora';var d=document.documentElement;d.setAttribute('data-theme',t);
-    var u=JSON.parse(localStorage.getItem('sunshine.ui')||'{}');d.setAttribute('data-glass',u.glass===false?'off':'on');d.setAttribute('data-glow',u.glow===false?'off':'on');d.setAttribute('data-large',u.large?'1':'0');
-    var m={aurora:'#0B0E27',studio:'#14161A',neon:'#05060B',classic:'#090c12'}[t];document.addEventListener('DOMContentLoaded',function(){var x=document.querySelector('meta[name="theme-color"]');if(x)x.setAttribute('content',m)});}catch(e){document.documentElement.setAttribute('data-theme','aurora')}})();
-  </script>
+    window.__sunUi=function(u){var d=document.documentElement,s=d.style;u=u||{};
+      d.setAttribute('data-glass',u.glass===false?'off':'on');d.setAttribute('data-glow',u.glow===false?'off':'on');d.setAttribute('data-large',u.large?'1':'0');
+      var m=/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(u.accent||'');
+      if(m){var r=parseInt(m[1],16),g=parseInt(m[2],16),bl=parseInt(m[3],16),hi=function(c){return Math.round(c+(255-c)*.38)},lum=(.299*r+.587*g+.114*bl)/255;
+        s.setProperty('--acc',u.accent);s.setProperty('--acc-rgb',r+','+g+','+bl);s.setProperty('--acc-hi','rgb('+hi(r)+','+hi(g)+','+hi(bl)+')');s.setProperty('--acc-ink',lum>.58?'#1a1206':'#ffffff');d.setAttribute('data-accent','1');}
+      else{d.removeAttribute('data-accent');['--acc','--acc-rgb','--acc-hi','--acc-ink'].forEach(function(k){s.removeProperty(k)});}
+      var k=typeof u.glassK==='number'?u.glassK/40:1;if(k===1)s.removeProperty('--glass-k');else s.setProperty('--glass-k',String(k));
+      if(typeof u.blur==='number'){d.setAttribute('data-blur','1');s.setProperty('--user-blur',u.blur+'px');}else{d.removeAttribute('data-blur');s.removeProperty('--user-blur');}
+      d.setAttribute('data-radius',u.radius==='sharp'||u.radius==='round'?u.radius:'normal');};
+    (function(){try{var t=localStorage.getItem('sunshine.theme');if(['aurora','studio','neon','classic','liquid'].indexOf(t)<0)t='aurora';var d=document.documentElement;d.setAttribute('data-theme',t);
+    window.__sunUi(JSON.parse(localStorage.getItem('sunshine.ui')||'{}'));
+    var m={aurora:'#0B0E27',studio:'#14161A',neon:'#05060B',classic:'#090c12',liquid:'#1B1D2B'}[t];document.addEventListener('DOMContentLoaded',function(){var x=document.querySelector('meta[name="theme-color"]');if(x)x.setAttribute('content',m)});}catch(e){document.documentElement.setAttribute('data-theme','aurora')}})();
+    </script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <!-- JSZip für ZIP-Stem-Import -->
@@ -211,37 +220,36 @@
    classic = bisheriges Design (keine Überschreibungen). Themes setzen CSS-Variablen + Skin-Regeln. */
 :root{--daw-bg:9 12 18;--daw-panel:17 22 34;--daw-surface:23 30 46;--daw-elevated:30 39 59;--daw-border:40 51 74;--daw-accent:56 189 248;--blur:blur(22px) saturate(150%)}
 html[data-glass="off"]{--blur:none}
-html[data-theme="aurora"]{background-color:#070817}html[data-theme="studio"]{background-color:#14161A}html[data-theme="neon"]{background-color:#05060B}html[data-theme="classic"]{background-color:#090c12}
 .brand-banner{display:none}
 .theme-card{transition:transform .12s,box-shadow .12s}
 .theme-card:active{transform:scale(.98)}
 
 /* ---------- gemeinsam für Glas-Themes (aurora, neon) ---------- */
-html[data-theme="aurora"],html[data-theme="neon"]{--daw-panel:255 255 255;--daw-surface:255 255 255;--daw-elevated:255 255 255;--daw-border:255 255 255}
-html[data-theme="aurora"] .bg-daw-panel,html[data-theme="neon"] .bg-daw-panel{--tw-bg-opacity:.06;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);background-image:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0))}
+html[data-theme="aurora"],html[data-theme="neon"],html[data-theme="liquid"]{--daw-panel:255 255 255;--daw-surface:255 255 255;--daw-elevated:255 255 255;--daw-border:255 255 255}
+html[data-theme="aurora"] .bg-daw-panel,html[data-theme="neon"] .bg-daw-panel,html[data-theme="liquid"] .bg-daw-panel{--tw-bg-opacity:calc(.06*var(--glass-k,1));-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);background-image:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0))}
 html[data-theme="aurora"] .bg-daw-panel\/80,html[data-theme="aurora"] .bg-daw-panel\/90,html[data-theme="aurora"] .bg-daw-panel\/95,
-html[data-theme="neon"] .bg-daw-panel\/80,html[data-theme="neon"] .bg-daw-panel\/90,html[data-theme="neon"] .bg-daw-panel\/95{background-color:rgba(10,12,36,.62);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
-html[data-theme="aurora"] .bg-daw-surface,html[data-theme="neon"] .bg-daw-surface{--tw-bg-opacity:.07}
-html[data-theme="aurora"] .bg-daw-surface\/80,html[data-theme="aurora"] .bg-daw-surface\/90,html[data-theme="neon"] .bg-daw-surface\/80,html[data-theme="neon"] .bg-daw-surface\/90{background-color:rgba(255,255,255,.06)}
-html[data-theme="aurora"] .bg-daw-bg:not(body),html[data-theme="neon"] .bg-daw-bg:not(body){--tw-bg-opacity:.5}
+html[data-theme="neon"] .bg-daw-panel\/80,html[data-theme="neon"] .bg-daw-panel\/90,html[data-theme="neon"] .bg-daw-panel\/95,html[data-theme="liquid"] .bg-daw-panel\/80,html[data-theme="liquid"] .bg-daw-panel\/90,html[data-theme="liquid"] .bg-daw-panel\/95{background-color:rgba(10,12,36,calc(.62*var(--glass-k,1)));-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+html[data-theme="aurora"] .bg-daw-surface,html[data-theme="neon"] .bg-daw-surface,html[data-theme="liquid"] .bg-daw-surface{--tw-bg-opacity:calc(.07*var(--glass-k,1))}
+html[data-theme="aurora"] .bg-daw-surface\/80,html[data-theme="aurora"] .bg-daw-surface\/90,html[data-theme="neon"] .bg-daw-surface\/80,html[data-theme="neon"] .bg-daw-surface\/90,html[data-theme="liquid"] .bg-daw-surface\/80,html[data-theme="liquid"] .bg-daw-surface\/90{background-color:rgba(255,255,255,calc(.06*var(--glass-k,1)))}
+html[data-theme="aurora"] .bg-daw-bg:not(body),html[data-theme="neon"] .bg-daw-bg:not(body),html[data-theme="liquid"] .bg-daw-bg:not(body){--tw-bg-opacity:calc(.5*var(--glass-k,1))}
 html[data-theme="aurora"] .bg-daw-bg\/60,html[data-theme="aurora"] .bg-daw-bg\/80,html[data-theme="aurora"] .bg-daw-bg\/90,
-html[data-theme="neon"] .bg-daw-bg\/60,html[data-theme="neon"] .bg-daw-bg\/80,html[data-theme="neon"] .bg-daw-bg\/90{background-color:rgba(4,5,20,.45)}
-html[data-theme="aurora"] .hover\:bg-daw-elevated:hover,html[data-theme="neon"] .hover\:bg-daw-elevated:hover{--tw-bg-opacity:.16}
-html[data-theme="aurora"] .hover\:bg-daw-elevated\/70:hover,html[data-theme="neon"] .hover\:bg-daw-elevated\/70:hover,
-html[data-theme="aurora"] .hover\:bg-daw-surface\/30:hover,html[data-theme="neon"] .hover\:bg-daw-surface\/30:hover{background-color:rgba(255,255,255,.12)}
+html[data-theme="neon"] .bg-daw-bg\/60,html[data-theme="neon"] .bg-daw-bg\/80,html[data-theme="neon"] .bg-daw-bg\/90,html[data-theme="liquid"] .bg-daw-bg\/60,html[data-theme="liquid"] .bg-daw-bg\/80,html[data-theme="liquid"] .bg-daw-bg\/90{background-color:rgba(4,5,20,calc(.45*var(--glass-k,1)))}
+html[data-theme="aurora"] .hover\:bg-daw-elevated:hover,html[data-theme="neon"] .hover\:bg-daw-elevated:hover,html[data-theme="liquid"] .hover\:bg-daw-elevated:hover{--tw-bg-opacity:calc(.16*var(--glass-k,1))}
+html[data-theme="aurora"] .hover\:bg-daw-elevated\/70:hover,html[data-theme="neon"] .hover\:bg-daw-elevated\/70:hover,html[data-theme="liquid"] .hover\:bg-daw-elevated\/70:hover,
+html[data-theme="aurora"] .hover\:bg-daw-surface\/30:hover,html[data-theme="neon"] .hover\:bg-daw-surface\/30:hover,html[data-theme="liquid"] .hover\:bg-daw-surface\/30:hover{background-color:rgba(255,255,255,calc(.12*var(--glass-k,1)))}
 html[data-theme="aurora"] .rounded{border-radius:9px}
-html[data-theme="aurora"] .rounded-md,html[data-theme="neon"] .rounded-md{border-radius:12px}
-html[data-theme="aurora"] .rounded-lg,html[data-theme="neon"] .rounded-lg{border-radius:14px}
-html[data-theme="aurora"] .rounded-xl,html[data-theme="neon"] .rounded-xl{border-radius:18px}
-html[data-theme="aurora"] .rounded-2xl,html[data-theme="neon"] .rounded-2xl{border-radius:26px}
-html[data-theme="neon"] .rounded{border-radius:9px}
-html[data-theme="aurora"] select option,html[data-theme="neon"] select option{background:#12123a;color:#F3F5FF}
-html[data-theme="aurora"] .bg-slate-950,html[data-theme="neon"] .bg-slate-950{background:linear-gradient(180deg,rgba(40,36,92,.86),rgba(12,12,36,.94))!important;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
-html[data-theme="aurora"] .bg-slate-900,html[data-theme="neon"] .bg-slate-900{background-color:rgba(255,255,255,.05)}
-html[data-theme="aurora"] .bg-slate-900\/80,html[data-theme="aurora"] .bg-slate-900\/60,html[data-theme="neon"] .bg-slate-900\/80,html[data-theme="neon"] .bg-slate-900\/60{background-color:rgba(255,255,255,.05)}
-html[data-theme="aurora"] .bg-slate-800,html[data-theme="neon"] .bg-slate-800{background-color:rgba(255,255,255,.09)}
-html[data-theme="aurora"] .dock-tab-btn,html[data-theme="neon"] .dock-tab-btn{border-radius:999px;min-height:44px}
-html[data-theme="aurora"] header.sticky,html[data-theme="neon"] header.sticky{border-radius:0 0 26px 26px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.14),0 14px 40px rgba(0,0,0,.4)}
+html[data-theme="aurora"] .rounded-md,html[data-theme="neon"] .rounded-md,html[data-theme="liquid"] .rounded-md{border-radius:12px}
+html[data-theme="aurora"] .rounded-lg,html[data-theme="neon"] .rounded-lg,html[data-theme="liquid"] .rounded-lg{border-radius:14px}
+html[data-theme="aurora"] .rounded-xl,html[data-theme="neon"] .rounded-xl,html[data-theme="liquid"] .rounded-xl{border-radius:18px}
+html[data-theme="aurora"] .rounded-2xl,html[data-theme="neon"] .rounded-2xl,html[data-theme="liquid"] .rounded-2xl{border-radius:26px}
+html[data-theme="neon"] .rounded,html[data-theme="liquid"] .rounded{border-radius:9px}
+html[data-theme="aurora"] select option,html[data-theme="neon"] select option,html[data-theme="liquid"] select option{background:#12123a;color:#F3F5FF}
+html[data-theme="aurora"] .bg-slate-950,html[data-theme="neon"] .bg-slate-950,html[data-theme="liquid"] .bg-slate-950{background:linear-gradient(180deg,rgba(40,36,92,.86),rgba(12,12,36,.94))!important;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+html[data-theme="aurora"] .bg-slate-900,html[data-theme="neon"] .bg-slate-900,html[data-theme="liquid"] .bg-slate-900{background-color:rgba(255,255,255,calc(.05*var(--glass-k,1)))}
+html[data-theme="aurora"] .bg-slate-900\/80,html[data-theme="aurora"] .bg-slate-900\/60,html[data-theme="neon"] .bg-slate-900\/80,html[data-theme="neon"] .bg-slate-900\/60,html[data-theme="liquid"] .bg-slate-900\/80,html[data-theme="liquid"] .bg-slate-900\/60{background-color:rgba(255,255,255,calc(.05*var(--glass-k,1)))}
+html[data-theme="aurora"] .bg-slate-800,html[data-theme="neon"] .bg-slate-800,html[data-theme="liquid"] .bg-slate-800{background-color:rgba(255,255,255,calc(.09*var(--glass-k,1)))}
+html[data-theme="aurora"] .dock-tab-btn,html[data-theme="neon"] .dock-tab-btn,html[data-theme="liquid"] .dock-tab-btn{border-radius:999px;min-height:44px}
+html[data-theme="aurora"] header.sticky,html[data-theme="neon"] header.sticky,html[data-theme="liquid"] header.sticky{border-radius:0 0 26px 26px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.14),0 14px 40px rgba(0,0,0,.4)}
 
 /* ---------- A · AURORA GLASS ---------- */
 html[data-theme="aurora"]{--daw-bg:6 8 26;--daw-accent:255 138 26}
@@ -307,12 +315,112 @@ html[data-theme="neon"] ::-webkit-scrollbar-track{background:transparent}
 html[data-theme="neon"] ::-webkit-scrollbar-thumb{background:rgba(138,61,255,.55)}
 html[data-theme="neon"] #btn-export-wav{box-shadow:0 0 26px rgba(255,138,26,.5)}
 
+/* ---------- E · LIQUID MATT (mattes Milchglas, weich, pastellig) ---------- */
+html[data-theme="liquid"]{--daw-bg:22 24 34;--daw-accent:196 181 253;--blur:blur(30px) saturate(108%)}
+html[data-theme="liquid"] body.bg-daw-bg{background:radial-gradient(460px 420px at 108% -6%,rgba(255,196,160,.30),transparent 70%),radial-gradient(520px 480px at -16% 34%,rgba(176,160,255,.30),transparent 70%),radial-gradient(520px 420px at 96% 104%,rgba(150,226,205,.22),transparent 70%),linear-gradient(180deg,#1B1D2B,#14151F);background-attachment:fixed}
+html[data-theme="liquid"] body.bg-daw-bg::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2147483000;opacity:.05;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+html[data-theme="liquid"] .bg-daw-panel{--tw-bg-opacity:calc(.085*var(--glass-k,1));background-image:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));box-shadow:0 14px 40px rgba(6,6,16,.30),0 2px 6px rgba(6,6,16,.18);border-color:rgba(255,255,255,.07)}
+html[data-theme="liquid"] .bg-daw-surface{--tw-bg-opacity:calc(.09*var(--glass-k,1))}
+html[data-theme="liquid"] .bg-daw-bg:not(body){--tw-bg-opacity:calc(.42*var(--glass-k,1))}
+html[data-theme="liquid"] .border-daw-border{--tw-border-opacity:.08}
+html[data-theme="liquid"] .border-daw-border\/60{border-color:rgba(255,255,255,.06)}
+html[data-theme="liquid"] .divide-daw-border>:not([hidden])~:not([hidden]){--tw-divide-opacity:.07}
+html[data-theme="liquid"] .divide-daw-border\/80>:not([hidden])~:not([hidden]){border-color:rgba(255,255,255,.06)}
+html[data-theme="liquid"] .bg-black\/70{background-color:rgba(10,10,20,.45);border-color:rgba(255,255,255,.07);box-shadow:inset 0 2px 10px rgba(0,0,0,.35)}
+html[data-theme="liquid"] .bg-slate-950{background:linear-gradient(180deg,rgba(52,52,76,.90),rgba(28,29,44,.95))!important}
+html[data-theme="liquid"] .rounded-lg{border-radius:16px}
+html[data-theme="liquid"] .rounded-xl{border-radius:22px}
+html[data-theme="liquid"] .rounded-2xl{border-radius:32px}
+html[data-theme="liquid"] header.sticky{border-radius:0 0 32px 32px;border-bottom:0;box-shadow:0 16px 44px rgba(6,6,16,.40),inset 0 -1px 0 rgba(255,255,255,.06)}
+html[data-theme="liquid"] button{border-radius:999px}
+html[data-theme="liquid"] .tr-mute-btn,html[data-theme="liquid"] .tr-solo-btn{border-radius:12px}
+html[data-theme="liquid"] #btn-play{background:linear-gradient(145deg,#FFD9C2,#FFB38A)!important;color:#3A1D0C!important;border-color:transparent!important;border-radius:999px;min-height:40px;padding-left:18px;padding-right:18px;box-shadow:0 10px 26px rgba(255,170,120,.35),inset 0 -2px 6px rgba(190,90,40,.18)!important}
+html[data-theme="liquid"] #btn-export-wav{box-shadow:0 10px 26px rgba(255,170,120,.28)}
+html[data-theme="liquid"] .dock-tab-btn.font-bold{background:linear-gradient(180deg,rgba(196,181,253,.30),rgba(196,181,253,.14))!important;color:#E4DBFF!important;border-color:rgba(196,181,253,.38)!important;box-shadow:0 8px 22px rgba(150,130,240,.18)}
+html[data-theme="liquid"] #brand-icon{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 22px rgba(0,0,0,.35)}
+html[data-theme="liquid"] #lcd-position{color:#CFC4FF!important}
+html[data-theme="liquid"] #lcd-time{color:#FFD0B5!important}
+html[data-theme="liquid"] input[type="range"].daw-slider{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.08)}
+html[data-theme="liquid"] input[type="range"].daw-slider:not(.amber-thumb):not(.emerald-thumb):not(.purple-thumb)::-webkit-slider-thumb{background:#F4F0FF;border-color:#B7A6FF;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+html[data-theme="liquid"] ::-webkit-scrollbar-track{background:transparent}
+html[data-theme="liquid"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18)}
+html[data-theme="liquid"] .bg-purple-500,html[data-theme="liquid"] .bg-emerald-500,html[data-theme="liquid"] .bg-cyan-500{filter:saturate(.8) brightness(1.05)}
+
 /* ---------- Optionen: Leuchteffekte / große Bedienelemente ---------- */
 html[data-glow="off"] *{text-shadow:none!important}
 html[data-glow="off"] #btn-play,html[data-glow="off"] #btn-export-wav,html[data-glow="off"] .dock-tab-btn,html[data-glow="off"] #brand-icon,html[data-glow="off"] .bg-daw-panel,html[data-glow="off"] button.bg-daw-surface{box-shadow:none!important}
 html[data-large="1"] button,html[data-large="1"] select{min-height:44px}
 html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40px}
 
+
+/* ---------- Eigene Anpassungen (Optionen → Anpassen) ---------- */
+html[data-blur="1"]:not([data-glass="off"]){--blur:blur(var(--user-blur,22px)) saturate(140%)}
+html[data-accent="1"] #btn-play{background:linear-gradient(145deg,var(--acc-hi),var(--acc))!important;color:var(--acc-ink)!important;box-shadow:0 8px 24px rgba(var(--acc-rgb),.45),inset 0 1px 0 rgba(255,255,255,.45)!important}
+html[data-accent="1"] #btn-export-wav{background-image:linear-gradient(90deg,var(--acc-hi),var(--acc))!important;color:var(--acc-ink)!important;box-shadow:0 8px 26px rgba(var(--acc-rgb),.4)}
+html[data-accent="1"] .dock-tab-btn.font-bold{background:linear-gradient(180deg,rgba(var(--acc-rgb),.34),rgba(var(--acc-rgb),.12))!important;color:var(--acc-hi)!important;border-color:rgba(var(--acc-rgb),.55)!important;box-shadow:0 6px 20px rgba(var(--acc-rgb),.2)}
+html[data-accent="1"][data-theme="studio"] .dock-tab-btn.font-bold{background:transparent!important;box-shadow:none;border-color:transparent!important;border-bottom-color:var(--acc)!important}
+html[data-accent="1"] input[type="range"].daw-slider:not(.amber-thumb):not(.emerald-thumb):not(.purple-thumb)::-webkit-slider-thumb{border-color:var(--acc);box-shadow:0 0 10px rgba(var(--acc-rgb),.6)}
+html[data-accent="1"][data-theme="aurora"] body.bg-daw-bg{background:radial-gradient(520px 380px at 104% -4%,rgba(var(--acc-rgb),.36),transparent 70%),radial-gradient(480px 460px at -14% 38%,rgba(124,61,255,.36),transparent 70%),radial-gradient(520px 380px at 92% 102%,rgba(25,195,255,.26),transparent 70%),linear-gradient(180deg,#0B0E27,#070817);background-attachment:fixed}
+html[data-accent="1"][data-theme="liquid"] body.bg-daw-bg{background:radial-gradient(460px 420px at 108% -6%,rgba(var(--acc-rgb),.30),transparent 70%),radial-gradient(520px 480px at -16% 34%,rgba(176,160,255,.30),transparent 70%),radial-gradient(520px 420px at 96% 104%,rgba(150,226,205,.22),transparent 70%),linear-gradient(180deg,#1B1D2B,#14151F);background-attachment:fixed}
+html[data-radius="sharp"] .rounded{border-radius:3px!important}
+html[data-radius="sharp"] .rounded-md{border-radius:5px!important}
+html[data-radius="sharp"] .rounded-lg{border-radius:7px!important}
+html[data-radius="sharp"] .rounded-xl{border-radius:9px!important}
+html[data-radius="sharp"] .rounded-2xl{border-radius:12px!important}
+html[data-radius="sharp"] .dock-tab-btn,html[data-radius="sharp"] #btn-play,html[data-radius="sharp"][data-theme="liquid"] button{border-radius:8px!important}
+html[data-radius="sharp"] #bottom-nav,html[data-radius="sharp"] header.sticky{border-radius:14px!important}
+html[data-radius="round"] .rounded{border-radius:12px!important}
+html[data-radius="round"] .rounded-md{border-radius:16px!important}
+html[data-radius="round"] .rounded-lg{border-radius:20px!important}
+html[data-radius="round"] .rounded-xl{border-radius:26px!important}
+html[data-radius="round"] .rounded-2xl{border-radius:36px!important}
+#settings-modal{transition:background .15s}
+#settings-modal > div{transition:opacity .15s}
+#settings-modal.peek{background:rgba(0,0,0,.08)!important}
+#settings-modal.peek > div{opacity:.28}
+.sw-dot{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.25);flex:0 0 auto}
+.sw-dot[aria-pressed="true"]{outline:3px solid #fbbf24;outline-offset:2px}
+
+/* ---------- Kopfzeile: Aktionsleiste + Datei-Menü ---------- */
+#file-menu{position:fixed;z-index:50;min-width:236px;padding:8px;display:flex;flex-direction:column;gap:2px}
+#file-menu[hidden]{display:none}
+#file-menu .fm-title{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:rgba(226,230,255,.6);font-weight:700;padding:6px 12px 4px}
+#file-menu .fm-item{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 14px;border-radius:14px;border:0;background:transparent;color:#e2e8f0;font-size:14px;font-weight:600;text-align:left;cursor:pointer}
+#file-menu .fm-item:hover,#file-menu .fm-item:active{background:rgba(255,255,255,.09)}
+#file-menu .fm-danger{color:#fda4af}
+#file-menu .fm-sep{height:1px;background:rgba(255,255,255,.10);margin:4px 8px}
+#btn-menu[aria-expanded="true"]{background:rgba(255,255,255,.16)}
+@media (max-width:760px){
+  #hdr-actions{width:100%;flex-wrap:nowrap;justify-content:space-between;gap:6px}
+  #hdr-actions .hb-tx{display:none}
+  #hdr-actions>button{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;padding-left:10px;padding-right:10px;font-size:15px}
+  #hdr-actions>button{min-width:40px;padding-left:8px;padding-right:8px}
+  #hdr-actions>#btn-export-wav{flex:1 1 auto;font-size:12px;white-space:nowrap}
+}
+  
+/* ---------- Schwebende Bottom-Navigation (mobil) ---------- */
+#bottom-nav{display:none}
+@media (max-width:760px){
+  #bottom-nav{display:flex;position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:45;gap:4px;padding:6px;border-radius:28px;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+  #bottom-nav[hidden]{display:none}
+  #bottom-nav>button{flex:1 1 0;min-width:0;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 2px;border-radius:22px;font-size:10.5px;line-height:1.1;text-align:center}
+  #bottom-nav .nv-ic{font-size:19px;line-height:1}
+  #bottom-nav .nv-tx{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+  #toast-container{bottom:calc(92px + env(safe-area-inset-bottom))}
+}
+  
+/* ---------- Spurkarten mobil: größere Tippflächen (min. 40 px), Zeile 2 darf umbrechen ---------- */
+@media (max-width:760px){
+  #multitrack-lanes .tr-mute-btn,#multitrack-lanes .tr-solo-btn{width:40px;height:40px;font-size:13px;border-radius:12px}
+  #multitrack-lanes .tr-collapse-btn,#multitrack-lanes .tr-fx-btn,#multitrack-lanes .tr-edit-btn,#multitrack-lanes .tr-del-btn{min-width:40px;min-height:40px;padding:0 10px;font-size:11px;border-radius:12px}
+  #multitrack-lanes .tr-load-btn,#multitrack-lanes .tr-vc-btn,#multitrack-lanes .tr-a2m-btn,#multitrack-lanes .tr-mic-arm-btn,#multitrack-lanes .tr-selmidi-btn,#multitrack-lanes .tr-inst-select{min-height:40px;padding:0 10px;font-size:11px;border-radius:12px}
+  #multitrack-lanes .tr-inst-select{flex:1 1 0;min-width:120px;max-width:none}
+  #multitrack-lanes .col-span-12 > .flex.items-center.gap-1\.5{flex-wrap:wrap;row-gap:6px}
+  #multitrack-lanes .col-span-12 > .flex.items-center.gap-1\.5 > .flex-1{flex:1 1 180px;min-width:150px}
+  #multitrack-lanes .tr-load-btn,#multitrack-lanes .tr-vc-btn,#multitrack-lanes .tr-a2m-btn{flex:1 1 auto}
+  #multitrack-lanes .text-xs.font-bold.text-white{font-size:14px}
+}
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-daw-bg text-slate-200">
@@ -394,13 +502,13 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
       </div>
 
       <!-- Right: Demo Stems, ZIP/Audio/MIDI Import, Auto-Trim, MIDI Export, WAV Export -->
-      <div class="flex flex-wrap items-center gap-1.5">
+      <div id="hdr-actions" class="flex flex-wrap items-center gap-1.5">
 
-        <button id="btn-import-files" class="px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition flex items-center gap-1">
-          <span>📂 ZIP / Audio / MIDI</span>
+        <button id="btn-import-files" aria-label="ZIP, Audio oder MIDI laden" title="ZIP / Audio / MIDI laden" class="px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition flex items-center gap-1">
+          <span><span class="hb-ic">📂</span><span class="hb-tx"> ZIP / Audio / MIDI</span></span>
         </button>
-        <button id="btn-save-project" class="project-action-btn px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 text-xs font-semibold transition">💾 Projekt speichern</button>
-        <button id="btn-open-projects" class="project-action-btn px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition">📁 Projekte</button>
+        <button id="btn-save-project" aria-label="Projekt speichern" title="Projekt speichern" class="project-action-btn px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 text-xs font-semibold transition"><span class="hb-ic">💾</span><span class="hb-tx"> Projekt speichern</span></button>
+        <button id="btn-open-projects" aria-label="Projekte öffnen" title="Projekte öffnen" class="project-action-btn px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition"><span class="hb-ic">📁</span><span class="hb-tx"> Projekte</span></button>
 
         <button id="btn-auto-trim" type="button" hidden aria-hidden="true" tabindex="-1" style="display:none"></button>
 
@@ -413,6 +521,7 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
         <button id="btn-export-wav" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1">
           <span id="lbl-export-wav">⬇️ Master WAV</span>
         </button>
+        <button id="btn-menu" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="file-menu" aria-label="Menü" title="Menü: .MID-Export, Optionen, Reset" class="px-3 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-sm font-bold transition">☰</button>
       </div>
     </div>
   </header>
@@ -583,6 +692,7 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
                 <option value="melody">Melodie (monophon)</option>
                 <option value="bass">Bass</option>
                 <option value="poly">🎹 Polyphon – Einzelnoten (Klavier/Gitarre/Pad)</option>
+                <option value="ai">🧠 KI – Basic Pitch (polyphon, genauer)</option>
                 <option value="chords">Akkorde (Blöcke)</option>
               </select>
               <label class="flex items-center gap-1 bg-daw-surface border border-daw-border rounded-lg px-2 py-1">Ab Takt <input id="input-a2m-bar" type="number" min="1" max="999" value="1" inputmode="numeric" class="w-12 bg-transparent text-xs text-slate-100 focus:outline-none"></label>
@@ -3565,8 +3675,8 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
         }
       }
       let notes = [], chords = null, key = null;
-      if (mode === 'poly') {
-        const pn = a2mPoly(x, sr, secPer16th, steps, {});
+      if (mode === 'poly' || (mode === 'ai' && o.aiNotes)) {
+        const pn = mode === 'ai' ? o.aiNotes : a2mPoly(x, sr, secPer16th, steps, {});
         const raw = pn.map(n => { const s0 = Math.round(n.t0 / secPer16th), s1 = Math.round(n.t1 / secPer16th); return { midi: n.midi, start: s0, dur: Math.max(1, s1 - s0), sal: n.sal }; })
           .filter(n => n.start >= 0 && n.start < steps);
         raw.forEach(n => { n.dur = Math.min(n.dur, steps - n.start); });
@@ -3654,10 +3764,25 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
       const secPer16th = (60 / dawState.bpm) / 4, sr = buf.sampleRate;
       const startSample = Math.floor((dawState.startOffsetMs / 1000) * sr + (startBar - 1) * 16 * secPer16th * sr);
       if (startSample >= buf.length - sr * 0.2) { toast('Takt ' + startBar + ' liegt hinter dem Ende der Audio-Datei.', 'warn'); return; }
-      toast('Analysiere Audio …', 'info');
+      let effMode = mode, aiNotes = null;
+      if (mode === 'ai') {
+        try {
+          if (!window.BasicPitchAI) throw new Error('KI-Modul fehlt');
+          if (window.BasicPitchAI.state.status !== 'ready') toast('KI-Modell wird geladen (einmalig ~1 MB) …', 'info');
+          const nS = Math.min(Math.floor(32 * secPer16th * sr), buf.length - startSample), mono = new Float32Array(nS);
+          for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < nS; i++) mono[i] += d[startSample + i] / buf.numberOfChannels; }
+          toast('KI analysiert …', 'info');
+          const raw = await window.BasicPitchAI.transcribe(mono, sr, {});
+          aiNotes = raw.map(n => ({ midi: n.midi, t0: n.t0, t1: n.t1, sal: n.amp }));
+        } catch (err) {
+          console.warn('[Basic Pitch]', err);
+          toast('KI-Modell nicht verfügbar – es wird der eigene Polyphon-Algorithmus genutzt. (' + (err && err.message ? err.message.slice(0, 140) : err) + ')', 'warn');
+          effMode = 'poly';
+        }
+      } else { toast('Analysiere Audio …', 'info'); }
       await new Promise(r => setTimeout(r, 40));
       let res;
-      try { res = analyzeAudioToMidi(buf, { startSample, secPer16th, steps: 32, mode, name: tr ? tr.name : '' }); }
+      try { res = analyzeAudioToMidi(buf, { startSample, secPer16th, steps: 32, mode: effMode, aiNotes, name: tr ? tr.name : '' }); }
       catch (err) { console.error('[Audio→MIDI]', err); toast(`Analyse fehlgeschlagen: ${err && err.message ? err.message : err}`, 'error'); return; }
       if (!res.notes.length) { toast('Keine eindeutige Musik erkannt – anderen Stem, Modus oder Takt versuchen.', 'warn'); return; }
 
@@ -3683,7 +3808,7 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
       drawPianoRoll();
       drawVelocityLane();
       renderMultiTrackLanes();
-      const label = { melody: 'Melodie', bass: 'Bass', chords: 'Akkorde', poly: 'Polyphon' }[res.mode] || res.mode;
+      const label = { melody: 'Melodie', bass: 'Bass', chords: 'Akkorde', poly: 'Polyphon', ai: '🧠 KI (Basic Pitch)' }[res.mode] || res.mode;
       toast(`${label}: ${res.info}${res.chords && res.chords.length ? ' · Akkorde für Pattern-Generator gemerkt' : ''}`, 'success');
     }
 
@@ -6331,8 +6456,13 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
     trim: dawState.startOffsetMs,
     sub: $('status-subtitle').textContent
   });
-  function updateUndoBtn() { const b = $('btn-undo'); if (b) b.classList.toggle('opacity-40', undoStack.length === 0); }
-  function pushUndo() { if (!ready) return; undoStack.push(snap()); if (undoStack.length > 40) undoStack.shift(); updateUndoBtn(); }
+  const redoStack = [];
+  function updateUndoBtn() {
+    const b = $('btn-undo'); if (b) b.classList.toggle('opacity-40', undoStack.length === 0);
+    const r = $('btn-redo'); if (r) r.classList.toggle('opacity-40', redoStack.length === 0);
+  }
+  // Neue Aktion → alter „Vor“-Verlauf ist ungültig
+  function pushUndo() { if (!ready) return; undoStack.push(snap()); if (undoStack.length > 40) undoStack.shift(); redoStack.length = 0; updateUndoBtn(); }
   window.__dawPushUndo = pushUndo;
   function refreshAll() {
     renumberTracks();
@@ -6343,10 +6473,7 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
     $('lbl-trim-offset').textContent = `${dawState.startOffsetMs} ms`;
     if (dawState.isPlaying) safe(() => audioEngine.seek(dawState.playheadSec));
   }
-  function undo() {
-    const s = undoStack.pop();
-    updateUndoBtn();
-    if (!s) { toast('Nichts zum Rückgängigmachen.', 'info'); return; }
+  function restoreSnap(s) {
     dawState.tracks = s.tracks; dawState.buffers = s.buffers; dawState.midiNotes = s.midiNotes;
     SEQ.forEach((k, i) => { dawState[k] = s.seq[i]; });
     dawState.stepVelocities = s.vel; dawState.startOffsetMs = s.trim;
@@ -6354,8 +6481,24 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
     dawState.activeMidiTrackId = firstMidi ? firstMidi.id : null;
     $('status-subtitle').textContent = s.sub;
     refreshAll();
+  }
+  function undo() {
+    const s = undoStack.pop();
+    if (!s) { updateUndoBtn(); toast('Nichts zum Rückgängigmachen.', 'info'); return; }
+    redoStack.push(snap()); if (redoStack.length > 40) redoStack.shift();
+    updateUndoBtn();
+    restoreSnap(s);
     toast('Letzter Schritt rückgängig gemacht.', 'success');
   }
+  function redo() {
+    const s = redoStack.pop();
+    if (!s) { updateUndoBtn(); toast('Nichts zum Wiederherstellen.', 'info'); return; }
+    undoStack.push(snap()); if (undoStack.length > 40) undoStack.shift();
+    updateUndoBtn();
+    restoreSnap(s);
+    toast('Schritt wiederhergestellt.', 'success');
+  }
+  window.__dawUndo = undo; window.__dawRedo = redo;
   ['autoTrimSilence', 'applyArpGenerator', 'extractMidiFromStem'].forEach(n => {
     const orig = window[n];
     if (typeof orig === 'function') window[n] = function (...a) { pushUndo(); return orig.apply(this, a); };
@@ -6366,9 +6509,10 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
     if (t.closest('#piano-roll-canvas, #tab-panel-drums, #btn-clear-midi, .midi-trans-btn, #btn-midi-quantize')) pushUndo();
   }, true);
   document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !e.target.closest('input,select,textarea')) {
-      e.preventDefault(); undo();
-    }
+    if (!(e.ctrlKey || e.metaKey) || e.target.closest('input,select,textarea')) return;
+    const k = e.key.toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
   });
 
   // + Neue Spur Button & Einzelspur-Audio-Upload verbinden
@@ -6444,6 +6588,88 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
     br.textContent = 'Wirklich leeren?';
     armed = setTimeout(() => { armed = null; br.textContent = '🗑 Reset'; }, 3000);
   };
+
+  /* ---------- Kopfzeile aufgeräumt: Undo kompakt, Rest im Datei-Menü (IDs & Handler bleiben) ---------- */
+  (function buildFileMenu() {
+    try {
+      const undoB = $('btn-undo');
+      if (undoB) {
+        undoB.innerHTML = '<span class="hb-ic">↩</span><span class="hb-tx"> Zurück</span>'; undoB.setAttribute('aria-label', 'Zurück (rückgängig)');
+        const redoB = document.createElement('button');
+        redoB.id = 'btn-redo'; redoB.type = 'button'; redoB.title = 'Rückgängig gemachten Schritt wiederherstellen (Strg+Y)';
+        redoB.setAttribute('aria-label', 'Vor (wiederherstellen)');
+        redoB.className = undoB.className;
+        redoB.innerHTML = '<span class="hb-ic">↪</span><span class="hb-tx"> Vor</span>';
+        redoB.onclick = redo;
+        undoB.after(redoB); updateUndoBtn();
+      }
+      const hdr = $('hdr-actions'), btn = $('btn-menu');
+      if (!hdr || !btn) return;
+      const menu = document.createElement('div');
+      menu.id = 'file-menu'; menu.hidden = true; menu.setAttribute('role', 'menu');
+      menu.className = 'bg-slate-950 border border-daw-border rounded-2xl shadow-2xl';
+      menu.innerHTML = '<div class="fm-title">Datei &amp; Optionen</div>';
+      const put = (el, cls) => { if (!el) return; el.className = 'fm-item ' + (cls || ''); el.setAttribute('role', 'menuitem'); el.removeAttribute('hidden'); menu.appendChild(el); };
+      put($('btn-export-midi'));
+      put($('btn-settings'));
+      const sep = document.createElement('div'); sep.className = 'fm-sep'; menu.appendChild(sep);
+      put(br, 'fm-danger');
+      document.body.appendChild(menu);
+      const hdrEl = document.querySelector('header');
+      const place = () => { const r = (hdrEl || hdr).getBoundingClientRect(); menu.style.top = Math.max(0, r.bottom + 6) + 'px'; menu.style.right = '12px'; };
+      const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+      const open = () => { place(); menu.hidden = false; btn.setAttribute('aria-expanded', 'true'); };
+      btn.addEventListener('click', e => { e.stopPropagation(); menu.hidden ? open() : close(); });
+      menu.addEventListener('click', e => {
+        if (!e.target.closest('.fm-item')) return;
+        // Reset braucht zwei Tipps: beim ersten bleibt das Menü offen
+        setTimeout(() => { if (!/Wirklich/.test(br.textContent)) close(); }, 0);
+      });
+      document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target) && e.target !== btn) close(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) close(); });
+      window.addEventListener('resize', () => { if (!menu.hidden) place(); });
+    } catch (err) { console.error('[Datei-Menü]', err); }
+  })();
+
+  /* ---------- Schwebende Bottom-Navigation: Dock-Tabs wandern mobil in eine Glas-Leiste (Handler bleiben) ---------- */
+  (function buildBottomNav() {
+    try {
+      const btns = Array.from(document.querySelectorAll('.dock-tab-btn'));
+      if (!btns.length) return;
+      const group = btns[0].parentElement;
+      const SHORT = { midi: ['🎹', 'Editor'], drums: ['🥁', 'Drums'], vocals: ['🎙️', 'Vocal'], mixer: ['🎚️', 'Mixer'] };
+      btns.forEach(b => { const s = b.querySelector('span'); if (s) b.dataset.longLabel = s.innerHTML; });
+      const nav = document.createElement('nav');
+      nav.id = 'bottom-nav'; nav.hidden = true; nav.setAttribute('aria-label', 'Bereiche');
+      nav.className = 'bg-slate-950 border border-daw-border shadow-2xl';
+      const tr = document.createElement('button');
+      tr.type = 'button'; tr.id = 'btn-nav-tracks'; tr.className = 'text-slate-300 border border-transparent transition';
+      tr.setAttribute('aria-label', 'Zu den Spuren'); tr.innerHTML = '<span class="nv-ic">🎛️</span><span class="nv-tx">Spuren</span>';
+      document.body.appendChild(nav);
+      const mq = window.matchMedia('(max-width:760px)');
+      const hdrH = () => { const h = document.querySelector('header'); return h ? h.getBoundingClientRect().height : 0; };
+      const goTo = el => { if (!el) return; const y = el.getBoundingClientRect().top + window.scrollY - hdrH() - 8; window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); };
+      const place = () => {
+        if (mq.matches) {
+          nav.replaceChildren(tr);
+          btns.forEach(b => { const s = b.querySelector('span'), sh = SHORT[b.dataset.tab]; if (s && sh) s.innerHTML = '<span class="nv-ic">' + sh[0] + '</span><span class="nv-tx">' + sh[1] + '</span>'; s && (s.style.display = 'contents'); nav.appendChild(b); });
+          nav.hidden = false;
+        } else {
+          btns.forEach(b => { const s = b.querySelector('span'); if (s && b.dataset.longLabel) { s.innerHTML = b.dataset.longLabel; s.style.display = ''; } group.appendChild(b); });
+          nav.hidden = true;
+        }
+      };
+      tr.addEventListener('click', () => { const l = $('multitrack-lanes'); goTo(l && (l.closest('section') || l)); });
+      btns.forEach(b => b.addEventListener('click', () => {
+        setTimeout(() => {
+          if (!mq.matches || dawState.dockCollapsed) return;
+          const p = $('tab-panel-' + b.dataset.tab); goTo(p && (p.closest('section') || p));
+        }, 60);
+      }));
+      (mq.addEventListener ? mq.addEventListener('change', place) : mq.addListener(place));
+      place();
+    } catch (err) { console.error('[Bottom-Nav]', err); }
+  })();
 
   /* ---------- Lokaler OPFS-Zwischenspeicher ---------- */
   const STEM_CACHE_DIR = 'sunshine-stem-cache';
@@ -6988,6 +7214,208 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
 </script>
 <!-- SpessaSynth (spessasynth_core, (c) spessasus, Apache License 2.0, https://github.com/spessasus/spessasynth_core) – Quellcode der Bibliothek ist dort verfügbar; Lizenztext unten. -->
 <script>
+/* ===== Sunshine@R · KI-Audio→MIDI: Basic Pitch (Spotify, Apache-2.0) via TensorFlow.js =====
+   Modell (~0,9 MB) + TF.js werden bei Bedarf nachgeladen und danach offline aus dem Browser-Speicher genutzt.
+   Quellen in dieser Reihenfolge: gespeichertes Modell (IndexedDB) → assets/basic-pitch/ → CDN.
+   Alternativ: Modelldateien (model.json + .bin) in den Optionen von Hand wählen.
+   Inferenz/Fensterung folgen basic-pitch-ts (22,05 kHz mono, Fenster 43844 Samples, Hop 36164, 15 Frames Rand). */
+(function () {
+  'use strict';
+  const SR = 22050, HOPF = 256, WIN = 43844, HOP = 36164, PAD = 3840, TRIM = 15, MIDI0 = 21, NP = 88;
+  const TF_URLS = ['assets/basic-pitch/tf.min.js', 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js'];
+  const MODEL_URLS = ['assets/basic-pitch/model.json',
+    'https://cdn.jsdelivr.net/npm/@spotify/basic-pitch@1.0.1/model/model.json',
+    'https://raw.githubusercontent.com/spotify/basic-pitch-ts/main/model/model.json'];
+  const IDB_KEY = 'indexeddb://sunshine-basic-pitch', LS_FLAG = 'sunshine.bp.cached';
+  const listeners = [];
+  const st = { status: 'idle', source: '', error: '', cached: false, backend: '' };
+  try { st.cached = localStorage.getItem(LS_FLAG) === '1'; } catch (_) {}
+  let model = null, loading = null;
+  const emit = () => listeners.forEach(f => { try { f(st); } catch (_) {} });
+  const set = (o) => { Object.assign(st, o); emit(); };
+
+  function loadScript(url, ms = 25000) {
+    return new Promise((res, rej) => {
+      const s = document.createElement('script'); let done = false;
+      const t = setTimeout(() => { if (!done) { done = true; s.remove(); rej(new Error('Zeitüberschreitung: ' + url)); } }, ms);
+      s.src = url; s.async = true;
+      s.onload = () => { if (!done) { done = true; clearTimeout(t); res(); } };
+      s.onerror = () => { if (!done) { done = true; clearTimeout(t); s.remove(); rej(new Error('Nicht ladbar: ' + url)); } };
+      document.head.appendChild(s);
+    });
+  }
+  async function ensureTf() {
+    if (window.tf && window.tf.loadGraphModel) return window.tf;
+    let last = null;
+    for (const u of TF_URLS) { try { await loadScript(u); if (window.tf && window.tf.loadGraphModel) break; } catch (e) { last = e; } }
+    if (!(window.tf && window.tf.loadGraphModel)) throw new Error('TensorFlow.js konnte nicht geladen werden (' + (last ? last.message : '?') + '). Internet prüfen oder assets/basic-pitch/tf.min.js ablegen.');
+    try { await window.tf.ready(); } catch (_) {}
+    try { set({ backend: window.tf.getBackend() }); } catch (_) {}
+    return window.tf;
+  }
+  async function persist(m) { try { await m.save(IDB_KEY); try { localStorage.setItem(LS_FLAG, '1'); } catch (_) {} set({ cached: true }); } catch (e) { console.warn('[BasicPitch] Speichern im Browser nicht möglich:', e); } }
+
+  async function load(force) {
+    if (model && !force) return model;
+    if (loading) return loading;
+    loading = (async () => {
+      set({ status: 'loading', error: '' });
+      try {
+        const tf = await ensureTf();
+        let m = null, src = '';
+        if (st.cached) { try { m = await tf.loadGraphModel(IDB_KEY); src = 'Browser-Speicher'; } catch (_) { try { localStorage.removeItem(LS_FLAG); } catch (__) {} st.cached = false; } }
+        const errs = [];
+        for (const u of (m ? [] : MODEL_URLS)) {
+          try { m = await tf.loadGraphModel(u); src = /^https?:/.test(u) ? 'Download' : 'assets-Ordner'; await persist(m); break; }
+          catch (e) { errs.push(u + ' → ' + (e && e.message ? e.message : e)); }
+        }
+        if (!m) throw new Error('Modell nicht erreichbar. Bitte Internet prüfen oder die Dateien model.json + group1-shard1of1.bin in den Optionen auswählen. (' + errs.length + ' Quellen versucht)');
+        model = m; set({ status: 'ready', source: src, error: '' });
+        return m;
+      } catch (e) { model = null; set({ status: 'error', error: e && e.message ? e.message : String(e) }); throw e; }
+      finally { loading = null; }
+    })();
+    return loading;
+  }
+  async function installFiles(files) {
+    const arr = Array.from(files || []);
+    const js = arr.find(f => /\.json$/i.test(f.name)), bins = arr.filter(f => /\.bin$/i.test(f.name));
+    if (!js || !bins.length) throw new Error('Bitte model.json UND die .bin-Datei (group1-shard1of1.bin) gemeinsam auswählen.');
+    set({ status: 'loading', error: '' });
+    try {
+      const tf = await ensureTf();
+      const m = await tf.loadGraphModel(tf.io.browserFiles([js].concat(bins)));
+      await persist(m); model = m; set({ status: 'ready', source: 'eigene Dateien', error: '' });
+    } catch (e) { set({ status: 'error', error: e && e.message ? e.message : String(e) }); throw e; }
+  }
+  async function remove() {
+    try { if (window.tf) await window.tf.io.removeModel(IDB_KEY); } catch (_) {}
+    try { localStorage.removeItem(LS_FLAG); } catch (_) {}
+    model = null; set({ status: 'idle', cached: false, source: '', error: '' });
+  }
+
+  async function resample(x, sr) {
+    if (Math.abs(sr - SR) < 1) return x;
+    const n = Math.max(1, Math.ceil(x.length * SR / sr));
+    const oc = new OfflineAudioContext(1, n, SR), b = oc.createBuffer(1, x.length, sr);
+    b.copyToChannel(x, 0);
+    const s = oc.createBufferSource(); s.buffer = b; s.connect(oc.destination); s.start();
+    return (await oc.startRendering()).getChannelData(0);
+  }
+
+  /* ---- Modell über alle Fenster laufen lassen → frames/onsets [T][88], contours werden nicht gebraucht ---- */
+  async function run(x, progress) {
+    const tf = window.tf, L = x.length;
+    const padded = new Float32Array(PAD + L); padded.set(x, PAD);
+    const nWin = Math.max(1, Math.ceil((L - (172 - 2 * TRIM) * HOPF) / HOP) + 1);
+    const G = Math.max(1, Math.floor(L / HOPF));
+    const frames = new Array(G), onsets = new Array(G);
+    const zero = () => new Float32Array(NP);
+    let last = -1;
+    for (let w = 0; w < nWin; w++) {
+      if (progress) progress(w / nWin);
+      const win = new Float32Array(WIN); win.set(padded.subarray(w * HOP, Math.min(padded.length, w * HOP + WIN)));
+      let fr, on;
+      const res = tf.tidy(() => {
+        const inp = tf.tensor3d(win, [1, WIN, 1]);
+        try { return { named: model.execute(inp, ['Identity_1', 'Identity_2', 'Identity']) }; }
+        catch (_) { return { pred: model.predict(inp) }; }
+      });
+      let outs;
+      if (res.named) outs = res.named; else { const p = res.pred; outs = Array.isArray(p) ? p : Object.values(p); }
+      const arrs = [];
+      for (const t of outs) { arrs.push({ shape: t.shape, data: await t.array() }); t.dispose && t.dispose(); }
+      if (res.named) { fr = arrs[0].data[0]; on = arrs[1].data[0]; }
+      else {
+        const n88 = arrs.filter(a => a.shape[a.shape.length - 1] === NP);
+        if (n88.length < 2) throw new Error('Unerwartete Modell-Ausgabe (Form ' + arrs.map(a => a.shape.join('x')).join(' | ') + ')');
+        const mean = a => { let s = 0, c = 0; for (const r of a.data[0]) for (const v of r) { s += v; c++; } return s / c; };
+        n88.sort((a, b) => mean(b) - mean(a)); fr = n88[0].data[0]; on = n88[1].data[0];   // Frames sind dichter als Onsets
+      }
+      for (let j = TRIM; j < fr.length - TRIM; j++) {
+        const g = Math.round((w * HOP + (j - TRIM) * HOPF) / HOPF);
+        if (g >= G) break;
+        frames[g] = Float32Array.from(fr[j]); onsets[g] = Float32Array.from(on[j]); last = Math.max(last, g);
+      }
+    }
+    for (let g = 0; g < G; g++) { if (!frames[g]) { frames[g] = g ? frames[g - 1] : zero(); onsets[g] = zero(); } }
+    if (progress) progress(1);
+    return { frames, onsets };
+  }
+
+  /* ---- Port von outputToNotesPoly (basic-pitch): Onset-Spitzen verfolgen + Melodia-Trick ---- */
+  function toNotes(frames, onsets, o) {
+    o = o || {};
+    const onT = o.onsetThresh ?? 0.5, frT = o.frameThresh ?? 0.3, minLen = o.minNoteLen ?? 5, tol = o.energyTol ?? 11, T = frames.length;
+    if (T < 3) return [];
+    // abgeleitete Onsets aus Frame-Anstiegen (hilft bei sanften Einsätzen)
+    let maxOn = 0; for (let t = 0; t < T; t++) for (let p = 0; p < NP; p++) if (onsets[t][p] > maxOn) maxOn = onsets[t][p];
+    const diff = new Array(T); let maxD = 0;
+    for (let t = 0; t < T; t++) {
+      diff[t] = new Float32Array(NP);
+      if (t < 2) continue;
+      for (let p = 0; p < NP; p++) { const d = Math.max(0, Math.min(frames[t][p] - frames[t - 1][p], frames[t][p] - frames[t - 2][p])); diff[t][p] = d; if (d > maxD) maxD = d; }
+    }
+    const on2 = new Array(T);
+    for (let t = 0; t < T; t++) { on2[t] = new Float32Array(NP); for (let p = 0; p < NP; p++) { const inf = maxD > 0 ? maxOn * diff[t][p] / maxD : 0; on2[t][p] = Math.max(onsets[t][p], inf); } }
+    const rem = new Float32Array(T * NP);
+    for (let t = 0; t < T; t++) rem.set(frames[t], t * NP);
+    const clear = (a, b, p) => { for (let i = a; i < b; i++) { rem[i * NP + p] = 0; if (p < NP - 1) rem[i * NP + p + 1] = 0; if (p > 0) rem[i * NP + p - 1] = 0; } };
+    const peaks = [];
+    for (let t = 1; t < T - 1; t++) for (let p = 0; p < NP; p++) { const v = on2[t][p]; if (v >= onT && v > on2[t - 1][p] && v > on2[t + 1][p]) peaks.push([t, p]); }
+    peaks.sort((a, b) => b[0] - a[0]);
+    const notes = [];
+    for (const [t, p] of peaks) {
+      if (t >= T - 1) continue;
+      let i = t + 1, k = 0;
+      while (i < T - 1 && k < tol) { if (frames[i][p] < frT) k++; else k = 0; i++; }
+      i -= k;
+      if (i - t <= minLen) continue;
+      clear(t, i, p);
+      let s = 0; for (let f = t; f < i; f++) s += frames[f][p];
+      notes.push({ startFrame: t, durFrames: i - t, bin: p, amp: s / (i - t) });
+    }
+    if (o.melodia !== false) {
+      for (let guard = 0; guard < 4000; guard++) {
+        let best = frT, bi = -1;
+        for (let q = 0; q < rem.length; q++) if (rem[q] > best) { best = rem[q]; bi = q; }
+        if (bi < 0) break;
+        const im = Math.floor(bi / NP), p = bi % NP;
+        rem[bi] = 0;
+        let i = im + 1, k = 0;
+        while (i < T - 1 && k < tol) { if (rem[i * NP + p] < frT) k++; else k = 0; rem[i * NP + p] = 0; if (p < NP - 1) rem[i * NP + p + 1] = 0; if (p > 0) rem[i * NP + p - 1] = 0; i++; }
+        const iEnd = i - 1 - k;
+        i = im - 1; k = 0;
+        while (i > 0 && k < tol) { if (rem[i * NP + p] < frT) k++; else k = 0; rem[i * NP + p] = 0; if (p < NP - 1) rem[i * NP + p + 1] = 0; if (p > 0) rem[i * NP + p - 1] = 0; i--; }
+        const iStart = i + 1 + k;
+        if (iEnd - iStart <= minLen) continue;
+        let s = 0; for (let f = iStart; f < iEnd; f++) s += frames[f][p];
+        notes.push({ startFrame: iStart, durFrames: iEnd - iStart, bin: p, amp: s / (iEnd - iStart) });
+      }
+    }
+    return notes;
+  }
+
+  /* x: Float32Array (mono) bei Samplerate sr → [{midi,t0,t1,amp}] in Sekunden ab Anfang von x */
+  async function transcribe(x, sr, opts, progress) {
+    opts = opts || {};
+    if (!model) await load();
+    const y = await resample(x, sr);
+    if (y.length < SR * 0.25) return [];
+    const { frames, onsets } = await run(y, progress);
+    const raw = toNotes(frames, onsets, opts);
+    return raw.map(n => ({ midi: n.bin + MIDI0, t0: n.startFrame * HOPF / SR, t1: (n.startFrame + n.durFrames) * HOPF / SR, amp: n.amp }))
+      .sort((a, b) => a.t0 - b.t0 || a.midi - b.midi);
+  }
+
+  window.BasicPitchAI = {
+    state: st, load, installFiles, remove, transcribe,
+    onChange: f => { listeners.push(f); },
+    _internals: { toNotes, run, resample, set model(m) { model = m; st.status = 'ready'; }, get model() { return model; }, consts: { SR, HOPF, WIN, HOP, PAD, TRIM } }
+  };
+})();
+</script>
+<script>
 /* ===== Sunshine@R · Design-Auswahl & Optionen ===== */
 (function () {
   'use strict';
@@ -6998,18 +7426,24 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
       pv: { bg: '#14161A', bar: 'background:#08090B;border:1px solid #2D323B', play: 'background:#FFB21E', card: 'background:#1E2127;border:1px solid #2D323B', r: 6 } },
     { id: 'neon', name: 'Neon Spektrum', desc: 'Schwarz mit Equalizer-Farben und Leuchten', meta: '#05060B',
       pv: { bg: 'radial-gradient(90px 60px at 0 0,rgba(25,195,255,.4),transparent),radial-gradient(90px 70px at 100% 60%,rgba(255,47,160,.35),transparent),#05060B', bar: 'background:rgba(255,255,255,.06);border:1px solid rgba(138,61,255,.6)', play: 'background:linear-gradient(120deg,#19C3FF,#8A3DFF,#FF2FA0)', card: 'background:rgba(255,255,255,.05);border:1px solid rgba(138,61,255,.5)', r: 9 } },
+    { id: 'liquid', name: 'Liquid Matt', desc: 'Mattes Milchglas, weich, Pastell-Akzente', meta: '#1B1D2B',
+      pv: { bg: 'radial-gradient(90px 60px at 100% 0,rgba(255,196,160,.45),transparent),radial-gradient(90px 70px at 0 60%,rgba(176,160,255,.45),transparent),#1B1D2B', bar: 'background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.08)', play: 'background:linear-gradient(145deg,#FFD9C2,#FFB38A)', card: 'background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.07)', r: 12 } },
     { id: 'classic', name: 'Klassisch', desc: 'Das bisherige Design', meta: '#090c12',
       pv: { bg: '#090c12', bar: 'background:#111622;border:1px solid #28334a', play: 'background:#10b981', card: 'background:#171e2e;border:1px solid #28334a', r: 6 } }
   ];
   const LS_THEME = 'sunshine.theme', LS_UI = 'sunshine.ui';
   const html = document.documentElement;
   const getTheme = () => { const t = html.getAttribute('data-theme'); return THEMES.some(x => x.id === t) ? t : 'aurora'; };
-  const readUi = () => { try { return Object.assign({ glass: true, glow: true, large: false }, JSON.parse(localStorage.getItem(LS_UI) || '{}')); } catch (_) { return { glass: true, glow: true, large: false }; } };
+  const UI_DEFAULTS = { glass: true, glow: true, large: false, accent: null, glassK: 40, blur: null, radius: 'normal' };
+  const readUi = () => { try { return Object.assign({}, UI_DEFAULTS, JSON.parse(localStorage.getItem(LS_UI) || '{}')); } catch (_) { return Object.assign({}, UI_DEFAULTS); } };
   function applyUi(p) {
+    if (typeof window.__sunUi === 'function') { window.__sunUi(p); return; }
     html.setAttribute('data-glass', p.glass ? 'on' : 'off');
     html.setAttribute('data-glow', p.glow ? 'on' : 'off');
     html.setAttribute('data-large', p.large ? '1' : '0');
   }
+  const ACCENTS = [['#FF8A1A', 'Sonne'], ['#38C8FF', 'Cyan'], ['#A78BFF', 'Violett'], ['#34D399', 'Grün'], ['#FF6B8A', 'Rosa'], ['#FACC15', 'Gold'], ['#F8FAFC', 'Weiß']];
+  const BLUR_DEFAULT = { aurora: 22, neon: 22, liquid: 30, studio: 0, classic: 0 };
   function applyTheme(id, persist) {
     const t = THEMES.find(x => x.id === id) || THEMES[0];
     html.setAttribute('data-theme', t.id);
@@ -7045,16 +7479,91 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
         ${toggle('glow', 'Leuchteffekte', 'Glühende Zahlen, Buttons und Schatten.', ui.glow)}
         ${toggle('large', 'Große Bedienelemente', 'Alle Buttons mindestens 44 px hoch – leichter zu treffen.', ui.large)}
       </div>
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Anpassen</div>
+      <div class="rounded-xl border border-slate-800 p-3 space-y-3.5">
+        <div>
+          <div class="flex items-center justify-between mb-1.5"><span class="text-sm font-semibold">Akzentfarbe</span><span class="text-[11px] text-slate-400">Play, Export, aktiver Tab, Regler</span></div>
+          <div id="acc-row" class="flex flex-wrap items-center gap-2">
+            <button type="button" data-accent-auto aria-pressed="${!ui.accent}" class="sw-dot text-[10px] font-bold text-slate-200 bg-slate-800" title="Standard des Designs" aria-label="Akzent: Standard des Designs">Auto</button>
+            ${ACCENTS.map(a => `<button type="button" data-accent="${a[0]}" aria-pressed="${(ui.accent || '').toLowerCase() === a[0].toLowerCase()}" class="sw-dot" style="background:${a[0]}" title="${a[1]}" aria-label="Akzent: ${a[1]}"></button>`).join('')}
+            <label class="sw-dot relative overflow-hidden cursor-pointer" title="Eigene Farbe" style="background:conic-gradient(#f43f5e,#f59e0b,#84cc16,#06b6d4,#8b5cf6,#f43f5e)"><input type="color" data-accent-custom value="${ui.accent || '#ff8a1a'}" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" aria-label="Eigene Akzentfarbe"></label>
+          </div>
+        </div>
+        <label class="block"><div class="flex items-center justify-between"><span class="text-sm font-semibold">Transparenz der Flächen</span><span id="v-glassK" class="text-[11px] font-mono text-slate-400">${ui.glassK === 40 ? 'Standard' : Math.round(ui.glassK * 2.5) + ' %'}</span></div>
+          <input type="range" data-range="glassK" min="8" max="100" step="1" value="${ui.glassK}" class="w-full daw-slider mt-1"><div class="flex justify-between text-[10px] text-slate-500"><span>klar</span><span>Standard</span><span>deckend</span></div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Wirkt bei den Glas-Designs (Aurora, Neon, Liquid).</div></label>
+        <label class="block"><div class="flex items-center justify-between"><span class="text-sm font-semibold">Unschärfe (Glas)</span><span id="v-blur" class="text-[11px] font-mono text-slate-400">${ui.blur == null ? 'Standard' : ui.blur + ' px'}</span></div>
+          <input type="range" data-range="blur" min="0" max="40" step="1" value="${ui.blur == null ? (BLUR_DEFAULT[cur] || 22) : ui.blur}" class="w-full daw-slider mt-1"></label>
+        <div><div class="text-sm font-semibold mb-1.5">Rundung</div>
+          <div class="grid grid-cols-3 gap-2" id="rad-row">${[['sharp', 'Eckig'], ['normal', 'Normal'], ['round', 'Extra rund']].map(r => `<button type="button" data-radius="${r[0]}" aria-pressed="${ui.radius === r[0]}" class="py-2.5 text-xs font-bold rounded-xl border ${ui.radius === r[0] ? 'border-amber-400 bg-slate-800 text-amber-200' : 'border-slate-700 bg-slate-900 text-slate-300'}">${r[1]}</button>`).join('')}</div></div>
+        <button type="button" data-reset-custom class="w-full py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-xs font-bold text-slate-300">Anpassungen zurücksetzen</button>
+      </div>
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">KI · Audio → MIDI</div>
+      <div class="rounded-xl border border-slate-800 p-3 space-y-2.5">
+        <div class="flex items-start gap-2.5"><span id="bp-dot" class="mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 bg-slate-500"></span><div class="min-w-0"><div class="text-sm font-semibold">Basic Pitch (Spotify) · polyphone Noten-KI</div><div id="bp-status" class="text-[11px] text-slate-400"></div></div></div>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" data-bp-load class="py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-xs font-bold text-slate-200">Jetzt laden (Internet)</button>
+          <button type="button" data-bp-pick class="py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-xs font-bold text-slate-200">Dateien wählen …</button>
+        </div>
+        <button type="button" data-bp-remove class="w-full py-2 rounded-xl border border-slate-800 text-[11px] font-semibold text-slate-400">Aus dem Gerätespeicher entfernen</button>
+        <input type="file" id="bp-files" multiple accept=".json,.bin,application/json,application/octet-stream" hidden>
+        <div class="text-[10px] leading-snug text-slate-500">Im Audio-to-MIDI-Menü „🧠 KI – Basic Pitch“ wählen. Das kleine Modell (~1 MB) wird beim ersten Einsatz automatisch geladen und danach offline genutzt. Ohne Internet: <span class="font-mono">model.json</span> + <span class="font-mono">group1-shard1of1.bin</span> (Ordner <span class="font-mono">model/</span> im Paket „@spotify/basic-pitch“) hier mit „Dateien wählen“ auswählen. Lizenz Apache-2.0.</div>
+      </div>
       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Klang</div>
       <label class="flex items-start gap-3 py-2 cursor-pointer ${spessaOk ? '' : 'opacity-50'}"><input type="checkbox" data-spessa ${spessaOk && SpessaEngine.enabled ? 'checked' : ''} ${spessaOk ? '' : 'disabled'} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">SpessaSynth-Engine für SoundFonts</span><span class="block text-[11px] text-slate-400">Volle SoundFont-Unterstützung (Zonen, Filter, Drums). Aus = einfacher Ersatz-Player.</span></span></label>
       <div class="flex items-center gap-3 mt-4 pt-3 border-t border-slate-800"><img src="assets/sunshine-r-app-icon.png" alt="" class="w-10 h-10 rounded-xl" onerror="this.remove()"><div class="min-w-0"><div class="text-sm font-bold">Sunshine@R Stem DAW Studio <span class="text-[10px] font-mono text-cyan-300">PRO</span></div><div class="text-[11px] text-slate-400">Design wird auf diesem Gerät gespeichert.</div></div><button type="button" data-close class="ml-auto px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-sm">Fertig</button></div>
     </div>`;
     document.body.appendChild(ov);
+    // KI-Modell-Status live anzeigen
+    const bpRender = () => {
+      const el = ov.querySelector('#bp-status'), dot = ov.querySelector('#bp-dot'); if (!el) return;
+      const B = window.BasicPitchAI; if (!B) { el.textContent = 'KI-Modul nicht eingebaut.'; return; }
+      const s = B.state; let txt, col = 'bg-slate-500';
+      if (s.status === 'ready') { txt = 'Bereit ✓ · Quelle: ' + (s.source || '?') + (s.backend ? ' · ' + s.backend : ''); col = 'bg-emerald-400'; }
+      else if (s.status === 'loading') { txt = 'Lädt …'; col = 'bg-amber-400 animate-pulse'; }
+      else if (s.status === 'error') { txt = 'Fehler: ' + (s.error || '').slice(0, 220); col = 'bg-rose-500'; }
+      else txt = s.cached ? 'Im Gerätespeicher – wird bei Bedarf geladen.' : 'Noch nicht geladen – lädt automatisch beim ersten KI-Einsatz (~1 MB).';
+      el.textContent = txt; dot.className = 'mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 ' + col;
+    };
+    if (window.BasicPitchAI) window.BasicPitchAI.onChange(() => { if (document.body.contains(ov)) bpRender(); });
+    bpRender();
+    const say = (m, k) => { if (typeof toast === 'function') toast(m, k); };
+    ov.addEventListener('change', e => {
+      if (e.target.id === 'bp-files' && e.target.files.length) {
+        window.BasicPitchAI.installFiles(e.target.files).then(() => say('KI-Modell aus eigenen Dateien geladen und gespeichert.', 'success'), err => say(err.message, 'error'));
+        e.target.value = '';
+      }
+    });
     ov.addEventListener('click', e => {
       const t = e.target;
+      if (t.closest('button[data-bp-load]')) { say('KI-Modell wird geladen …', 'info'); window.BasicPitchAI.load(true).then(() => say('KI-Modell bereit.', 'success'), err => say(err.message.slice(0, 200), 'error')); return; }
+      if (t.closest('button[data-bp-pick]')) { ov.querySelector('#bp-files').click(); return; }
+      if (t.closest('button[data-bp-remove]')) { window.BasicPitchAI.remove().then(() => say('KI-Modell entfernt.', 'info')); return; }
       if (t === ov || t.closest('[data-close]')) { ov.remove(); return; }
-      const card = t.closest('[data-theme-id]');
+      const card = t.closest('button[data-theme-id]');
       if (card) { applyTheme(card.dataset.themeId); openSettings(); const sc = document.querySelector('#settings-modal > div'); return; }
+      const setAcc = v => { const p = readUi(); p.accent = v; saveUi(p); ov.querySelectorAll('#acc-row .sw-dot').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.accent || '').toLowerCase() === (v || '').toLowerCase() && !!v || (b.hasAttribute('data-accent-auto') && !v)))); };
+      if (t.closest('button[data-accent-auto]')) { setAcc(null); return; }
+      const sw = t.closest('button[data-accent]'); if (sw) { setAcc(sw.dataset.accent); return; }
+      const rb = t.closest('button[data-radius]');
+      if (rb) { const p = readUi(); p.radius = rb.dataset.radius; saveUi(p); ov.querySelectorAll('#rad-row button').forEach(b => { const on = b === rb; b.setAttribute('aria-pressed', String(on)); b.className = 'py-2.5 text-xs font-bold rounded-xl border ' + (on ? 'border-amber-400 bg-slate-800 text-amber-200' : 'border-slate-700 bg-slate-900 text-slate-300'); }); return; }
+      if (t.closest('button[data-reset-custom]')) { const p = readUi(); Object.assign(p, { accent: null, glassK: UI_DEFAULTS.glassK, blur: null, radius: 'normal' }); saveUi(p); openSettings(); return; }
+    });
+    // Live-Regler: Dialog wird beim Ziehen durchsichtig, damit man die Wirkung sieht
+    const peek = on => ov.classList.toggle('peek', on);
+    ov.addEventListener('pointerdown', e => { if (e.target.closest('[data-range],[data-accent-custom]')) peek(true); });
+    ['pointerup', 'pointercancel', 'change', 'blur'].forEach(ev => ov.addEventListener(ev, e => { if (e.target.closest && e.target.closest('[data-range],[data-accent-custom]')) peek(false); }, true));
+    ov.addEventListener('input', e => {
+      const t = e.target;
+      if (t.dataset && t.dataset.range) {
+        const p = readUi(), v = +t.value;
+        if (t.dataset.range === 'glassK') { p.glassK = v; const l = ov.querySelector('#v-glassK'); if (l) l.textContent = v === 40 ? 'Standard' : Math.round(v * 2.5) + ' %'; }
+        else if (t.dataset.range === 'blur') { p.blur = v; const l = ov.querySelector('#v-blur'); if (l) l.textContent = v + ' px'; }
+        saveUi(p);
+      } else if (t.dataset && 'accentCustom' in t.dataset) {
+        const p = readUi(); p.accent = t.value; saveUi(p);
+        ov.querySelectorAll('#acc-row .sw-dot').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      }
     });
     ov.addEventListener('change', e => {
       const t = e.target;
@@ -7067,7 +7576,6 @@ html[data-large="1"] .tr-mute-btn,html[data-large="1"] .tr-solo-btn{min-width:40
   applyUi(readUi());
   document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#btn-settings')) { e.preventDefault(); try { openSettings(); } catch (err) { console.error('[Optionen]', err); if (typeof toast === 'function') toast('Optionen konnten nicht geöffnet werden: ' + err.message, 'error'); } } });
 })();
-
 </script>
 <script type="text/plain" id="spessa-license">
 
