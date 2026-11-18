@@ -15,6 +15,9 @@ const fs = require('fs'), path = require('path');
 const root = process.argv[2] || process.cwd();
 const app = path.join(root, 'android', 'app', 'src', 'main');
 if (!fs.existsSync(app)) { console.error('android/app/src/main nicht gefunden – erst „npx cap add android“ ausführen.'); process.exit(1); }
+// Sicherungen NIE in res/ oder java/ ablegen – Gradle würde sie als Ressource/Quelltext behandeln und scheitern
+const bak = path.join(root, 'android', 'sunshine-orig'); fs.mkdirSync(bak, { recursive: true });
+for (const d of ['res/values', 'java']) { const base = path.join(app, d); if (!fs.existsSync(base)) continue; (function w(x){ for (const e of fs.readdirSync(x, { withFileTypes: true })) { const q = path.join(x, e.name); if (e.isDirectory()) w(q); else if (e.name.endsWith('.orig')) fs.unlinkSync(q); } })(base); }
 const log = m => console.log('[patch-android] ' + m);
 
 // ---- MainActivity.java -----------------------------------------------------------
@@ -33,7 +36,7 @@ if (src.includes('SUNSHINE_PATCH')) { log('MainActivity.java ist schon gepatcht.
 else {
   const pkg = (src.match(/^\s*package\s+([\w.]+)\s*;/m) || [])[1];
   if (!pkg) { console.error('package-Zeile nicht gefunden.'); process.exit(1); }
-  fs.writeFileSync(ma + '.orig', src);
+  fs.writeFileSync(path.join(bak, 'MainActivity.java.txt'), src);
   fs.writeFileSync(ma, `package ${pkg};
 // SUNSHINE_PATCH – von scripts/patch-android.cjs erzeugt
 import android.content.res.Configuration;
@@ -94,7 +97,7 @@ public class MainActivity extends BridgeActivity {
   }
 }
 `);
-  log('MainActivity.java geschrieben (' + pkg + ', Original: MainActivity.java.orig).');
+  log('MainActivity.java geschrieben (' + pkg + ', Sicherung: android/sunshine-orig/).');
 }
 
 // ---- styles.xml: Kamera-Ausschnitt nutzen + Fensterfarbe -----------------------------
@@ -108,7 +111,7 @@ if (fs.existsSync(stylesP)) {
     const cut = '\n        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>';
     let n = 0;
     st = st.replace(/(<style\s+name="(AppTheme[^"]*)"[^>]*>)/g, (m, tag, nm) => { n++; return tag + (/Launch|Splash/i.test(nm) ? cut : add); });
-    fs.writeFileSync(stylesP + '.orig', fs.readFileSync(stylesP));
+    fs.writeFileSync(path.join(bak, 'styles.xml.txt'), fs.readFileSync(stylesP));
     fs.writeFileSync(stylesP, st);
     log('styles.xml: ' + n + ' Theme(s) ergänzt.');
   }
