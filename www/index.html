@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Sunshine@R Stem DAW Studio – Multi-Track &amp; MIDI Browser DAW</title>
+
+  <meta name="theme-color" content="#090c12" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2338bdf8%27/%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%238b5cf6%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2310b981%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2728%27%20fill%3D%27%23090c12%27/%3E%3Crect%20x%3D%277%27%20y%3D%277%27%20width%3D%27114%27%20height%3D%27114%27%20rx%3D%2724%27%20fill%3D%27url%28%23g%29%27/%3E%3Cpath%20d%3D%27M48%2088V34l48-10v53M48%2088c0%208-10%2014-22%2014S4%2096%204%2088s10-14%2022-14%2022%206%2022%2014zm48-11c0%208-10%2014-22%2014s-22-6-22-14%2010-14%2022-14%2022%206%2022%2014z%27%20transform%3D%27translate%2813%200%29%20scale%28.9%29%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2338bdf8%27/%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%238b5cf6%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2310b981%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2728%27%20fill%3D%27%23090c12%27/%3E%3Crect%20x%3D%277%27%20y%3D%277%27%20width%3D%27114%27%20height%3D%27114%27%20rx%3D%2724%27%20fill%3D%27url%28%23g%29%27/%3E%3Cpath%20d%3D%27M48%2088V34l48-10v53M48%2088c0%208-10%2014-22%2014S4%2096%204%2088s10-14%2022-14%2022%206%2022%2014zm48-11c0%208-10%2014-22%2014s-22-6-22-14%2010-14%2022-14%2022%206%2022%2014z%27%20transform%3D%27translate%2813%200%29%20scale%28.9%29%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <!-- JSZip für ZIP-Stem-Import -->
@@ -160,12 +164,48 @@
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
     }
+
+    /* Sunshine@R responsive studio layout */
+    .brand-mark { flex: 0 0 auto; }
+    .dock-tab-btn { min-height: 38px; }
+    .dock-tab-panel { min-width: 0; }
+    .track-collapse-btn { min-width: 25px; }
+    .project-action-btn { white-space: nowrap; }
+    @media (max-width: 760px) {
+      header.sticky { padding-left: 8px; padding-right: 8px; }
+      header.sticky > div { align-items: stretch; }
+      header.sticky > div > div:first-child { width: 100%; }
+      header.sticky .max-w-\[1800px\] { gap: 8px; }
+      header.sticky .text-sm.font-extrabold { font-size: 12px; }
+      #status-subtitle { max-width: 220px; }
+      header.sticky > div > div:last-child { width: 100%; display:flex; flex-wrap:wrap; }
+      #drop-zone-wrapper { padding-left: 7px; padding-right: 7px; }
+      #multitrack-lanes { max-height: 48vh; }
+      #tab-panel-midi, #tab-panel-drums, #tab-panel-vocals, #tab-panel-mixer { padding: 9px; }
+      .dock-tab-btn { flex: 1 1 calc(50% - 6px); justify-content: flex-start; text-align:left; }
+      #piano-roll-container { height: 220px; }
+      #tab-panel-drums .flex.items-center.gap-2\\.5 { gap: 5px; }
+      #tab-panel-drums .w-32 { width: 82px; }
+      #tab-panel-drums .seq-pad { min-width: 0; }
+    }
+    @media (orientation: portrait) and (max-width: 760px) {
+      header.sticky > div { flex-direction: column; }
+      header.sticky > div > div:first-child { flex-direction: column; align-items: stretch; }
+      header.sticky .border-r { border-right: 0; padding-right: 0; }
+      #drop-zone-wrapper > .bg-daw-panel { border-radius: 12px; }
+      #multitrack-lanes .grid.grid-cols-12 { display:flex; flex-direction:column; }
+      #multitrack-lanes .grid.grid-cols-12 > .col-span-12 { width:100%; }
+      #multitrack-lanes .grid.grid-cols-12 > .relative { width:100%; }
+    }
+    .dock-is-collapsed { display:none !important; }
+    .track-is-collapsed { display:none !important; }
+
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-daw-bg text-slate-200">
 
   <!-- Non-blocking Toast Notification Stack -->
-  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
   <!-- Hidden Universal File Input (ZIP, Audio, MIDI) -->
   <input id="universal-file-input" type="file" accept=".zip,.wav,.mp3,.ogg,.flac,.m4a,.aac,.mid,.midi,application/zip,application/x-zip-compressed,audio/*,audio/midi,audio/x-midi" multiple class="hidden" />
@@ -179,7 +219,7 @@
       <!-- Left: App Title & Transport Controls -->
       <div class="flex flex-wrap items-center gap-2.5">
         <div class="flex items-center gap-2 pr-2 border-r border-daw-border">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-sky-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <div class="brand-mark w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 via-sky-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
@@ -244,6 +284,8 @@
         <button id="btn-import-files" class="px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition flex items-center gap-1">
           <span>📂 ZIP / Audio / MIDI</span>
         </button>
+        <button id="btn-save-project" class="project-action-btn px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 text-xs font-semibold transition">💾 Projekt speichern</button>
+        <button id="btn-open-projects" class="project-action-btn px-2.5 py-1.5 rounded-lg bg-daw-surface hover:bg-daw-elevated text-slate-200 border border-daw-border text-xs font-semibold transition">📁 Projekte</button>
 
         <button id="btn-auto-trim" type="button" hidden aria-hidden="true" tabindex="-1" style="display:none"></button>
 
@@ -920,7 +962,8 @@
         vocalCleanup: opts.vocalCleanup !== undefined ? opts.vocalCleanup : tpl.vocalCleanup,
         badge: opts.badge || tpl.badge,
         editTab: opts.editTab || tpl.editTab,
-        sectionClips: { intro: true, verse: true, drop: true, break: true, outro: true }
+        sectionClips: { intro: true, verse: true, drop: true, break: true, outro: true },
+        fx: []
       };
 
       if (tpl.type === 'midi') {
@@ -1013,6 +1056,168 @@
      * WEB AUDIO API DSP & REAL-TIME LOOKAHEAD SCHEDULER ENGINE
      * ============================================================================
      */
+    /* Globaler HTML-Escaper. Vorher gab es escapeText nur lokal im letzten Script-Block,
+       dadurch warf openTrackFxRack() einen ReferenceError und das Fenster wurde nie angezeigt. */
+    function escapeText(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    const FX_CATALOG = {
+      eq: { name: '3-Band EQ', group: 'Klang', defaults: { low: 0, mid: 0, high: 0 } },
+      compressor: { name: 'Compressor', group: 'Dynamik', defaults: { threshold: -18, ratio: 3, attack: 10, release: 120 } },
+      reverb: { name: 'Reverb / Hall', group: 'Raum', defaults: { mix: 22 } },
+      delay: { name: 'Stereo Delay', group: 'Zeit', defaults: { time: 260, feedback: 28, mix: 20 } },
+      filter: { name: 'Filter', group: 'Klang', defaults: { cutoff: 8000, resonance: 1.2, mode: 'lowpass' } },
+      saturation: { name: 'Saturation', group: 'Farbe', defaults: { drive: 18, mix: 25 } },
+      chorus: { name: 'Chorus', group: 'Modulation', defaults: { rate: 0.8, depth: 12, mix: 25 } },
+      deesser: { name: 'De-Esser', group: 'Vocal', defaults: { frequency: 6800, reduction: 5 } }
+    };
+
+    function suggestedFxForTrack(track) {
+      if (track.type === 'midi') return ['eq','filter','chorus','reverb','delay','compressor','saturation'];
+      if (track.type === 'mic') return ['eq','deesser','compressor','reverb','delay','filter','saturation'];
+      if (track.type === 'audio' || track.type === 'stem') return ['eq','compressor','deesser','filter','reverb','delay','saturation'];
+      if (track.type === 'kick' || track.type === 'bass') return ['eq','compressor','saturation','filter','delay'];
+      return ['eq','filter','reverb','delay','saturation','compressor'];
+    }
+
+    function buildTrackEffect(ctx, effect) {
+      const p = effect.params || {};
+      const input = ctx.createGain(), output = ctx.createGain();
+      let node = null;
+      if (effect.type === 'eq') {
+        const low=ctx.createBiquadFilter(), mid=ctx.createBiquadFilter(), high=ctx.createBiquadFilter();
+        low.type='lowshelf'; low.frequency.value=180; low.gain.value=p.low||0;
+        mid.type='peaking'; mid.frequency.value=1000; mid.Q.value=0.8; mid.gain.value=p.mid||0;
+        high.type='highshelf'; high.frequency.value=6500; high.gain.value=p.high||0;
+        input.connect(low); low.connect(mid); mid.connect(high); high.connect(output);
+        return {input, output, nodes:{low,mid,high}};
+      }
+      if (effect.type === 'compressor') {
+        node=ctx.createDynamicsCompressor(); node.threshold.value=p.threshold ?? -18; node.ratio.value=p.ratio ?? 3; node.attack.value=(p.attack ?? 10)/1000; node.release.value=(p.release ?? 120)/1000; node.knee.value=8;
+      } else if (effect.type === 'filter') {
+        node=ctx.createBiquadFilter(); node.type=p.mode || 'lowpass'; node.frequency.value=p.cutoff ?? 8000; node.Q.value=p.resonance ?? 1.2;
+      } else if (effect.type === 'deesser') {
+        node=ctx.createBiquadFilter(); node.type='peaking'; node.frequency.value=p.frequency ?? 6800; node.Q.value=2.2; node.gain.value=-(p.reduction ?? 5);
+      } else if (effect.type === 'saturation') {
+        node=ctx.createWaveShaper(); const amount=Math.max(1,p.drive ?? 18); const curve=new Float32Array(2048); for(let i=0;i<curve.length;i++){const x=i*2/(curve.length-1)-1;curve[i]=Math.tanh(x*(1+amount/10))/Math.tanh(1+amount/10);} node.curve=curve; node.oversample='2x';
+      } else if (effect.type === 'delay' || effect.type === 'chorus') {
+        const delay=ctx.createDelay(2); const feedback=ctx.createGain(); const wet=ctx.createGain(); const dry=ctx.createGain();
+        const mix=(p.mix ?? 22)/100; dry.gain.value=1-mix; wet.gain.value=mix;
+        delay.delayTime.value=effect.type==='chorus' ? 0.018 : (p.time ?? 260)/1000;
+        feedback.gain.value=effect.type==='chorus' ? 0.08 : Math.min(0.78,(p.feedback ?? 28)/100);
+        input.connect(dry); dry.connect(output); input.connect(delay); delay.connect(wet); wet.connect(output); delay.connect(feedback); feedback.connect(delay);
+        if(effect.type==='chorus') { const lfo=ctx.createOscillator(), depth=ctx.createGain(); lfo.frequency.value=p.rate ?? 0.8; depth.gain.value=(p.depth ?? 12)/1000; lfo.connect(depth); depth.connect(delay.delayTime); lfo.start(); return {input,output,nodes:{delay,feedback,wet,dry,lfo,depth}}; }
+        return {input,output,nodes:{delay,feedback,wet,dry}};
+      } else if (effect.type === 'reverb') {
+        // Eigener Send in den vorhandenen Stereo-Hallbus; das trockene Signal bleibt erhalten.
+        const send=ctx.createGain(); send.gain.value=(p.mix ?? 22)/100; input.connect(output); input.connect(send);
+        if(audioEngine.reverbConvolver && audioEngine.masterGain){send.connect(audioEngine.reverbConvolver);}
+        return {input,output,nodes:{send}};
+      }
+      if (!node) return null;
+      input.connect(node); node.connect(output);
+      return {input,output,node,nodes:{node}};
+    }
+
+    function rebuildTrackAudioGraph(track) {
+      if (!audioEngine.ctx) return;
+      const old=audioEngine.channelNodes[track.id];
+      if(old){
+        try { old.input.disconnect(); old.lowCut.disconnect(); old.fxInput?.disconnect(); old.scGain.disconnect(); old.sectionGate.disconnect(); old.panner.disconnect(); old.fader.disconnect(); old.analyser.disconnect(); old.vocalChain && Object.values(old.vocalChain).forEach(n=>n.disconnect()); old.fxNodes?.forEach(e=>{[e.input,e.output,...Object.values(e.nodes||{})].forEach(n=>{try{n?.disconnect();}catch(_){}})}); } catch(_){}
+        delete audioEngine.channelNodes[track.id];
+      }
+      audioEngine.ensureTrackNode(track);
+      audioEngine.syncAudioParams();
+    }
+
+    function openTrackFxRack(trackId) {
+      const track=dawState.tracks.find(t=>t.id===trackId); if(!track) return;
+      if(!Array.isArray(track.fx)) track.fx=[];
+      document.getElementById('track-fx-modal')?.remove();
+      const overlay=document.createElement('div'); overlay.id='track-fx-modal'; overlay.className='fixed inset-0 z-[100] bg-black/80 flex items-end sm:items-center justify-center p-2 sm:p-5';
+      const options=suggestedFxForTrack(track);
+      const cards=track.fx.map((fx,i)=>{
+        const meta=FX_CATALOG[fx.type]; if(!meta) return '';
+        const p=fx.params||{};
+        const fields=Object.entries(meta.defaults).map(([key,def])=>{
+          if(key==='mode') return `<label class="text-xs text-slate-300">Filtertyp<select data-param="mode" data-index="${i}" class="w-full mt-1 bg-slate-900 border border-slate-600 rounded p-2"><option value="lowpass" ${p.mode==='lowpass'?'selected':''}>Low-pass</option><option value="highpass" ${p.mode==='highpass'?'selected':''}>High-pass</option><option value="bandpass" ${p.mode==='bandpass'?'selected':''}>Band-pass</option></select></label>`;
+          const min=key==='threshold'?-60:key==='time'?1:key==='frequency'||key==='cutoff'?80:key==='ratio'?1:key==='attack'?1:key==='release'?10:key==='feedback'||key==='mix'||key==='drive'||key==='depth'||key==='reduction'?0:key==='rate'?0.1:-12;
+          const max=key==='threshold'?0:key==='time'?1200:key==='frequency'||key==='cutoff'?18000:key==='ratio'?20:key==='attack'?100:key==='release'?1000:key==='feedback'||key==='mix'||key==='drive'||key==='depth'?100:key==='rate'?8:key==='reduction'?18:12;
+          const step=key==='rate'||key==='resonance'?0.1:key==='time'||key==='frequency'||key==='cutoff'?1:1;
+          return `<label class="block text-[11px] text-slate-300">${({low:'Bass (dB)',mid:'Mitten (dB)',high:'Höhen (dB)',threshold:'Threshold (dB)',ratio:'Ratio',attack:'Attack (ms)',release:'Release (ms)',mix:'Wet (%)',time:'Zeit (ms)',feedback:'Feedback (%)',cutoff:'Cutoff (Hz)',resonance:'Resonanz',drive:'Drive (%)',rate:'Rate (Hz)',depth:'Tiefe',frequency:'Frequenz (Hz)',reduction:'Absenkung (dB)'})[key]||key}<span class="float-right text-cyan-300" data-value="${i}-${key}">${p[key] ?? def}</span><input data-param="${key}" data-index="${i}" type="range" min="${min}" max="${max}" step="${step}" value="${p[key] ?? def}" class="w-full accent-cyan-400" /></label>`;
+        }).join('');
+        return `<section class="rounded-xl border border-slate-700 bg-slate-900/80 p-3"><div class="flex items-center gap-2 mb-3"><strong class="text-sm">${meta.name}</strong><label class="ml-auto text-xs"><input data-enabled="${i}" type="checkbox" ${fx.enabled?'checked':''}/> Aktiv</label><button data-remove="${i}" class="text-rose-300 text-xs px-2">Entfernen</button></div><div class="grid grid-cols-2 gap-x-4 gap-y-3">${fields}</div></section>`;
+      }).join('');
+      overlay.innerHTML=`<div class="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl border border-cyan-500/40 bg-slate-950 p-4 shadow-2xl"><div class="flex items-center gap-3 mb-1"><div class="text-lg font-black text-white">FX-Rack · ${escapeText(track.name)}</div><button data-close class="ml-auto px-3 py-1 rounded-lg bg-slate-800 text-slate-300">✕</button></div><p class="text-xs text-slate-400 mb-4">${escapeText(String(track.type||'').toUpperCase())} · Effekte werden nur auf diese Spur angewendet.</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">${cards || '<p class="text-xs text-slate-500">Noch keine Effekte eingefügt.</p>'}</div><div class="border-t border-slate-700 pt-3"><label class="text-xs text-slate-300">Effekt hinzufügen</label><div class="flex gap-2 mt-2"><select id="fx-add-select" class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm">${options.map(k=>`<option value="${k}">${FX_CATALOG[k].name}</option>`).join('')}</select><button data-add class="px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">＋ Hinzufügen</button></div><div class="flex flex-wrap gap-2 mt-3">${options.map(k=>`<button data-quickadd="${k}" class="px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300">＋ ${FX_CATALOG[k].name}</button>`).join('')}</div></div><div class="flex justify-end mt-4"><button data-close class="px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">Fertig</button></div></div>`;
+      document.body.appendChild(overlay);
+      const redraw=()=>{rebuildTrackAudioGraph(track); document.querySelectorAll('.tr-fx-btn').forEach(b=>{if(b.dataset.fx===track.id)b.textContent=`FX ${track.fx.filter(x=>x.enabled).length}`;});};
+      const add=(type)=>{const meta=FX_CATALOG[type]; if(!meta)return; track.fx.push({id:`fx_${Date.now()}_${Math.random().toString(36).slice(2,5)}`,type,enabled:true,params:{...meta.defaults}}); redraw(); openTrackFxRack(track.id);};
+      overlay.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>overlay.remove());
+      overlay.querySelector('[data-add]').onclick=()=>add(overlay.querySelector('#fx-add-select').value);
+      overlay.querySelectorAll('[data-quickadd]').forEach(b=>b.onclick=()=>add(b.dataset.quickadd));
+      overlay.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{track.fx.splice(Number(b.dataset.remove),1);redraw();openTrackFxRack(track.id);});
+      overlay.querySelectorAll('[data-enabled]').forEach(b=>b.onchange=()=>{track.fx[Number(b.dataset.enabled)].enabled=b.checked;redraw();});
+      overlay.querySelectorAll('[data-param]').forEach(el=>{
+        const update=()=>{const fx=track.fx[Number(el.dataset.index)]; if(!fx)return; fx.params[el.dataset.param]=el.tagName==='SELECT'?el.value:Number(el.value); const val=overlay.querySelector(`[data-value="${el.dataset.index}-${el.dataset.param}"]`);if(val)val.textContent=el.value;redraw();};
+        el.addEventListener('change',update);
+      });
+    }
+
+    /* Öffnet das FX-Rack und meldet Fehler sichtbar (Toast + Konsole) statt still zu scheitern. */
+    function safeOpenTrackFxRack(trackId) {
+      try {
+        if (!trackId) throw new Error('Keine Spur-ID am FX-Button gefunden.');
+        if (!dawState.tracks.some(t => t.id === trackId)) throw new Error(`Spur „${trackId}“ existiert nicht mehr.`);
+        openTrackFxRack(trackId);
+        if (!document.getElementById('track-fx-modal')) throw new Error('Das Fenster wurde nicht eingehängt.');
+      } catch (err) {
+        console.error('[FX-Rack]', err);
+        try { toast(`FX-Rack konnte nicht geöffnet werden: ${err && err.message ? err.message : err}`, 'error'); }
+        catch (_) { alert(`FX-Rack konnte nicht geöffnet werden: ${err && err.message ? err.message : err}`); }
+      }
+    }
+
+    /* Zentrale Klick-Behandlung für alle FX-Buttons (überlebt jeden dynamischen Neuaufbau der Spuren).
+       - Capture-Phase am document: unabhängig davon, wann/wie oft renderMultiTrackLanes() die Buttons neu erzeugt.
+       - pointerup für Touch/Stift (Android) + click für Maus/Tastatur, mit Doppelauslösungs-Schutz.
+       - Scroll-Gesten in der Spurliste (Finger bewegt sich > 10 px) öffnen nichts.
+       - preventDefault/stopPropagation: keine andere Aktion (Seek, Edit, Mute …) wird mitausgelöst. */
+    (function installFxButtonDelegation() {
+      if (window.__fxDelegationInstalled) return;
+      window.__fxDelegationInstalled = true;
+      const SEL = '.tr-fx-btn[data-fx]';
+      let down = null, lastOpenAt = 0;
+      const findBtn = e => (e.target instanceof Element ? e.target.closest(SEL) : null);
+
+      document.addEventListener('pointerdown', e => {
+        const btn = findBtn(e);
+        down = btn ? { id: btn.dataset.fx, x: e.clientX, y: e.clientY, type: e.pointerType } : null;
+        if (btn) e.stopPropagation();
+      }, true);
+
+      document.addEventListener('pointerup', e => {
+        const btn = findBtn(e);
+        if (!btn || !down || e.pointerType === 'mouse') { return; }
+        const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y) > 10;
+        const id = btn.dataset.fx || down.id;
+        down = null;
+        e.preventDefault(); e.stopPropagation();
+        if (moved) return;
+        lastOpenAt = Date.now();
+        safeOpenTrackFxRack(id);
+      }, true);
+
+      document.addEventListener('click', e => {
+        const btn = findBtn(e);
+        if (!btn) return;
+        e.preventDefault(); e.stopPropagation();
+        if (Date.now() - lastOpenAt < 600) return; // wurde bereits per pointerup behandelt
+        lastOpenAt = Date.now();
+        safeOpenTrackFxRack(btn.dataset.fx);
+      }, true);
+    })();
+
     class ProDawAudioEngine {
       constructor() {
         this.ctx = null;
@@ -1136,8 +1341,24 @@
           vocalChain = { deHarsh, presence, deEsser, comp };
         }
 
+        // Individuelle Effektkette pro Spur (wird im Spur-FX-Rack bearbeitet)
+        const fxNodes = [];
+        let fxInput = ctx.createGain();
+        postFilter.connect(fxInput);
+        let fxTail = fxInput;
+        (track.fx || []).forEach(effect => {
+          if (!effect.enabled) return;
+          const built = buildTrackEffect(ctx, effect);
+          if (!built) return;
+          if (built.input) fxTail.connect(built.input);
+          else fxTail.connect(built.node);
+          fxTail = built.output || built.node;
+          fxNodes.push({ id: effect.id, ...built });
+        });
+
         const scGain = ctx.createGain();
         scGain.gain.value = 1.0;
+        fxTail.connect(scGain);
 
         const sectionGate = ctx.createGain();
         sectionGate.gain.value = 1.0;
@@ -1152,7 +1373,6 @@
         analyser.fftSize = 128;
 
         input.connect(lowCut);
-        postFilter.connect(scGain);
         scGain.connect(sectionGate);
         sectionGate.connect(panner);
         panner.connect(fader);
@@ -1167,7 +1387,7 @@
         }
 
         this.channelNodes[track.id] = {
-          input, lowCut, scGain, sectionGate, panner, fader, analyser, vocalChain, revSend
+          input, lowCut, scGain, sectionGate, panner, fader, analyser, vocalChain, revSend, fxInput, fxNodes
         };
       }
 
@@ -1180,7 +1400,8 @@
           this.masterGain.gain.setTargetAtTime(dawState.masterGainVal, now, 0.015);
         }
         if (this.reverbReturn) {
-          this.reverbReturn.gain.setTargetAtTime(dawState.vocalRackActive ? dawState.vocalReverbWet : 0, now, 0.02);
+          const hasTrackReverb = dawState.tracks.some(t => (t.fx || []).some(fx => fx.type === 'reverb' && fx.enabled));
+          this.reverbReturn.gain.setTargetAtTime(dawState.vocalRackActive ? dawState.vocalReverbWet : (hasTrackReverb ? 1 : 0), now, 0.02);
         }
 
         dawState.tracks.forEach(tr => {
@@ -3063,7 +3284,7 @@
         }
 
         const headerDiv = document.createElement('div');
-        headerDiv.className = 'col-span-12 lg:col-span-4 xl:col-span-3 px-2.5 py-1.5 border-b lg:border-b-0 lg:border-r border-daw-border bg-daw-panel/80 flex flex-col justify-between gap-1';
+        headerDiv.className = tr.collapsed ? 'col-span-12 px-2.5 py-1.5 border-b border-daw-border bg-daw-panel/80 flex flex-col justify-between gap-1' : 'col-span-12 lg:col-span-4 xl:col-span-3 px-2.5 py-1.5 border-b lg:border-b-0 lg:border-r border-daw-border bg-daw-panel/80 flex flex-col justify-between gap-1';
         headerDiv.innerHTML = `
           <div class="flex items-center justify-between gap-1.5">
             <div class="flex items-center gap-1.5 min-w-0">
@@ -3073,6 +3294,8 @@
             </div>
             <div class="flex items-center gap-1 shrink-0">
               <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-daw-bg text-slate-400 border border-daw-border hidden sm:inline">${tr.badge}</span>
+              <button data-collapse="${tr.id}" title="Spur ein-/ausklappen" aria-expanded="${tr.collapsed ? 'false' : 'true'}" class="track-collapse-btn tr-collapse-btn px-1.5 py-0.5 rounded bg-daw-surface hover:bg-daw-elevated text-[10px] font-bold text-slate-300 border border-daw-border">${tr.collapsed ? '＋' : '－'}</button>
+              <button type="button" data-fx="${escapeText(tr.id)}" title="FX-Rack öffnen" aria-label="FX-Rack öffnen" style="touch-action:manipulation" class="tr-fx-btn px-1.5 py-0.5 rounded bg-fuchsia-500/15 hover:bg-fuchsia-500/30 text-[9px] font-bold text-fuchsia-300 border border-fuchsia-500/40">FX ${Array.isArray(tr.fx)?tr.fx.filter(x=>x.enabled).length:0}</button>
               <button data-edit="${tr.editTab}" data-trackid="${tr.id}" class="tr-edit-btn px-1.5 py-0.5 rounded bg-daw-surface hover:bg-daw-elevated text-[9px] font-bold text-cyan-300 border border-daw-border">Edit</button>
               <button data-del="${tr.id}" title="Spur löschen" class="tr-del-btn px-1.5 py-0.5 rounded bg-rose-500/15 hover:bg-rose-500/30 text-[9px] font-bold text-rose-300 border border-rose-500/35">✕</button>
             </div>
@@ -3097,7 +3320,7 @@
         `;
 
         const laneDiv = document.createElement('div');
-        laneDiv.className = 'col-span-12 lg:col-span-8 xl:col-span-9 relative h-14 bg-daw-bg/90 overflow-hidden flex items-stretch';
+        laneDiv.className = `col-span-12 lg:col-span-8 xl:col-span-9 relative h-14 bg-daw-bg/90 overflow-hidden flex items-stretch ${tr.collapsed ? 'track-is-collapsed' : ''}`;
 
         const clipsOverlay = document.createElement('div');
         clipsOverlay.className = 'absolute inset-0 flex items-stretch z-10 pointer-events-none';
@@ -3140,6 +3363,15 @@
         row.appendChild(headerDiv);
         row.appendChild(laneDiv);
         container.appendChild(row);
+      });
+
+      document.querySelectorAll('.tr-collapse-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tr = dawState.tracks.find(t => t.id === btn.dataset.collapse);
+          if (!tr) return;
+          tr.collapsed = !tr.collapsed;
+          renderMultiTrackLanes();
+        });
       });
 
       document.querySelectorAll('.tr-mute-btn').forEach(btn => {
@@ -3222,6 +3454,8 @@
           switchBottomTab('midi');
         });
       });
+
+      // FX-Buttons: zentral über installFxButtonDelegation() behandelt (kein Einzel-Listener mehr nötig).
 
       document.querySelectorAll('.tr-edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -4075,6 +4309,7 @@
 
     function switchBottomTab(tabKey) {
       dawState.activeTab = tabKey;
+      dawState.dockCollapsed = false;
       document.querySelectorAll('.dock-tab-btn').forEach(btn => {
         const active = btn.dataset.tab === tabKey;
         btn.className = active
@@ -4191,7 +4426,19 @@
 
       // Bottom Tab Dock Switching
       document.querySelectorAll('.dock-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchBottomTab(btn.dataset.tab));
+        btn.addEventListener('click', () => {
+          const panel = document.getElementById(`tab-panel-${btn.dataset.tab}`);
+          const isOpen = panel && !panel.classList.contains('hidden');
+          if (isOpen && dawState.activeTab === btn.dataset.tab) {
+            panel.classList.add('hidden');
+            dawState.dockCollapsed = true;
+            btn.setAttribute('aria-expanded', 'false');
+          } else {
+            dawState.dockCollapsed = false;
+            switchBottomTab(btn.dataset.tab);
+            document.querySelectorAll('.dock-tab-btn').forEach(b => b.setAttribute('aria-expanded', b === btn ? 'true' : 'false'));
+          }
+        });
       });
 
       // Web MIDI Connect
@@ -4925,5 +5172,203 @@
   };
 })();
 </script>
+
+<script>
+/* Sunshine@R project library: named projects with audio buffers + DAW state */
+(() => {
+  const DB_NAME = 'SunshineRStemStudioProjects';
+  const STORE = 'projects';
+  let dbPromise;
+  const $ = id => document.getElementById(id);
+
+  function openDB() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'id' });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error || new Error('Projekt-Datenbank konnte nicht geöffnet werden.'));
+    });
+    return dbPromise;
+  }
+
+  function requestStore(mode, action) {
+    return openDB().then(db => new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, mode);
+      const store = tx.objectStore(STORE);
+      let req;
+      try { req = action(store); } catch (e) { reject(e); return; }
+      tx.oncomplete = () => resolve(req && req.result);
+      tx.onerror = () => reject(tx.error || new Error('Datenbankfehler'));
+      tx.onabort = () => reject(tx.error || new Error('Speichern abgebrochen'));
+    }));
+  }
+
+  function makePayload() {
+    if (typeof syncActiveMidiTrackFromState === 'function') syncActiveMidiTrackFromState();
+    const state = {};
+    Object.keys(dawState).forEach(key => {
+      if (['buffers','isPlaying','playheadSec','isRecordingMic','micRecStartTime','recordingMicTrackId','pendingAudioTargetTrackId','lastDuckTime','lastDuckDb'].includes(key)) return;
+      try { state[key] = JSON.parse(JSON.stringify(dawState[key])); } catch (_) {}
+    });
+    const buffers = {};
+    Object.entries(dawState.buffers || {}).forEach(([id, audioBuffer]) => {
+      if (!audioBuffer || !audioBuffer.numberOfChannels) return;
+      const channels = [];
+      for (let c = 0; c < audioBuffer.numberOfChannels; c++) channels.push(audioBuffer.getChannelData(c).slice());
+      buffers[id] = { sampleRate: audioBuffer.sampleRate, length: audioBuffer.length, channels };
+    });
+    return { state, buffers, savedAt: Date.now(), formatVersion: 1 };
+  }
+
+  function restorePayload(payload) {
+    if (!payload || !payload.state) throw new Error('Das Projekt enthält keine gültigen DAW-Daten.');
+    const volatile = new Set(['buffers','isPlaying','playheadSec','isRecordingMic','micRecStartTime','recordingMicTrackId','pendingAudioTargetTrackId','lastDuckTime','lastDuckDb']);
+    Object.entries(payload.state).forEach(([key, value]) => {
+      if (!volatile.has(key) && key in dawState) dawState[key] = value;
+    });
+    dawState.isPlaying = false;
+    dawState.playheadSec = 0;
+    dawState.isRecordingMic = false;
+    dawState.recordingMicTrackId = null;
+    dawState.pendingAudioTargetTrackId = null;
+    dawState.buffers = {};
+
+    const ctx = audioEngine.ctx;
+    if (ctx && typeof ctx.createBuffer === 'function') {
+      Object.entries(payload.buffers || {}).forEach(([id, item]) => {
+        try {
+          const audioBuffer = ctx.createBuffer(item.channels.length, item.length, item.sampleRate);
+          item.channels.forEach((channel, index) => audioBuffer.copyToChannel(new Float32Array(channel), index));
+          dawState.buffers[id] = audioBuffer;
+        } catch (e) { console.warn('Audio-Track konnte nicht wiederhergestellt werden:', id, e); }
+      });
+    }
+
+    if (!Array.isArray(dawState.tracks)) dawState.tracks = [];
+    dawState.tracks.forEach(track => {
+      if (!track.sectionClips) track.sectionClips = { intro:true, verse:true, drop:true, break:true, outro:true };
+      if (!Array.isArray(track.fx)) track.fx = [];
+      if (track.type === 'midi') {
+        if (!Array.isArray(track.midiNotes)) track.midiNotes = [];
+        if (!Array.isArray(track.stepVelocities)) track.stepVelocities = new Array(32).fill(108);
+      }
+    });
+    const active = dawState.tracks.find(t => t.id === dawState.activeMidiTrackId && t.type === 'midi');
+    dawState.midiNotes = active ? JSON.parse(JSON.stringify(active.midiNotes || [])) : [];
+    dawState.stepVelocities = active && active.stepVelocities ? [...active.stepVelocities] : new Array(32).fill(108);
+    renumberTracks();
+
+    if (audioEngine.channelNodes) {
+      Object.values(audioEngine.channelNodes).forEach(n => { try { n.fader.disconnect(); } catch (_) {} });
+      audioEngine.channelNodes = {};
+    }
+    dawState.tracks.forEach(track => { try { audioEngine.ensureTrackNode(track); } catch (e) { console.warn(e); } });
+    try { audioEngine.syncAudioParams(); } catch (_) {}
+    renderArrangementHeaderBar();
+    renderMultiTrackLanes();
+    renderDrumSequencerGrids();
+    renderVerticalMixer();
+    updateAudioToMidiDropdown();
+    drawPianoRoll();
+    drawVelocityLane();
+    updateClockLCD();
+    if (typeof updatePlayButtonUI === 'function') updatePlayButtonUI();
+  }
+
+  function modalBase(title, body, footer) {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-[150] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3';
+    overlay.innerHTML = `<div class="w-full max-w-lg max-h-[88vh] overflow-hidden rounded-2xl border border-daw-border bg-daw-panel shadow-2xl flex flex-col text-slate-100">
+      <div class="px-4 py-3 border-b border-daw-border flex items-center justify-between"><strong class="text-sm">${title}</strong><button type="button" data-close class="text-slate-400 hover:text-white text-xl">×</button></div>
+      <div class="p-4 overflow-y-auto">${body}</div>
+      <div class="px-4 py-3 border-t border-daw-border flex justify-end gap-2">${footer}</div></div>`;
+    overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-close]')) overlay.remove(); });
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  async function saveNamedProject() {
+    const body = `<label class="block text-xs text-slate-400 mb-2" for="project-name-input">Projektname</label>
+      <input id="project-name-input" maxlength="48" placeholder="z. B. Mein neuer Trance-Track" class="w-full rounded-lg bg-daw-bg border border-daw-border px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+      <p class="text-[11px] text-slate-500 mt-2">Gespeichert werden Spuraufbau, MIDI-Noten, Sequencer, Mixer- und Effektwerte sowie geladene Audio-Stems.</p>`;
+    const ov = modalBase('💾 Projekt speichern', body,
+      `<button data-cancel class="px-3 py-2 rounded-lg bg-daw-surface border border-daw-border text-xs">Abbrechen</button><button id="project-save-confirm" class="px-3 py-2 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs">Speichern</button>`);
+    ov.querySelector('[data-cancel]').onclick = () => ov.remove();
+    const input = ov.querySelector('#project-name-input');
+    input.value = $('status-subtitle')?.dataset.projectName || '';
+    input.focus();
+    ov.querySelector('#project-save-confirm').onclick = async () => {
+      const name = input.value.trim();
+      if (!name) { input.focus(); input.placeholder = 'Bitte einen Projektnamen eingeben'; return; }
+      const button = ov.querySelector('#project-save-confirm');
+      button.disabled = true; button.textContent = 'Speichert…';
+      try {
+        const all = await requestStore('readonly', store => store.getAll()) || [];
+        const existing = all.find(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+        const record = { id: existing?.id || (crypto.randomUUID ? crypto.randomUUID() : `p_${Date.now()}`), name, updatedAt: Date.now(), payload: makePayload() };
+        await requestStore('readwrite', store => store.put(record));
+        $('status-subtitle').textContent = `Projekt: ${name}`;
+        $('status-subtitle').dataset.projectName = name;
+        ov.remove();
+        toast(`Projekt „${name}“ wurde gespeichert.`, 'success');
+      } catch (e) {
+        console.error(e); button.disabled = false; button.textContent = 'Erneut versuchen';
+        toast(`Projekt konnte nicht gespeichert werden: ${e.message}`, 'error');
+      }
+    };
+  }
+
+  async function openProjectLibrary() {
+    try {
+      const projects = (await requestStore('readonly', store => store.getAll()) || []).sort((a,b) => b.updatedAt - a.updatedAt);
+      const body = projects.length ? `<div class="flex flex-col gap-2" id="project-list">
+        ${projects.map(p => `<div class="rounded-xl border border-daw-border bg-daw-bg p-3 flex items-center gap-2">
+          <div class="min-w-0 flex-1"><div class="text-sm font-bold truncate">${escapeText(p.name)}</div><div class="text-[10px] text-slate-500">${new Date(p.updatedAt).toLocaleString('de-DE')}</div></div>
+          <button data-open="${escapeText(p.id)}" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-xs font-bold">Öffnen</button>
+          <button data-delete="${escapeText(p.id)}" class="px-2 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs">✕</button>
+        </div>`).join('')}</div>` : `<div class="rounded-xl border border-dashed border-daw-border p-6 text-center text-xs text-slate-400">Noch keine gespeicherten Projekte vorhanden.</div>`;
+      const ov = modalBase('📁 Gespeicherte Projekte', body,
+        `<span class="mr-auto self-center text-[10px] text-slate-500">${projects.length} Projekt(e)</span><button data-close class="px-3 py-2 rounded-lg bg-daw-surface border border-daw-border text-xs">Schließen</button>`);
+      ov.querySelectorAll('[data-open]').forEach(btn => btn.onclick = async () => {
+        const record = projects.find(p => p.id === btn.dataset.open);
+        if (!record) return;
+        if (!confirm(`Aktuelles Projekt durch „${record.name}“ ersetzen? Nicht gespeicherte Änderungen gehen verloren.`)) return;
+        try {
+          await audioEngine.ensureCtx();
+          if (dawState.isPlaying) audioEngine.stop(true);
+          restorePayload(record.payload);
+          $('status-subtitle').textContent = `Projekt: ${record.name}`;
+          $('status-subtitle').dataset.projectName = record.name;
+          ov.remove();
+          toast(`Projekt „${record.name}“ wurde geöffnet.`, 'success');
+        } catch (e) { console.error(e); toast(`Projekt konnte nicht geöffnet werden: ${e.message}`, 'error'); }
+      });
+      ov.querySelectorAll('[data-delete]').forEach(btn => btn.onclick = async () => {
+        const record = projects.find(p => p.id === btn.dataset.delete);
+        if (!record || !confirm(`Projekt „${record.name}“ wirklich löschen?`)) return;
+        await requestStore('readwrite', store => store.delete(record.id));
+        ov.remove(); openProjectLibrary();
+        toast(`Projekt „${record.name}“ gelöscht.`, 'success');
+      });
+    } catch (e) {
+      console.error(e); toast(`Projektliste konnte nicht geladen werden: ${e.message}`, 'error');
+    }
+  }
+
+  function escapeText(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    $('btn-save-project')?.addEventListener('click', saveNamedProject);
+    $('btn-open-projects')?.addEventListener('click', openProjectLibrary);
+  });
+})();
+</script>
+
 </body>
 </html>
