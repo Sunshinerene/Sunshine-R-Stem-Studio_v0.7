@@ -47,6 +47,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.ServiceWorkerClient;
+import android.webkit.ServiceWorkerController;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.WindowCompat;
@@ -60,6 +64,7 @@ public class MainActivity extends BridgeActivity {
     super.onCreate(savedInstanceState);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     applyBars(getResources().getConfiguration());
+    hookServiceWorker();
     getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
       @Override
       public void handleOnBackPressed() {
@@ -70,6 +75,19 @@ public class MainActivity extends BridgeActivity {
           value -> { if (!"true".equals(value)) moveTaskToBack(true); });
       }
     });
+  }
+
+  /** Live-Update: Der Service Worker (sw.js) muss seine Dateien wie die Seite aus der App bekommen, sonst scheitert seine Registrierung. */
+  private void hookServiceWorker() {
+    try {
+      if (android.os.Build.VERSION.SDK_INT < 24 || getBridge() == null) return;
+      ServiceWorkerController.getInstance().setServiceWorkerClient(new ServiceWorkerClient() {
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebResourceRequest request) {
+          try { return getBridge().getLocalServer().shouldInterceptRequest(request); } catch (Throwable e) { return null; }
+        }
+      });
+    } catch (Throwable e) { /* ohne Hintergrunddienst läuft die App normal weiter */ }
   }
 
   @Override
