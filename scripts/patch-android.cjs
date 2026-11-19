@@ -10,7 +10,8 @@
      3. Android-Zurück-Taste → ruft window.__androidBack() in der Web-App (Dialog schließen / Startseite), sonst App in den Hintergrund
      4. Bildschirm bleibt an, solange die App im Vordergrund ist (Musik-App: kein Abdunkeln beim Abspielen)
      5. Hintergrundfarbe der Fenster = App-Farbe (kein weißes Aufblitzen beim Start/Drehen)
-     6. Feste Signatur (signing/sunshine.p12) + hochzählende versionCode (BUILD_NUMBER) → Updates über die installierte App, Daten bleiben
+     6. App-Name „Sunshine@R DAW Studio“ (strings.xml)
+     7. Feste Signatur (signing/sunshine.p12) + hochzählende versionCode (BUILD_NUMBER) → Updates über die installierte App, Daten bleiben
    Das Skript ist wiederholbar (erkennt, was schon gepatcht ist). */
 const fs = require('fs'), path = require('path');
 const root = process.argv[2] || process.cwd();
@@ -150,4 +151,11 @@ if (fs.existsSync(gradleP)) {
   } else log('Keine BUILD_NUMBER gesetzt – versionCode bleibt (lokaler Build).');
   if (changed) fs.writeFileSync(gradleP, g);
 } else log('android/app/build.gradle nicht gefunden – Signatur/Version übersprungen.');
+// ---- App-Name auf dem Startbildschirm: „Sunshine@R DAW Studio“ ------------------------------------------------------
+const strP = path.join(app, 'res', 'values', 'strings.xml');
+if (fs.existsSync(strP)) {
+  let sx = fs.readFileSync(strP, 'utf8'); const NAME = 'Sunshine@R DAW Studio';
+  const sx2 = sx.replace(/(<string\s+name="(?:app_name|title_activity_main)"[^>]*>)[^<]*(<\/string>)/g, '$1' + NAME + '$2');
+  if (sx2 !== sx) { fs.writeFileSync(strP, sx2); log('strings.xml: App-Name = ' + NAME); } else log('strings.xml: Name schon gesetzt.');
+}
 log('fertig.');
