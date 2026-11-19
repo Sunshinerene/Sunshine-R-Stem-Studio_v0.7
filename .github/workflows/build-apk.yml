@@ -3,6 +3,8 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
+    # Nur die Vorschau-Datei geändert → kein neuer Build nötig (die App liest sie direkt aus dem Repo)
+    paths-ignore: [ 'VORSCHAU.md' ]
   workflow_dispatch:
 
 # Nötig, damit der Lauf eine "Release" mit der APK veröffentlichen darf (daraus holt sich die App ihre Updates)
