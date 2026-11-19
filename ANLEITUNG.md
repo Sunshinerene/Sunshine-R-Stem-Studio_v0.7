@@ -1,23 +1,38 @@
-# Sunshine@R – Update: Offline, Vollbild, Zurück-Taste
+# Sunshine@R – Anleitung für den Alltag
 
-## 1. Dateien einsetzen
-- `index_ueberarbeitet.html` → wie bisher als `www/index.html` (bzw. dein bisheriger Name)
-- Ordner `www/assets/vendor/` (Tailwind + JSZip) → in dein `www/assets/` kopieren.
-  Ohne diese zwei Dateien lädt die App sie weiter aus dem Internet (dann geht sie offline nicht).
-- `scripts/patch-android.cjs` → in dein Repo unter `scripts/`
+## 1. Ein Update einspielen
+1. Die neue Seite als **`www/index.html`** ins Repository legen (alte Datei ersetzen).
+2. **`CHANGELOG.md`** im Hauptordner ersetzen – der oberste Abschnitt erscheint in der App unter „Was ist neu“ und als Text des GitHub-Releases.
+3. Commit auf `main`. Unter **Actions** startet der Lauf „Build APK“ und legt danach unter **Releases** den neuen Build an.
+4. Handy: **Optionen → Updates & Datensicherung → Nach Updates suchen → Herunterladen → Installieren**.
 
-## 2. Im GitHub-Workflow einen Schritt ergänzen
-Direkt NACH `npx cap add android` (oder dem Schritt, der den android-Ordner erzeugt) und VOR dem Gradle-Build:
+### Wann reicht das Live-Update, wann braucht es eine neue APK?
+- Hat sich **nur `www/index.html`** geändert, bietet die App eine „neue Oberfläche“ an, die ohne Neuinstallation geladen wird (mit automatischem Rückfall, falls sie nicht startet).
+- Haben sich **andere Dateien** geändert (Logo/Icons in `www/assets/`, `scripts/`, `package.json`, `capacitor.config.json`), wird eine neue APK angeboten, die du installierst.
+- Die Version 1.17 ändert nur `www/index.html` → das **Live-Update** reicht (wer von 1.15 oder älter kommt, braucht wegen 1.16 einmal die neue APK).
 
-```yaml
-      - name: Android-Feinschliff (Vollbild, Zurück-Taste)
-        run: node scripts/patch-android.cjs && npx cap sync android
-```
+## 2. Dateien dieser Lieferung
+| Datei | Ziel im Repo |
+|---|---|
+| `index_ueberarbeitet.html` | `www/index.html` (**umbenennen auf `index.html`**, alte Datei ersetzen) |
+| `VORSCHAU.md` | Hauptordner (neu; Text der „Bald neu“-Vorschau) |
+| `CHANGELOG.md` | Hauptordner (ersetzen) |
+| `README.md`, `ANLEITUNG.md` | Hauptordner (ersetzen) |
+| `capacitor.config.json` | Hauptordner (ersetzen; `appId` bleibt gleich) |
+| `.gitignore` | Hauptordner (neu) |
 
-Liegt der android-Ordner bei dir schon im Repo, einmal lokal ausführen: `node scripts/patch-android.cjs`.
-Das Skript ist wiederholbar und legt Sicherungen (`*.orig`) an.
+## 2a. Vorschau & Feedback pflegen
+- **Vorschau:** `VORSCHAU.md` im Hauptordner bearbeiten (Titel = erste Überschrift nach „# Vorschau“, Stichpunkte mit `- `). Die App lädt sie beim Start live nach – ohne neues Update. Datei leeren = keine Vorschau. Das Repository muss öffentlich sein.
+- **Feedback-Adresse:** Beim Bauen wird die Empfänger-Adresse für „Per E-Mail“ in die Seite eingetragen. Ohne Adresse bleiben Teilen, Datei und Kopieren.
 
-## 3. Prüfen nach der Installation
-- Querformat: Statusleiste/Navigationsleiste weg, Inhalt bis zum Rand (Wischen vom Rand zeigt die Leisten kurz).
-- Zurück-Taste: schließt zuerst Dialoge/Menüs, dann → Startseite, dann → App in den Hintergrund.
-- Flugmodus an, App starten: Oberfläche muss normal aussehen (nur die Schriftart weicht ab).
+## 3. Einmalig aufräumen (von Hand auf GitHub löschen)
+- `signing/Test` – leere Test-Datei, wird nicht gebraucht.
+- `www/assets/vendor/tailwind-3.4.17.js` – das Design ist ab 1.16 fest in der Seite eingebaut, die 400-KB-Datei wird nicht mehr geladen.
+- Behalten: `www/assets/vendor/jszip-3.10.1.min.js`, `signing/sunshine.p12`.
+
+Löschen auf GitHub: Datei öffnen → Mülleimer-Symbol oben rechts → „Commit changes“.
+
+## 4. Wenn etwas schiefgeht
+- **Neue Version startet nicht:** Die App fällt nach wenigen Sekunden von selbst auf die eingebaute Version zurück (Live-Update). Bei einer fehlerhaften APK: alte Releases bleiben auf GitHub; Android lässt keine niedrigere Versionsnummer zu, daher den Fehler beheben und einen neuen Build erzeugen.
+- **Fehlerbericht:** Optionen → Stabilität & Leistung → Fehlerprotokoll → Kopieren / Als Datei.
+- **Viel Speicher belegt:** Optionen → Speicher-Sparer (Spuren, die nicht klingen, entladen).

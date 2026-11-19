@@ -2,6 +2,22 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.17 · 2026-11-19 · Aufgeräumte Großansicht, Feedback & Vorschau
+- Neu: Klavier/Piano Roll, Drum-Sequencer, Mixer und MIDI-Werkzeuge öffnen jetzt in einem eigenen Großansicht-Fenster, wenn du sie brauchst – das Hauptfenster bleibt übersichtlich (Spuren, Transport und Navigation bleiben immer erreichbar). Schließen mit ✕, Zurück-Taste oder Esc; ein zweiter Tipp auf den Knopf schließt ebenfalls.
+- Neu: Der MIDI-Editor ist in fünf Werkzeug-Gruppen aufgeteilt (Raster, Tonart, Generator, Audio→MIDI, Klang) – es ist immer nur die Gruppe sichtbar, die du gerade brauchst. Die Auswahl wird gemerkt.
+- Neu: Feedback-Funktion für Tester (Menü, Startseite und Optionen): Fehler, Ideen, Anmerkungen, Lob oder Fragen schreiben, Bereich wird automatisch erkannt. Optional werden Geräte-/Versionsangaben und das technische Fehlerprotokoll (keine Audiodaten, keine Projektinhalte) angehängt. Du siehst vorher genau, was mitgeht, und schickst es per E-Mail, Teilen, Datei oder Kopieren selbst ab – es wird nichts automatisch gesendet.
+- Neu: Update-Vorschau („Bald neu“) auf der Startseite und in „Was ist neu“: ein kurzer Ausblick auf das nächste Release. Der Text wird beim Start live aus der Datei VORSCHAU.md im Repo nachgeladen (ohne neue App-Version) und lässt sich wegklicken.
+- Besser: Optionen → Darstellung der Fenster: „Großansicht“ ist neu der Standard; die bisherigen Modi „Fenster“ (Ziehharmonika) und „Tabs“ bleiben wählbar. Wer bewusst Tabs gewählt hatte, behält sie.
+- Hinweis: Diese Version ändert nur die Oberfläche (index.html), keine Dateien der App – das Update kann deshalb über das Live-Update kommen, eine neue APK ist nicht nötig.
+- Hinweis: Das Feedback läuft ohne Server. Für „Per E-Mail“ muss im Bau-Kit eine Empfängeradresse eingetragen sein; sonst bieten Teilen, Datei und Kopieren denselben Inhalt.
+
+## 1.16 · 2026-11-19 · Speicher-Sparer, schlankere App
+- Neu: Speicher-Sparer (Optionen → Speicher-Sparer, standardmäßig aus): Spuren, die gerade nicht zu hören sind (stumm oder durch Solo ausgeblendet), werden aus dem Arbeitsspeicher entladen – bei einer 4½-Minuten-Stereo-Spur sind das rund 95 MB. Wellenform, Länge und Name bleiben sichtbar; beim Einschalten, Abspielen oder Exportieren lädt die App die Spur automatisch wieder, bit-genau. Einzelne Spuren lassen sich auch von Hand entladen und laden.
+- Besser: Das Design (Tailwind) wird nicht mehr beim Start im Handy berechnet, sondern liegt fertig in der App. Das spart ca. 400 KB Programmcode, Rechenzeit beim Start und bei jeder Änderung der Oberfläche. Aussehen unverändert (in 135 Ansichten Punkt für Punkt gegen die alte Version geprüft).
+- Besser: Logo und App-Icon sind deutlich kleiner (Logo 2,5 MB → ca. 0,2 MB) – die App wird schneller geladen und das Paket schlanker.
+- Hinweis: Wer gleichzeitig viele Spuren hört, braucht diese Spuren auch gleichzeitig im Speicher. Der Sparer entlastet vor allem beim Arrangieren und beim Abhören einzelner Stems.
+- Hinweis: Diese Version ändert Dateien der App (Logo, Design). Das Update läuft deshalb über eine neue APK, nicht über das Live-Update.
+
 ## 1.15 · 2026-11-19 · Kompaktere Projekte & sparsameres Speichern
 - Neu: Importierte Stems (WAV, MP3, …) werden im Projekt als Original-Datei gespeichert statt als entpackte Rohdaten. Projekte, Autosave und Sicherungen werden dadurch kleiner (16-Bit-WAV etwa die Hälfte, MP3 rund ein Zehntel).
 - Besser: Beim Speichern werden die Audiodaten nicht mehr zusätzlich kopiert – das senkt die Speicherspitze, die bei vielen Spuren zum Absturz führen konnte.

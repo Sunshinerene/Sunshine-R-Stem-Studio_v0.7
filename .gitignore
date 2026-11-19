@@ -1,0 +1,4 @@
+node_modules/
+android/
+*.orig
+.DS_Store
