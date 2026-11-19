@@ -651,8 +651,9 @@ div:has(>#mt-collapse){flex-wrap:wrap;row-gap:4px}
 </script>
 <script>try{if(localStorage.getItem('sunshine.home')!=='off'){document.documentElement.classList.add('home-pending');setTimeout(function(){document.documentElement.classList.remove('home-pending')},6000)}}catch(e){}</script>
 <style>html.home-pending body>*:not(#home-root){visibility:hidden}</style>
+<script>window.SUNSHINE_BUILD={n:'__BUILD_N__',repo:'__BUILD_REPO__',time:'__BUILD_TIME__'};</script>
 <script>try{if(window.Capacitor||/; wv\)/.test(navigator.userAgent))document.documentElement.classList.add('android-app')}catch(e){}</script>
-<script>try{var f=JSON.parse(localStorage.getItem('sunshine.fx')||'{}'),d=document.documentElement,E=['off','glow','beam','line'],F=['off','aurora','eq','sparks','waves'];d.setAttribute('data-fx',f.on===false?'off':'on');d.setAttribute('data-fx-edge',E.indexOf(f.edge)<0?'glow':f.edge);d.setAttribute('data-fx-full',F.indexOf(f.full)<0?'aurora':f.full);d.style.setProperty('--fx-k',String(Math.max(10,Math.min(100,+f.k||50))/100))}catch(e){}</script>
+<script>try{var f=JSON.parse(localStorage.getItem('sunshine.fx')||'{}'),d=document.documentElement,E=['off','glow','beam','line'],F=['off','aurora','eq','sparks','waves'];d.setAttribute('data-fx',f.v===2&&f.on===true?'on':'off');d.setAttribute('data-fx-edge',E.indexOf(f.edge)<0?'glow':f.edge);d.setAttribute('data-fx-full',F.indexOf(f.full)<0?'aurora':f.full);d.style.setProperty('--fx-k',String(Math.max(10,Math.min(100,+f.k||50))/100))}catch(e){}</script>
 <style id="sunshine-polish">
 /* ===== Sunshine@R · Feinschliff: Icons, Vollbild/Querformat ===== */
 /* --- einheitliche Linien-Icons (Strichstärke je Design) --- */
@@ -677,7 +678,12 @@ html[data-theme="neon"]:not([data-glow="off"]) .ic{filter:drop-shadow(0 0 3px cu
 h1 .ic,h2 .ic,h3 .ic{width:1.15em;height:1.15em}
 
 /* --- Vollbild / Querformat: Kamera-Ausschnitt & Systemleisten --- */
-:root{--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px);--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+:root{--sal:0px;--sar:0px;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+/* Seitlicher Abstand zur Kamera-Aussparung nur, wenn in Optionen → Anzeige eingeschaltet – und nur im Querformat */
+@media (orientation:landscape){html[data-cutout="1"]{--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px)}}
+/* Wächter: nie breiter als der Bildschirm, kein Seitwärts-Wischen der Seite */
+html{overflow-x:hidden;max-width:100%}
+body{overflow-x:clip;max-width:100%}
 html,body{background-color:rgb(var(--daw-bg,9 12 18));margin:0;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
 body{padding-left:var(--sal);padding-right:var(--sar)}
 @media (max-width:900px){#bottom-nav{left:calc(12px + var(--sal))!important;right:calc(12px + var(--sar))!important}}
@@ -713,21 +719,27 @@ html[data-fx="on"][data-fx-edge="line"] .fx-win{box-shadow:inset 0 2px 0 rgb(var
 @keyframes fx-win{0%,100%{box-shadow:0 0 0 1px rgb(var(--fx-rgb)/.35),0 0 18px rgb(var(--fx-rgb)/.18),0 24px 60px rgba(0,0,0,.55)}50%{box-shadow:0 0 0 1px rgb(var(--fx-rgb)/.8),0 0 40px rgb(var(--fx-rgb)/.5),0 24px 60px rgba(0,0,0,.55)}}
 @keyframes fx-win-beam{0%,100%{box-shadow:0 0 0 1px rgb(var(--fx-rgb)/.7),0 0 34px rgb(var(--fx-rgb)/.45),0 24px 60px rgba(0,0,0,.55)}50%{box-shadow:0 0 0 1px rgb(var(--fx-rgb2)/.7),0 0 34px rgb(var(--fx-rgb2)/.45),0 24px 60px rgba(0,0,0,.55)}}
 
-/* --- Vollflächig: Overlay über der App (unter Dialogen), blendet Licht dazu --- */
-#fx-root{position:fixed;inset:0;z-index:46;pointer-events:none;overflow:hidden;mix-blend-mode:screen;display:none;opacity:calc(.14 + .5*var(--fx-k))}
-html[data-fx="on"]:not([data-fx-full="off"]) #fx-root{display:block}
-#fx-aurora,#fx-canvas{display:none;position:absolute;inset:0;width:100%;height:100%}
-html[data-fx-full="aurora"] #fx-aurora{display:block}
-html[data-fx-full="eq"] #fx-canvas,html[data-fx-full="sparks"] #fx-canvas,html[data-fx-full="waves"] #fx-canvas{display:block}
-#fx-aurora i{position:absolute;left:50%;top:50%;width:120vmax;height:120vmax;margin:-60vmax 0 0 -60vmax;border-radius:50%;will-change:transform}
-#fx-aurora i:nth-child(1){background:radial-gradient(circle,rgb(var(--fx-rgb)) 0,transparent 54%);animation:fx-a1 26s ease-in-out infinite alternate}
-#fx-aurora i:nth-child(2){background:radial-gradient(circle,rgb(var(--fx-rgb2)) 0,transparent 54%);animation:fx-a2 31s ease-in-out infinite alternate}
-#fx-aurora i:nth-child(3){background:radial-gradient(circle,rgb(var(--fx-rgb3)) 0,transparent 54%);animation:fx-a3 37s ease-in-out infinite alternate}
-@keyframes fx-a1{from{transform:translate3d(-34%,-44%,0) scale(.7)}to{transform:translate3d(30%,-8%,0) scale(1)}}
-@keyframes fx-a2{from{transform:translate3d(38%,30%,0) scale(.8)}to{transform:translate3d(-26%,6%,0) scale(1.05)}}
-@keyframes fx-a3{from{transform:translate3d(-20%,46%,0) scale(.65)}to{transform:translate3d(24%,-30%,0) scale(.95)}}
-@media (prefers-reduced-motion:reduce){.fx-edge::after,.fx-win,#fx-aurora i{animation:none!important}}
-html[data-fx-pause="1"] #fx-aurora i,html[data-fx-pause="1"] .fx-edge::after{animation-play-state:paused}
+/* --- Flächen-Effekte: nur große Bereiche (Kopfleiste, Spuren, Editor-Fenster, Navigation) – kein Overlay über der ganzen App --- */
+html{--fx-m:1}
+html[data-fx-live="1"]{--fx-m:.55}
+html[data-fx="on"]:not([data-fx-full="off"]) .fx-edge::before{content:"";position:absolute;left:0;right:0;top:0;height:min(100%,var(--fx-h,190px));border-radius:inherit;pointer-events:none;z-index:2;opacity:calc(.22 + .6*var(--fx-k));-webkit-mask-image:linear-gradient(#000 45%,transparent);mask-image:linear-gradient(#000 45%,transparent)}
+html[data-fx="on"] header.fx-edge,html[data-fx="on"] #bottom-nav.fx-edge{--fx-h:100%}
+/* Aurora: weiche Farbwolken driften quer durch die Fläche */
+html[data-fx="on"][data-fx-full="aurora"] .fx-edge::before{background:radial-gradient(60% 130% at 30% 0,rgb(var(--fx-rgb)/.75),transparent 70%),radial-gradient(55% 130% at 70% 0,rgb(var(--fx-rgb2)/.7),transparent 70%),radial-gradient(50% 120% at 50% 0,rgb(var(--fx-rgb3)/.55),transparent 70%);background-size:220% 100%,180% 100%,260% 100%;background-repeat:no-repeat;animation:fx-drift calc(20s*var(--fx-m)) ease-in-out infinite alternate}
+@keyframes fx-drift{from{background-position:0% 0,100% 0,50% 0}to{background-position:100% 0,0% 0,0% 0}}
+/* Equalizer: schmale Lichtbalken hängen von der Oberkante und wippen */
+html[data-fx="on"][data-fx-full="eq"] .fx-edge::before{--fx-h:100px;height:min(100%,100px);opacity:calc(.1 + .36*var(--fx-k));background:linear-gradient(90deg,rgb(var(--fx-rgb)/.9) 0 30%,transparent 30%) 0 0/14px 30% repeat-x,linear-gradient(90deg,rgb(var(--fx-rgb2)/.85) 0 22%,transparent 22%) 5px 0/21px 55% repeat-x,linear-gradient(90deg,rgb(var(--fx-rgb3)/.8) 0 18%,transparent 18%) 9px 0/29px 40% repeat-x;animation:fx-eq calc(2.6s*var(--fx-m)) ease-in-out infinite}
+html[data-fx="on"][data-fx-full="eq"] header.fx-edge::before,html[data-fx="on"][data-fx-full="eq"] #bottom-nav.fx-edge::before{--fx-h:80px;height:80px}
+@keyframes fx-eq{0%,100%{background-size:14px 22%,21px 62%,29px 36%}25%{background-size:14px 72%,21px 26%,29px 66%}50%{background-size:14px 40%,21px 82%,29px 22%}75%{background-size:14px 86%,21px 36%,29px 56%}}
+/* Funken: kleine Lichtpunkte steigen auf */
+html[data-fx="on"][data-fx-full="sparks"] .fx-edge::before{background:radial-gradient(circle,rgb(var(--fx-rgb)) 0 1.3px,transparent 2.4px) 0 0/46px 70px,radial-gradient(circle,rgb(var(--fx-rgb2)) 0 1px,transparent 2.2px) 17px 31px/61px 90px,radial-gradient(circle,rgb(var(--fx-rgb3)) 0 1.5px,transparent 2.6px) 9px 12px/83px 110px;animation:fx-rise calc(9s*var(--fx-m)) linear infinite}
+@keyframes fx-rise{from{background-position:0 0,17px 31px,9px 12px}to{background-position:0 -70px,17px -59px,9px -98px}}
+/* Wellen: ein weicher Wellensaum läuft über die Oberkante */
+html[data-fx="on"][data-fx-full="waves"] .fx-edge::before{--fx-h:46px;height:46px;opacity:calc(.14 + .45*var(--fx-k));background:linear-gradient(90deg,rgb(var(--fx-rgb)),rgb(var(--fx-rgb2)),rgb(var(--fx-rgb3)));-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='46'%3E%3Cpath d='M0 20Q45 2 90 20T180 20V0H0Z' fill='%23000'/%3E%3C/svg%3E") 0 0/180px 46px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='46'%3E%3Cpath d='M0 20Q45 2 90 20T180 20V0H0Z' fill='%23000'/%3E%3C/svg%3E") 0 0/180px 46px repeat-x;animation:fx-wave calc(7s*var(--fx-m)) linear infinite}
+@keyframes fx-wave{to{-webkit-mask-position:180px 0;mask-position:180px 0}}
+html[data-fx="on"][data-fx-full="waves"] header.fx-edge::before,html[data-fx="on"][data-fx-full="waves"] #bottom-nav.fx-edge::before{--fx-h:46px}
+@media (prefers-reduced-motion:reduce){.fx-edge::before,.fx-edge::after,.fx-win{animation:none!important}}
+html[data-fx-pause="1"] .fx-edge::before,html[data-fx-pause="1"] .fx-edge::after{animation-play-state:paused}
 
 /* ===== Sunshine@R · Anleitung (Rundgang + Handbuch) ===== */
 #hp-tour,#hp-man{--hp-a:rgb(var(--fx-rgb,var(--daw-accent)));--hp-bg:rgba(12,14,32,.97);--hp-line:rgba(255,255,255,.14);--hp-txt:#eef1ff;--hp-dim:#a9b0d0;font-family:inherit;color:var(--hp-txt)}
@@ -795,10 +807,10 @@ html[data-fx-pause="1"] #fx-aurora i,html[data-fx-pause="1"] .fx-edge::after{ani
 #hp-man .hp-foot{margin:14px 0 0;text-align:center;font-size:12px;color:var(--hp-dim)}
 /* Startseite: Hilfe-Knopf & Neu-hier-Karte */
 #hm-help{margin-left:auto}
-#hm-newbie .hp-new{display:flex;gap:12px;align-items:center;padding:14px 16px;margin-bottom:10px;border-radius:var(--hm-r,22px);border:1px solid var(--hm-line,rgba(255,255,255,.16));background:var(--hm-glass,rgba(255,255,255,.08))}
-#hm-newbie .hp-new .tx{flex:1;min-width:0}#hm-newbie .hp-new b{display:block;font-size:15px}#hm-newbie .hp-new span.s{font-size:12px;opacity:.75}
-#hm-newbie .hp-new button{min-height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--hm-line,rgba(255,255,255,.2));background:var(--hm-a,#ff8a1a);color:#1b0f00;font-weight:800;font-size:13px}
-#hm-newbie .hp-new .no{background:transparent;color:inherit;font-weight:600;opacity:.7;padding:0 8px}
+:is(#hm-newbie,#hm-update) .hp-new{display:flex;gap:12px;align-items:center;padding:14px 16px;margin-bottom:10px;border-radius:var(--hm-r,22px);border:1px solid var(--hm-line,rgba(255,255,255,.16));background:var(--hm-glass,rgba(255,255,255,.08))}
+:is(#hm-newbie,#hm-update) .hp-new .tx{flex:1;min-width:0}:is(#hm-newbie,#hm-update) .hp-new b{display:block;font-size:15px}:is(#hm-newbie,#hm-update) .hp-new span.s{font-size:12px;opacity:.75}
+:is(#hm-newbie,#hm-update) .hp-new button{min-height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--hm-line,rgba(255,255,255,.2));background:var(--hm-a,#ff8a1a);color:#1b0f00;font-weight:800;font-size:13px}
+:is(#hm-newbie,#hm-update) .hp-new .no{background:transparent;color:inherit;font-weight:600;opacity:.7;padding:0 8px}
 @media (prefers-reduced-motion:reduce){#hp-tour .hp-ring{animation:none}#hp-tour .hp-b,#hp-tour .hp-ring{transition:none}}
 
 </style>
@@ -11025,6 +11037,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     <div class="hm-top"><button type="button" class="hm-pill" id="hm-back" hidden>← Zurück zum Projekt</button><button type="button" class="hm-pill" id="hm-help">❓ Anleitung</button></div>
     <header class="hm-hero"><div class="hm-logo" id="hm-logo"><img src="${LOGO}" alt="Sunshine@R DAW Studio"><div class="hm-wm">${WM}<b>Sunshine@R</b><small>STEM DAW STUDIO</small></div></div>
       <p class="hm-tag">Stems importieren · mischen · veredeln</p></header>
+    <div id="hm-update"></div>
     <div id="hm-newbie"></div>
     <div id="hm-resume"></div>
     <button type="button" class="hm-cta" id="hm-new"><em>＋</em> Neues Projekt</button>
@@ -11198,7 +11211,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     $('hm-back').hidden = !(hasContent() || dawState.project); $('hm-auto').checked = startEnabled();
     root.querySelector('.hm-scroll').scrollTop = 0;
     root.querySelectorAll('.hm-logo,.hm-tag,.hm-cta,.hm-two,.hm-sechead').forEach(e => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; });
-    renderResume(); eqStart(); refreshList(); safe(() => window.Help && Help.onHome($('hm-newbie')));
+    renderResume(); eqStart(); refreshList(); safe(() => window.Help && Help.onHome($('hm-newbie'))); safe(() => window.Update && Update.onHome($('hm-update')));
     if (hasContent() && isDirty()) persistCurrent().then(() => { renderResume(); if (!root.hidden) refreshList(); });
     safe(() => window.Autosave && Autosave._peek && !hasContent() && Autosave._peek().then(m => { if (m && m.state && !root.hidden && !hasContent()) { pendingSession = { name: m.name || (m.state.project && m.state.project.name) || '', savedAt: m.savedAt, tracks: (m.state.tracks || []).length }; renderResume(); } }));
   }
@@ -11412,36 +11425,24 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
 <script>
 /* ===== Sunshine@R · Effekte =====
    Rand-Effekte (Glühen · Lichtstrahl · Linie) an Kopfleiste, Bereichen, Navigation und Dialogen
-   + vollflächige Effekte (Aurora · Equalizer · Funken · Wellen) als Licht-Overlay über der App.
-   Alles in Optionen → Effekte wählbar oder komplett abschaltbar. Equalizer/Funken/Wellen reagieren auf die Musik. */
+   + Flächen-Effekte (Aurora · Equalizer · Funken · Wellen) NUR auf den großen Bereichen – kein Overlay über der ganzen App.
+   Standard: aus. Alles in Optionen → Effekte wählbar oder komplett abschaltbar. Während Musik spielt, laufen die Effekte lebendiger. */
 (function () {
   'use strict';
-  const LS = 'sunshine.fx';
-  const DEF = { on: true, edge: 'glow', full: 'aurora', k: 50, react: true };
+  const LS = 'sunshine.fx', VER = 2;
+  const DEF = { on: false, edge: 'glow', full: 'aurora', k: 50, react: true };
   const EDGES = [['off', 'Aus'], ['glow', 'Glühen'], ['beam', 'Lichtstrahl'], ['line', 'Linie']];
   const FULLS = [['off', 'Aus'], ['aurora', 'Aurora'], ['eq', 'Equalizer'], ['sparks', 'Funken'], ['waves', 'Wellen']];
-  const CANVAS_STYLES = ['eq', 'sparks', 'waves'];
   const html = document.documentElement;
   const mq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   let st = Object.assign({}, DEF);
-  try { Object.assign(st, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (_) {}
-  const clean = () => { if (!EDGES.some(e => e[0] === st.edge)) st.edge = DEF.edge; if (!FULLS.some(f => f[0] === st.full)) st.full = DEF.full; st.k = Math.max(10, Math.min(100, +st.k || DEF.k)); st.on = st.on !== false; st.react = st.react !== false; };
+  try { const o = JSON.parse(localStorage.getItem(LS) || '{}'); if (o.v !== VER) o.on = false; delete o.v; Object.assign(st, o); } catch (_) {}   // Version 2: Effekte starten einmalig aus
+  const clean = () => { if (!EDGES.some(e => e[0] === st.edge)) st.edge = DEF.edge; if (!FULLS.some(f => f[0] === st.full)) st.full = DEF.full; st.k = Math.max(10, Math.min(100, +st.k || DEF.k)); st.on = st.on === true; st.react = st.react !== false; };
   clean();
-  const save = () => { try { localStorage.setItem(LS, JSON.stringify(st)); } catch (_) {} };
-
-  // ---------- DOM ----------
-  let root, aur, cv, g;
-  function build() {
-    if (root) return;
-    root = document.createElement('div'); root.id = 'fx-root'; root.setAttribute('aria-hidden', 'true');
-    aur = document.createElement('div'); aur.id = 'fx-aurora'; aur.innerHTML = '<i></i><i></i><i></i>';
-    cv = document.createElement('canvas'); cv.id = 'fx-canvas';
-    root.appendChild(aur); root.appendChild(cv); document.body.appendChild(root);
-    g = cv.getContext('2d');
-  }
+  const save = () => { try { localStorage.setItem(LS, JSON.stringify(Object.assign({ v: VER }, st))); } catch (_) {} };
 
   // ---------- Rand: Elemente markieren ----------
-  const EDGE_SEL = ['header.sticky', '#drop-zone-wrapper > .bg-daw-panel', 'section.pb-4 > .bg-daw-panel', '#bottom-nav'];
+  const EDGE_SEL = ['header.sticky', '#drop-zone-wrapper > .bg-daw-panel', 'section.pb-4 > .bg-daw-panel', '#bottom-nav', '.dock-win'];
   const WIN_IDS = /^(settings-modal|assistant-modal|chat-modal|assistant-settings|pattern-studio-modal|sf-picker-modal|as-offer|track-fx-modal)$/;
   function mark(e) {
     if (!e || e.classList.contains('fx-edge')) return;
@@ -11467,95 +11468,23 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   }
 
   // ---------- Anwenden ----------
+  const homeOpen = () => { try { return !!(window.Home && Home.isOpen && Home.isOpen()); } catch (_) { return false; } };
+  function live() {
+    let pl = false; try { pl = st.on && st.react && typeof dawState !== 'undefined' && !!dawState.isPlaying; } catch (_) {}
+    const v = pl ? '1' : '0'; if (html.getAttribute('data-fx-live') !== v) html.setAttribute('data-fx-live', v);
+    const p = (st.on && !document.hidden && !homeOpen()) ? '0' : '1'; if (html.getAttribute('data-fx-pause') !== p) html.setAttribute('data-fx-pause', p);
+  }
   function apply() {
-    clean(); build();
+    clean();
     html.setAttribute('data-fx', st.on ? 'on' : 'off');
     html.setAttribute('data-fx-edge', st.edge);
     html.setAttribute('data-fx-full', st.full);
     html.style.setProperty('--fx-k', String(st.k / 100));
-    syncColors(); tagAll(); reconcile();
+    syncColors(); tagAll(); live();
   }
   function set(p, persist) { Object.assign(st, p); clean(); if (persist !== false) save(); apply(); try { document.dispatchEvent(new CustomEvent('sunshine-fx', { detail: Object.assign({}, st) })); } catch (_) {} }
-
-  // ---------- Canvas-Effekte ----------
-  let running = false, raf = 0, last = 0, W = 0, H = 0, q = 0, lvl = 0, sb = null, bars = [], parts = [], draws = [], perfPaused = false;
-  const homeOpen = () => { try { return !!(window.Home && Home.isOpen && Home.isOpen()); } catch (_) { return false; } };
-  const wantCanvas = () => st.on && CANVAS_STYLES.includes(st.full) && !mq.matches && !document.hidden && !homeOpen() && !perfPaused;
-  function size() { const d = q ? 5 : 3; W = Math.max(64, Math.round(innerWidth / d)); H = Math.max(96, Math.round(innerHeight / d)); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; bars = []; parts = []; }
-  function reconcile() {
-    if (!root) return;
-    const want = wantCanvas();
-    if (want && !running) { size(); running = true; last = 0; raf = requestAnimationFrame(frame); }
-    else if (!want && running) { running = false; cancelAnimationFrame(raf); try { g.clearRect(0, 0, cv.width, cv.height); } catch (_) {} }
-    html.setAttribute('data-fx-pause', (st.on && !document.hidden && !homeOpen()) ? '0' : '1');
-  }
-  function audio() {
-    if (!st.react) return null;
-    try {
-      if (typeof dawState === 'undefined' || !dawState.isPlaying) return null;
-      const an = audioEngine && audioEngine.masterAnalyser; if (!an || !an.getByteFrequencyData) return null;
-      const n = an.frequencyBinCount; if (!sb || sb.length !== n) sb = new Uint8Array(n);
-      an.getByteFrequencyData(sb); return sb;
-    } catch (_) { return null; }
-  }
-  function band(a, i, n) { // logarithmische Bänder (≈ 40 Hz … 12 kHz)
-    const N = a.length, lo = Math.max(1, Math.floor(Math.pow(N * .5, i / n) )), hi = Math.max(lo + 1, Math.floor(Math.pow(N * .5, (i + 1) / n)));
-    let s = 0, c = 0; for (let b = lo; b < hi && b < N; b++) { s += a[b]; c++; } return c ? s / c / 255 : 0;
-  }
-  const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
-  function drawEq(t, spec) {
-    const n = W < 110 ? 18 : 26, bw = W / n; if (bars.length !== n) bars = new Array(n).fill(.1);
-    for (let i = 0; i < n; i++) {
-      const tgt = spec ? Math.min(1, band(spec, i, n) * 1.35) : (.1 + .07 * Math.sin(t * 1.3 + i * .7) + .04 * Math.sin(t * 2.1 + i * 1.9));
-      bars[i] += (tgt - bars[i]) * (tgt > bars[i] ? .55 : .16);
-      const h = bars[i] * H * .6, x = i * bw, gr = g.createLinearGradient(0, H, 0, H - h);
-      gr.addColorStop(0, rgba(C1, .95)); gr.addColorStop(.6, rgba(C2, .6)); gr.addColorStop(1, rgba(C3, 0));
-      g.fillStyle = gr; g.fillRect(x + bw * .12, H - h, bw * .76, h);
-    }
-  }
-  function drawSparks(t, dt) {
-    const n = 46; while (parts.length < n) parts.push({ x: Math.random() * W, y: Math.random() * H, v: .04 + Math.random() * .08, r: .7 + Math.random() * 1.5, ph: Math.random() * 6.28, c: Math.random() });
-    g.globalCompositeOperation = 'lighter';
-    for (const p of parts) {
-      p.y -= p.v * H * dt * (1 + lvl * 4); p.x += Math.sin(t * .8 + p.ph) * W * .02 * dt * 6;
-      if (p.y < -4) { p.y = H + 4; p.x = Math.random() * W; }
-      const tw = .45 + .55 * Math.sin(t * 2.4 + p.ph), col = p.c < .5 ? C1 : (p.c < .8 ? C2 : C3), r = p.r * (1 + lvl * 1.6);
-      g.fillStyle = rgba(col, .16 * tw); g.beginPath(); g.arc(p.x, p.y, r * 3.2, 0, 6.283); g.fill();
-      g.fillStyle = rgba(col, .85 * tw); g.beginPath(); g.arc(p.x, p.y, r, 0, 6.283); g.fill();
-    }
-    g.globalCompositeOperation = 'source-over';
-  }
-  function drawWaves(t) {
-    for (let L = 0; L < 4; L++) {
-      const base = H * (.58 + L * .09), amp = H * (.035 + .012 * L) * (1 + lvl * 2.6), f = (2.2 + L * .7) * 6.283 / W, sp = .5 + L * .25;
-      const gr = g.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, rgba(C1, .9)); gr.addColorStop(.5, rgba(C2, .9)); gr.addColorStop(1, rgba(C3, .9));
-      g.beginPath();
-      for (let x = 0; x <= W; x += 3) { const y = base + Math.sin(x * f + t * sp + L) * amp + Math.sin(x * f * .43 - t * sp * .8) * amp * .6; x ? g.lineTo(x, y) : g.moveTo(x, y); }
-      g.strokeStyle = gr; g.globalAlpha = .75 - L * .13; g.lineWidth = Math.max(1, H / 140); g.stroke();
-      g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.globalAlpha = .06; g.fillStyle = gr; g.fill(); g.globalAlpha = 1;
-    }
-  }
-  function frame(ts) {
-    if (!running) return; raf = requestAnimationFrame(frame);
-    if (document.hidden) return;
-    const minDt = q ? 66 : 41; if (last && ts - last < minDt) return;
-    const dt = last ? Math.min(.1, (ts - last) / 1000) : .04; last = ts;
-    const t0 = performance.now(), t = ts / 1000, spec = audio();
-    let l = 0; if (spec) { let s = 0; for (let i = 1; i < 9; i++) s += spec[i]; l = Math.min(1, s / 8 / 255 * 1.5); }
-    lvl += (l - lvl) * (l > lvl ? .45 : .12);
-    g.clearRect(0, 0, W, H);
-    if (st.full === 'eq') drawEq(t, spec); else if (st.full === 'sparks') drawSparks(t, dt); else if (st.full === 'waves') drawWaves(t);
-    // Leistungs-Wächter: erst gröber rechnen, dann pausieren – Audio hat Vorrang
-    draws.push(performance.now() - t0); if (draws.length >= 45) {
-      const avg = draws.reduce((a, b) => a + b, 0) / draws.length; draws = [];
-      if (avg > 9) { if (!q) { q = 1; size(); } else { perfPaused = true; reconcile(); try { if (typeof toast === 'function') toast('Effekt pausiert: Das Gerät kommt nicht hinterher. Aurora oder Rand-Effekte laufen sparsamer.', 'info'); } catch (_) {} } }
-    }
-  }
-  document.addEventListener('visibilitychange', reconcile);
-  window.addEventListener('resize', () => { if (running) size(); });
-  window.addEventListener('orientationchange', () => setTimeout(() => { if (running) size(); }, 250));
-  if (mq.addEventListener) mq.addEventListener('change', reconcile);
-  setInterval(reconcile, 900);
+  document.addEventListener('visibilitychange', live);
+  setInterval(() => { live(); if (st.on) tagAll(); }, 600);
   document.addEventListener('sunshine-ui', () => setTimeout(syncColors, 30));
   new MutationObserver(() => syncColors()).observe(html, { attributes: true, attributeFilter: ['data-theme', 'data-accent'] });
 
@@ -11564,11 +11493,11 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   function section(ph) {
     ph.innerHTML = `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Effekte</div>
       <div class="rounded-xl border border-slate-800 p-3 space-y-3.5">
-        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-fx-on ${st.on ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Visuelle Effekte</span><span class="block text-[11px] text-slate-400">Hauptschalter. Aus = keine Animationen, schont den Akku.${mq.matches ? ' <b>Systemeinstellung „Bewegung reduzieren“ ist aktiv: Es laufen nur ruhige Effekte.</b>' : ''}</span></span></label>
+        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-fx-on ${st.on ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Visuelle Effekte</span><span class="block text-[11px] text-slate-400">Hauptschalter – standardmäßig aus. Aus = keine Animationen, schont den Akku.${mq.matches ? ' <b>Systemeinstellung „Bewegung reduzieren“ ist aktiv: Es laufen nur ruhige Effekte.</b>' : ''}</span></span></label>
         <div><div class="text-sm font-semibold mb-1.5">Rand-Effekte <span class="text-[11px] font-normal text-slate-400">an Leisten, Bereichen &amp; Fenstern</span></div><div class="grid grid-cols-4 gap-2" id="fx-edge-row">${seg('fx-edge', EDGES, st.edge)}</div></div>
-        <div><div class="text-sm font-semibold mb-1.5">Vollflächig <span class="text-[11px] font-normal text-slate-400">über der ganzen App</span></div><div class="grid grid-cols-5 gap-1.5" id="fx-full-row">${seg('fx-full', FULLS, st.full)}</div></div>
+        <div><div class="text-sm font-semibold mb-1.5">Flächen-Effekte <span class="text-[11px] font-normal text-slate-400">nur große Bereiche</span></div><div class="grid grid-cols-5 gap-1.5" id="fx-full-row">${seg('fx-full', FULLS, st.full)}</div></div>
         <label class="block"><span class="flex justify-between text-sm font-semibold"><span>Stärke</span><span id="fx-k-v" class="text-slate-400 font-mono text-xs">${st.k}%</span></span><input type="range" data-fx-k min="10" max="100" step="5" value="${st.k}" class="w-full daw-slider mt-1"></label>
-        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-fx-react ${st.react ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Auf die Musik reagieren</span><span class="block text-[11px] text-slate-400">Equalizer, Funken und Wellen bewegen sich mit dem Abspielen. Beim Wechsel sieht man die Wirkung kurz durch den Dialog.</span></span></label>
+        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-fx-react ${st.react ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Beim Abspielen lebendiger</span><span class="block text-[11px] text-slate-400">Während Musik läuft, bewegen sich die Effekte etwa doppelt so schnell. Beim Wechsel sieht man die Wirkung kurz durch den Dialog.</span></span></label>
       </div>`;
     const ov = ph.closest('#settings-modal');
     const peek = ms => { if (!ov) return; ov.classList.add('peek'); clearTimeout(ov._fxp); ov._fxp = setTimeout(() => ov.classList.remove('peek'), ms); };
@@ -11576,11 +11505,11 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     ph.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.dataset.fxEdge) { set({ edge: b.dataset.fxEdge }); pressed('fx-edge-row', 'fxEdge', st.edge); peek(1800); }
-      else if (b.dataset.fxFull) { perfPaused = false; q = 0; set({ full: b.dataset.fxFull }); pressed('fx-full-row', 'fxFull', st.full); peek(1800); }
+      else if (b.dataset.fxFull) { set({ full: b.dataset.fxFull }); pressed('fx-full-row', 'fxFull', st.full); peek(1800); }
     });
     ph.addEventListener('change', e => {
       const t = e.target;
-      if (t.matches('[data-fx-on]')) { perfPaused = false; set({ on: t.checked }); peek(1800); }
+      if (t.matches('[data-fx-on]')) { set({ on: t.checked }); peek(1800); }
       else if (t.matches('[data-fx-react]')) set({ react: t.checked });
     });
     ph.addEventListener('input', e => { const t = e.target; if (t.matches('[data-fx-k]')) { set({ k: +t.value }, false); ph.querySelector('#fx-k-v').textContent = st.k + '%'; if (ov) ov.classList.add('peek'); } });
@@ -11588,8 +11517,322 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   }
   new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; const ph = n.id === 'fx-sec' ? n : (n.querySelector && n.querySelector('#fx-sec')); if (ph && !ph.dataset.done) { ph.dataset.done = '1'; section(ph); } }); }).observe(document.body, { childList: true, subtree: true });
 
-  window.FX = { get: () => Object.assign({}, st), set, apply, edges: EDGES.map(e => e[0]), fulls: FULLS.map(e => e[0]), _running: () => running, _quality: () => q, _perfPaused: () => perfPaused, _level: () => lvl, _colors: () => [C1, C2, C3] };
+  window.FX = { get: () => Object.assign({}, st), set, apply, edges: EDGES.map(e => e[0]), fulls: FULLS.map(e => e[0]), _live: () => html.getAttribute('data-fx-live') === '1', _colors: () => [C1, C2, C3] };
   function boot() { apply(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+</script>
+<script>
+/* ===== Sunshine@R · Anzeige-Wächter =====
+   Sorgt dafür, dass die App IMMER genau so breit wie der Bildschirm ist:
+   – kein seitliches Verschieben/Wischen der Seite (egal welcher Effekt oder Dialog etwas überstehen lässt)
+   – kein fester Seitenrand durch Kamera-Aussparung/Systemleisten, solange du ihn nicht in Optionen einschaltest
+   – „Anzeige prüfen“ in den Optionen zeigt die Messwerte und stellt die Ausrichtung sofort wieder her */
+(function () {
+  'use strict';
+  const LS = 'sunshine.layout', html = document.documentElement;
+  let st = { cutout: false }; try { Object.assign(st, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (_) {}
+  const save = () => { try { localStorage.setItem(LS, JSON.stringify(st)); } catch (_) {} };
+  const apply = () => html.setAttribute('data-cutout', st.cutout ? '1' : '0');
+  apply();
+
+  let fixes = 0;
+  function guard() {
+    let moved = false;
+    try {
+      if (window.scrollX) { window.scrollTo(0, window.scrollY); moved = true; }
+      if (html.scrollLeft) { html.scrollLeft = 0; moved = true; }
+      if (document.body && document.body.scrollLeft) { document.body.scrollLeft = 0; moved = true; }
+    } catch (_) {}
+    if (moved) fixes++;
+    return moved;
+  }
+  window.addEventListener('scroll', () => { if (window.scrollX || html.scrollLeft) guard(); }, { passive: true });
+  ['resize', 'orientationchange'].forEach(e => window.addEventListener(e, () => { guard(); setTimeout(guard, 300); }));
+  if (window.visualViewport) visualViewport.addEventListener('resize', guard);
+  document.addEventListener('sunshine-fx', () => setTimeout(guard, 50));
+  setInterval(guard, 1500);
+
+  function probe() {   // gemessene Sicherheitsabstände (so wie der Browser sie meldet)
+    const d = document.createElement('div');
+    d.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)';
+    document.body.appendChild(d); const c = getComputedStyle(d), r = [c.paddingTop, c.paddingRight, c.paddingBottom, c.paddingLeft].map(x => Math.round(parseFloat(x) || 0)); d.remove(); return r;
+  }
+  function measure() {
+    const b = document.body.getBoundingClientRect(), hd = document.querySelector('header.sticky, header'), h = hd ? hd.getBoundingClientRect() : null, vv = window.visualViewport;
+    const ins = probe();
+    return {
+      Fenster: innerWidth + ' × ' + innerHeight, Bildschirm: screen.width + ' × ' + screen.height, 'Dichte (dpr)': +(devicePixelRatio || 1).toFixed(2),
+      'Seite verschoben': (window.scrollX || html.scrollLeft) ? 'ja (' + Math.round(window.scrollX) + ' px)' : 'nein', 'Sichtfenster-Versatz': vv ? Math.round(vv.offsetLeft) + ' px' : '–', Zoom: vv ? +vv.scale.toFixed(2) : 1,
+      'Inhalt links/rechts': h ? Math.round(h.left) + ' / ' + Math.round(innerWidth - h.right) + ' px' : '–',
+      'Sicherheitsrand o/r/u/l': ins.join(' / ') + ' px', 'Kamera-Abstand': st.cutout ? 'an' : 'aus',
+      'Überstand (Seitenbreite)': Math.max(0, html.scrollWidth - innerWidth) + ' px', Korrekturen: fixes, Orientierung: innerWidth > innerHeight ? 'Quer' : 'Hoch'
+    };
+  }
+
+  // ---------- Optionen ----------
+  function section(ph) {
+    ph.innerHTML = `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Anzeige</div>
+      <div class="rounded-xl border border-slate-800 p-3 space-y-3">
+        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-ly-cut ${st.cutout ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Abstand zur Kamera-Aussparung (Querformat)</span><span class="block text-[11px] text-slate-400">Aus = Inhalt füllt den ganzen Bildschirm bis zum Rand (Standard). An = links/rechts bleibt Platz, falls dein Handy eine Kamera-Aussparung an der Seite hat.</span></span></label>
+        <div><button type="button" data-ly-check class="w-full py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Anzeige prüfen &amp; korrigieren</button><pre data-ly-out class="hidden mt-2 text-[11px] leading-5 text-slate-300 bg-slate-950 rounded-lg p-2.5 whitespace-pre-wrap select-text"></pre></div>
+      </div>`;
+    ph.addEventListener('change', e => { if (e.target.matches('[data-ly-cut]')) { st.cutout = e.target.checked; save(); apply(); setTimeout(guard, 50); } });
+    ph.addEventListener('click', e => {
+      if (!e.target.closest('[data-ly-check]')) return;
+      const was = guard(); const m = measure(), out = ph.querySelector('[data-ly-out]');
+      out.textContent = Object.entries(m).map(([k, v]) => k + ': ' + v).join('\n') + (was ? '\n→ Seite war verschoben und wurde zurückgesetzt.' : '\n→ Ausrichtung in Ordnung.');
+      out.classList.remove('hidden');
+    });
+  }
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; const ph = n.id === 'ly-sec' ? n : (n.querySelector && n.querySelector('#ly-sec')); if (ph && !ph.dataset.done) { ph.dataset.done = '1'; section(ph); } }); }).observe(document.body || html, { childList: true, subtree: true });
+
+  window.Layout = { get: () => Object.assign({}, st), set: p => { Object.assign(st, p); save(); apply(); guard(); }, guard, measure, _fixes: () => fixes };
+})();
+
+</script>
+<script>
+/* ===== Sunshine@R · Updates & Datensicherung =====
+   Update: fragt bei GitHub nach der neuesten veröffentlichten APK ("Build N"), vergleicht mit der installierten Build-Nummer
+           und öffnet den Download. Installiert wird über die bestehende App → Projekte & Einstellungen bleiben erhalten
+           (setzt voraus, dass alle Builds mit demselben Signatur-Schlüssel gebaut wurden – siehe ANLEITUNG-UPDATES.md).
+   Sicherung: packt ALLE Projekte, Autosave, Startseiten-Index und Einstellungen (IndexedDB + sunshine.*-Einstellungen) in eine ZIP-Datei
+              und stellt sie wieder her (Zusammenführen: gleiche Projekte werden überschrieben, andere bleiben). */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const say = (m, k) => { try { if (typeof toast === 'function') toast(m, k || 'info'); } catch (_) {} };
+  const LS = 'sunshine.update';
+  let U = { auto: true, checked: 0, latest: null, dismissed: 0 }; try { Object.assign(U, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (_) {}
+  const saveU = () => { try { localStorage.setItem(LS, JSON.stringify(U)); } catch (_) {} };
+
+  /* ================================================================ Update */
+  const B = window.SUNSHINE_BUILD || {};
+  const BUILD = /^\d+$/.test(String(B.n || '')) ? +B.n : 0;
+  const REPO = /^[\w.-]+\/[\w.-]+$/.test(String(B.repo || '')) ? B.repo : '';
+  const isNew = () => !!(U.latest && U.latest.n > BUILD);
+  const dateDe = s => { try { return new Date(s).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (_) { return ''; } };
+  async function fetchLatest() {
+    if (!REPO) throw new Error('Diese Version kennt ihr GitHub-Repo nicht (Entwicklungsversion). Updates werden nur in der gebauten App geprüft.');
+    if (navigator.onLine === false) throw new Error('Keine Internetverbindung.');
+    const r = await fetch('https://api.github.com/repos/' + REPO + '/releases/latest', { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
+    if (r.status === 404) throw new Error('Noch keine Veröffentlichung gefunden (oder das Repository ist privat).');
+    if (!r.ok) throw new Error('GitHub antwortet mit Fehler ' + r.status + '.');
+    const j = await r.json(), m = /(\d+)/.exec(j.tag_name || ''), apk = (j.assets || []).find(x => /\.apk$/i.test(x.name || ''));
+    return { n: m ? +m[1] : 0, tag: j.tag_name || '', name: j.name || '', notes: String(j.body || '').slice(0, 600), published: j.published_at || '', url: apk ? apk.browser_download_url : j.html_url, page: j.html_url, size: apk ? apk.size : 0 };
+  }
+  async function check(opts) {
+    opts = opts || {};
+    try {
+      const l = await fetchLatest(); U.latest = l; U.checked = Date.now(); saveU();
+      try { document.dispatchEvent(new CustomEvent('sunshine-update', { detail: { available: isNew(), latest: l, build: BUILD } })); } catch (_) {}
+      return { ok: true, available: isNew(), latest: l, build: BUILD };
+    } catch (e) { return { ok: false, error: e && e.message || String(e), build: BUILD }; }
+  }
+  function download() {
+    const l = U.latest; if (!l) return false;
+    try { if (typeof openExternalUrl === 'function') openExternalUrl(l.url); else window.open(l.url, '_blank', 'noopener'); } catch (_) { try { location.href = l.url; } catch (__) {} }
+    return true;
+  }
+  function onHome(el) {
+    if (!el) return; el.innerHTML = '';
+    if (!isNew() || U.dismissed === U.latest.n) return;
+    const l = U.latest;
+    el.innerHTML = `<div class="hp-new"><span class="tx"><b>Update verfügbar · Build ${l.n}</b><span class="s">Installiert ist Build ${BUILD || '–'}. Deine Projekte bleiben erhalten.</span></span><button type="button" data-up="dl">Laden</button><button type="button" class="no" data-up="no">Später</button></div>`;
+    el.onclick = e => { const b = e.target.closest('[data-up]'); if (!b) return; if (b.dataset.up === 'dl') download(); else { U.dismissed = l.n; saveU(); el.innerHTML = ''; } };
+  }
+
+  /* ================================================================ Sicherung */
+  const BASE = /^(SunshineRStemStudioProjects|SunshineHome|SunshineAutosave)$/;
+  const idbp = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error || new Error('IndexedDB-Fehler')); });
+  const txdone = t => new Promise((res, rej) => { t.oncomplete = () => res(); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error || new Error('abgebrochen')); });
+  async function listDbs() {
+    if (indexedDB.databases) { try { return (await indexedDB.databases()).map(d => d.name).filter(Boolean); } catch (_) {} }
+    return ['SunshineRStemStudioProjects', 'SunshineHome', 'SunshineAutosave', 'sunshine-soundfonts', 'SunshineStemCache'];
+  }
+  async function enc(v, zip, ctx, depth) {
+    depth = depth || 0; if (depth > 60) throw new Error('Datenstruktur zu tief');
+    if (v === undefined) return { $t: 'u' };
+    if (v === null || typeof v === 'boolean' || typeof v === 'string') return v;
+    if (typeof v === 'number') return Number.isFinite(v) ? v : { $t: 'n', v: String(v) };
+    if (typeof v === 'bigint') return { $t: 'bi', v: v.toString() };
+    if (v instanceof Date) return { $t: 'd', v: v.getTime() };
+    if (v instanceof ArrayBuffer) { const f = 'bin/' + (ctx.n++); zip.file(f, v, { binary: true, compression: 'STORE' }); ctx.bytes += v.byteLength; return { $t: 'ab', f }; }
+    if (ArrayBuffer.isView(v)) { const f = 'bin/' + (ctx.n++); zip.file(f, new Uint8Array(v.buffer, v.byteOffset, v.byteLength), { binary: true, compression: 'STORE' }); ctx.bytes += v.byteLength; return { $t: 'ta', k: v.constructor.name, f }; }
+    if (typeof Blob !== 'undefined' && v instanceof Blob) { const f = 'bin/' + (ctx.n++); const ab = await v.arrayBuffer(); zip.file(f, ab, { binary: true, compression: 'STORE' }); ctx.bytes += ab.byteLength; return { $t: 'bl', t: v.type || '', f, name: v.name, lm: v.lastModified }; }
+    if (Array.isArray(v)) { const o = []; for (const x of v) o.push(await enc(x, zip, ctx, depth + 1)); return o; }
+    if (v instanceof Map) { const o = []; for (const [k, x] of v) o.push([await enc(k, zip, ctx, depth + 1), await enc(x, zip, ctx, depth + 1)]); return { $t: 'm', v: o }; }
+    if (v instanceof Set) { const o = []; for (const x of v) o.push(await enc(x, zip, ctx, depth + 1)); return { $t: 's', v: o }; }
+    if (typeof v === 'object') { const o = {}; for (const k of Object.keys(v)) { if (typeof v[k] === 'function') continue; o[k] = await enc(v[k], zip, ctx, depth + 1); } return k_esc(o); }
+    return null;
+  }
+  const k_esc = o => (o && Object.prototype.hasOwnProperty.call(o, '$t')) ? { $t: 'o', v: o } : o;   // echtes Feld namens „$t“ schützen
+  async function dec(j, zip) {
+    if (j === null || typeof j !== 'object') return j;
+    if (Array.isArray(j)) { const o = []; for (const x of j) o.push(await dec(x, zip)); return o; }
+    if (typeof j.$t === 'string') {
+      const bin = async () => { const f = zip.file(j.f); if (!f) throw new Error('Datei fehlt in der Sicherung: ' + j.f); return f.async('arraybuffer'); };
+      switch (j.$t) {
+        case 'u': return undefined; case 'n': return Number(j.v); case 'bi': return BigInt(j.v); case 'd': return new Date(j.v);
+        case 'ab': return bin();
+        case 'ta': { const ab = await bin(), C = globalThis[j.k]; return C ? new C(ab) : new Uint8Array(ab); }
+        case 'bl': { const ab = await bin(); return (j.name && typeof File !== 'undefined') ? new File([ab], j.name, { type: j.t, lastModified: j.lm }) : new Blob([ab], { type: j.t }); }
+        case 'm': { const m = new Map(); for (const [k, x] of j.v) m.set(await dec(k, zip), await dec(x, zip)); return m; }
+        case 's': { const s = new Set(); for (const x of j.v) s.add(await dec(x, zip)); return s; }
+        case 'o': { const o = {}; for (const k of Object.keys(j.v)) o[k] = await dec(j.v[k], zip); return o; }
+      }
+    }
+    const o = {}; for (const k of Object.keys(j)) o[k] = await dec(j[k], zip); return o;
+  }
+  const stamp = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()); };
+
+  async function make(opts) {
+    opts = opts || {}; const prog = opts.onProgress || (() => {});
+    if (typeof JSZip === 'undefined') throw new Error('Das ZIP-Modul (JSZip) ist nicht geladen.');
+    if (typeof indexedDB === 'undefined') throw new Error('IndexedDB ist nicht verfügbar.');
+    const zip = new JSZip(), ctx = { n: 0, bytes: 0 };
+    const names = (await listDbs()).filter(n => opts.all ? true : BASE.test(n));
+    const man = { format: 1, app: 'Sunshine@R Stem DAW Studio', build: BUILD, created: new Date().toISOString(), dbs: [], ls: {} };
+    let records = 0;
+    for (let i = 0; i < names.length; i++) {
+      const name = names[i]; prog('Datenbank ' + (i + 1) + '/' + names.length + ': ' + name);
+      const db = await idbp(indexedDB.open(name)); const d = { name, version: db.version, stores: [] };
+      try {
+        const snames = Array.from(db.objectStoreNames);
+        for (let j = 0; j < snames.length; j++) {
+          const sn = snames[j], t = db.transaction(sn, 'readonly'), s = t.objectStore(sn);
+          const sch = { name: sn, keyPath: s.keyPath, autoIncrement: s.autoIncrement, indexes: Array.from(s.indexNames).map(x => { const ix = s.index(x); return { name: ix.name, keyPath: ix.keyPath, unique: ix.unique, multiEntry: ix.multiEntry }; }), count: 0 };
+          const keys = await idbp(s.getAllKeys());
+          for (let n = 0; n < keys.length; n++) {
+            const val = await idbp(db.transaction(sn, 'readonly').objectStore(sn).get(keys[n]));
+            const ek = await enc(keys[n], zip, ctx), ev = await enc(val, zip, ctx);
+            zip.file('d' + i + '/s' + j + '/' + n + '.json', JSON.stringify({ k: ek, v: ev }), { compression: 'DEFLATE' }); sch.count++; records++;
+            if (n % 5 === 0) prog(name + ' · ' + sn + ' ' + (n + 1) + '/' + keys.length);
+          }
+          d.stores.push(sch);
+        }
+      } finally { db.close(); }
+      man.dbs.push(d);
+    }
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^sunshine/i.test(k) && k !== LS) man.ls[k] = localStorage.getItem(k); } } catch (_) {}
+    man.records = records; man.binBytes = ctx.bytes;
+    zip.file('manifest.json', JSON.stringify(man, null, 1));
+    prog('ZIP wird gepackt …');
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'STORE', streamFiles: true }, m => prog('Packen ' + Math.round(m.percent) + ' %'));
+    return { blob, name: 'Sunshine-Sicherung-' + stamp() + '.zip', records, dbs: man.dbs.length, bytes: blob.size, manifest: man };
+  }
+  async function exportBackup(opts) {
+    const r = await make(opts);
+    let how = 'downloaded'; try { if (typeof saveOrShareBlob === 'function') how = await saveOrShareBlob(r.blob, r.name); else { const u = URL.createObjectURL(r.blob), a = document.createElement('a'); a.href = u; a.download = r.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000); } } catch (e) { throw new Error('Speichern fehlgeschlagen: ' + (e && e.message || e)); }
+    return Object.assign({ how }, r);
+  }
+  async function ensureStore(name, d) {
+    let db = await new Promise((res, rej) => { const q = indexedDB.open(name, d.version || 1); q.onupgradeneeded = () => mkStores(q.result, d); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); q.onblocked = () => rej(new Error('Datenbank ' + name + ' ist blockiert – App neu starten und erneut versuchen.')); });
+    const miss = d.stores.filter(s => !db.objectStoreNames.contains(s.name));
+    if (miss.length) { const v = db.version + 1; db.close(); db = await new Promise((res, rej) => { const q = indexedDB.open(name, v); q.onupgradeneeded = () => mkStores(q.result, d); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); q.onblocked = () => rej(new Error('Datenbank ' + name + ' ist blockiert – App neu starten und erneut versuchen.')); }); }
+    return db;
+  }
+  function mkStores(db, d) { d.stores.forEach(s => { if (db.objectStoreNames.contains(s.name)) return; const os = db.createObjectStore(s.name, s.keyPath == null ? { autoIncrement: !!s.autoIncrement } : { keyPath: s.keyPath, autoIncrement: !!s.autoIncrement }); (s.indexes || []).forEach(ix => { try { os.createIndex(ix.name, ix.keyPath, { unique: !!ix.unique, multiEntry: !!ix.multiEntry }); } catch (_) {} }); }); }
+  async function inspect(file) {
+    if (typeof JSZip === 'undefined') throw new Error('Das ZIP-Modul (JSZip) ist nicht geladen.');
+    let zip; try { zip = await JSZip.loadAsync(file); } catch (_) { throw new Error('Das ist keine gültige ZIP-Datei.'); } const mf = zip.file('manifest.json'); if (!mf) throw new Error('Das ist keine Sunshine-Sicherung (manifest.json fehlt).');
+    const man = JSON.parse(await mf.async('string')); if (man.format !== 1 || !Array.isArray(man.dbs)) throw new Error('Unbekanntes Sicherungsformat.');
+    return { zip, man };
+  }
+  async function restore(file, opts) {
+    opts = opts || {}; const prog = opts.onProgress || (() => {});
+    const { zip, man } = await inspect(file); let n = 0; const total = man.records || man.dbs.reduce((a, d) => a + d.stores.reduce((b, s) => b + s.count, 0), 0);
+    for (let i = 0; i < man.dbs.length; i++) {
+      const d = man.dbs[i]; const db = await ensureStore(d.name, d);
+      try {
+        for (let j = 0; j < d.stores.length; j++) {
+          const s = d.stores[j];
+          for (let k = 0; k < s.count; k++) {
+            const f = zip.file('d' + i + '/s' + j + '/' + k + '.json'); if (!f) continue;
+            const rec = JSON.parse(await f.async('string')), key = await dec(rec.k, zip), val = await dec(rec.v, zip);
+            const t = db.transaction(s.name, 'readwrite'), os = t.objectStore(s.name);
+            if (os.keyPath == null) os.put(val, key); else os.put(val);
+            await txdone(t); n++; if (n % 3 === 0) prog('Wiederherstellen ' + n + '/' + total);
+          }
+        }
+      } finally { db.close(); }
+    }
+    let ls = 0; try { Object.keys(man.ls || {}).forEach(k => { if (/^sunshine/i.test(k)) { localStorage.setItem(k, man.ls[k]); ls++; } }); } catch (_) {}
+    return { records: n, dbs: man.dbs.length, settings: ls, created: man.created, build: man.build };
+  }
+  async function storageInfo() {
+    const o = { persisted: null, usage: null, quota: null };
+    try { if (navigator.storage && navigator.storage.persisted) o.persisted = await navigator.storage.persisted(); } catch (_) {}
+    try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); o.usage = e.usage; o.quota = e.quota; } } catch (_) {}
+    return o;
+  }
+  async function persist() { try { if (navigator.storage && navigator.storage.persist) return await navigator.storage.persist(); } catch (_) {} return false; }
+  const mb = b => b == null ? '–' : (b / 1048576 >= 1024 ? (b / 1073741824).toFixed(1) + ' GB' : Math.round(b / 1048576) + ' MB');
+
+  /* ================================================================ Optionen */
+  function section(ph) {
+    const ver = BUILD ? 'Build ' + BUILD : 'Entwicklungsversion (Browser)';
+    ph.innerHTML = `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Updates &amp; Datensicherung</div>
+      <div class="rounded-xl border border-slate-800 p-3 space-y-3">
+        <div><div class="flex justify-between items-baseline"><span class="text-sm font-semibold">Installierte Version</span><span class="text-xs font-mono text-slate-300" data-up-ver>${ver}</span></div>
+          <button type="button" data-up-check class="mt-2 w-full py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Nach Updates suchen</button>
+          <div data-up-res class="hidden mt-2 text-[12px] leading-5 text-slate-300"></div></div>
+        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-up-auto ${U.auto ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Beim Start nach Updates suchen</span><span class="block text-[11px] text-slate-400">Höchstens alle 12 Stunden, nur bei Internet. Es wird nichts ohne dein Zutun installiert.</span></span></label>
+        <div class="border-t border-slate-800 pt-3"><div class="text-sm font-semibold">Datensicherung</div><div class="text-[11px] text-slate-400 mb-2">Alle Projekte, der letzte Autosave und deine Einstellungen als eine ZIP-Datei. Mach vorher eine Sicherung, wenn du die App neu installierst.</div>
+          <div class="grid grid-cols-2 gap-2"><button type="button" data-bk-make class="py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Alles sichern</button><button type="button" data-bk-restore class="py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Wiederherstellen</button></div>
+          <input type="file" data-bk-file accept=".zip,application/zip" class="hidden">
+          <label class="flex items-center gap-2 mt-2 text-[12px] text-slate-300 cursor-pointer"><input type="checkbox" data-bk-all class="w-4 h-4"> Auch große Zusatzdaten (SoundFonts, Zwischenspeicher)</label>
+          <div data-bk-out class="hidden mt-2 text-[12px] leading-5 text-slate-300 whitespace-pre-wrap"></div></div>
+        <div class="border-t border-slate-800 pt-3"><div class="flex justify-between items-baseline"><span class="text-sm font-semibold">Gerätespeicher</span><span class="text-xs font-mono text-slate-300" data-st-info>…</span></div><div class="text-[11px] text-slate-400">Android darf Browser-Daten bei Platzmangel löschen. „Dauerhaft“ schützt davor.</div>
+          <button type="button" data-st-persist class="mt-2 w-full py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Speicher dauerhaft schützen</button></div>
+      </div>`;
+    const res = ph.querySelector('[data-up-res]'), out = ph.querySelector('[data-bk-out]'), info = ph.querySelector('[data-st-info]');
+    const showRes = h => { res.innerHTML = h; res.classList.remove('hidden'); }, showOut = t => { out.textContent = t; out.classList.remove('hidden'); };
+    const refreshSt = async () => { const s = await storageInfo(); info.textContent = (s.persisted === null ? '' : (s.persisted ? 'dauerhaft · ' : 'nicht geschützt · ')) + mb(s.usage) + ' von ' + mb(s.quota); };
+    refreshSt();
+    const paintUpdate = r => {
+      if (!r.ok) { showRes('<span class="text-amber-300">' + r.error + '</span>'); return; }
+      if (r.available) showRes(`<b class="text-emerald-300">Update verfügbar: Build ${r.latest.n}</b>${r.latest.published ? ' · ' + dateDe(r.latest.published) : ''}${r.latest.size ? ' · ' + mb(r.latest.size) : ''}<br>Tipp: erst „Alles sichern“. Nach dem Download die Datei öffnen und „Installieren“ wählen – die App wird <b>aktualisiert</b>, deine Projekte bleiben.<br><button type="button" data-up-dl class="mt-2 w-full py-2.5 text-sm font-bold rounded-xl bg-amber-400 text-slate-900">Update herunterladen</button>`);
+      else showRes('Du hast die neueste Version (Build ' + BUILD + '; veröffentlicht: Build ' + r.latest.n + ').');
+    };
+    if (isNew()) paintUpdate({ ok: true, available: true, latest: U.latest });
+    ph.addEventListener('click', async e => {
+      const t = e.target.closest('button'); if (!t) return;
+      if (t.matches('[data-up-check]')) { t.disabled = true; showRes('Suche …'); paintUpdate(await check()); t.disabled = false; }
+      else if (t.matches('[data-up-dl]')) { download(); }
+      else if (t.matches('[data-bk-make]')) {
+        t.disabled = true; showOut('Sicherung wird erstellt …');
+        try { const r = await exportBackup({ all: ph.querySelector('[data-bk-all]').checked, onProgress: showOut }); showOut(r.how === 'cancelled' ? 'Abgebrochen.' : '✓ Gesichert: ' + r.records + ' Datensätze aus ' + r.dbs + ' Datenbanken (' + mb(r.bytes) + ')\n' + r.name + (r.how === 'downloaded' ? '\nDie Datei liegt im Download-Ordner.' : '')); }
+        catch (err) { showOut('Fehler: ' + (err && err.message || err)); }
+        t.disabled = false; refreshSt();
+      }
+      else if (t.matches('[data-bk-restore]')) ph.querySelector('[data-bk-file]').click();
+      else if (t.matches('[data-st-persist]')) { const ok = await persist(); say(ok ? 'Speicher ist jetzt dauerhaft geschützt.' : 'Android hat den Schutz nicht gewährt (er wird oft erst nach häufigerer Nutzung erteilt).', ok ? 'success' : 'info'); refreshSt(); }
+    });
+    ph.addEventListener('change', async e => {
+      const t = e.target;
+      if (t.matches('[data-up-auto]')) { U.auto = t.checked; saveU(); }
+      else if (t.matches('[data-bk-file]') && t.files && t.files[0]) {
+        const f = t.files[0]; t.value = '';
+        try {
+          showOut('Datei wird gelesen …'); const { man } = await inspect(f);
+          const n = man.records || 0, when = man.created ? new Date(man.created).toLocaleString('de-DE') : '?';
+          if (!confirm('Sicherung vom ' + when + ' wiederherstellen?\n' + n + ' Datensätze. Gleiche Projekte werden überschrieben, andere bleiben erhalten. Die App lädt danach neu.')) { showOut('Abgebrochen.'); return; }
+          const r = await restore(f, { onProgress: showOut });
+          showOut('✓ Wiederhergestellt: ' + r.records + ' Datensätze, ' + r.settings + ' Einstellungen. Die App lädt neu …'); setTimeout(() => location.reload(), 1200);
+        } catch (err) { showOut('Fehler: ' + (err && err.message || err)); }
+      }
+    });
+  }
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; const ph = n.id === 'up-sec' ? n : (n.querySelector && n.querySelector('#up-sec')); if (ph && !ph.dataset.done) { ph.dataset.done = '1'; section(ph); } }); }).observe(document.body || document.documentElement, { childList: true, subtree: true });
+
+  function boot() {
+    persist();   // stilles Anfordern des dauerhaften Speichers (Android erteilt es oft erst später)
+    if (REPO && U.auto && navigator.onLine !== false && Date.now() - (U.checked || 0) > 12 * 3600e3) setTimeout(async () => { const r = await check(); if (r.ok && r.available) { say('Update verfügbar: Build ' + r.latest.n + ' – Optionen → Updates & Datensicherung.', 'info'); try { const h = $('hm-update'); if (h && window.Home && Home.isOpen()) onHome(h); } catch (_) {} } }, 6000);
+  }
+  window.Update = { build: () => BUILD, repo: () => REPO, check, download, onHome, isNew, _state: () => Object.assign({}, U) };
+  window.Backup = { make, export: exportBackup, restore, inspect, storageInfo, persist, _enc: enc, _dec: dec };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 
@@ -11797,12 +12040,19 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
       <ul><li><b>✨ KI-Assistent</b> (☰): analysiert die Spuren und macht Vorschläge für Rollen, Mix und Pattern – du entscheidest.</li><li><b>💬 Assistent</b> (☰): Chat zum Bedienen und Fragen. In den Chat-Einstellungen wählst du ein <b>lokales Modell</b> (Download nötig, braucht viel Speicher) oder einen <b>Online-Dienst</b> mit deinem eigenen Schlüssel.</li><li><b>Sprachsteuerung (Test)</b> (Optionen → Experimentell): Befehle wie „Play“, „Tempo 120“, „Spur 2 stumm“. Löschen und Zurücksetzen sind aus Sicherheitsgründen gesperrt.</li></ul>
       ${tip('Online-Dienste und die Spracherkennung können je nach Gerät Daten an Dritte senden. Alles andere in der App bleibt lokal auf dem Gerät.')}` },
     { id: 'design', icon: 'gear', title: 'Design, Icons &amp; Effekte', sum: 'Optionen: Aussehen anpassen', body: `
-      <ul><li><b>Design</b>: Aurora Glass, Studio Matt, Neon Spektrum, Liquid Matt, Klassisch.</li><li><b>Darstellung</b>: Glas-Effekte, Leuchteffekte, große Bedienelemente, <b>einheitliche Linien-Icons</b> (oder Emoji).</li><li><b>Effekte</b>: Rand-Effekte (Glühen, Lichtstrahl, Linie) und vollflächig (Aurora, Equalizer, Funken, Wellen) mit Stärke und Musik-Reaktion – oder alles aus.</li><li><b>Anpassen</b>: Akzentfarbe, Transparenz, Unschärfe, Rundung (eckig bis extra rund).</li><li><b>Fenster untereinander</b>: Editor, Drums, Vocal und Mixer als einklappbare Fenster – oder klassisch als Reiter.</li></ul>
+      <ul><li><b>Design</b>: Aurora Glass, Studio Matt, Neon Spektrum, Liquid Matt, Klassisch.</li><li><b>Darstellung</b>: Glas-Effekte, Leuchteffekte, große Bedienelemente, <b>einheitliche Linien-Icons</b> (oder Emoji).</li><li><b>Effekte</b> (standardmäßig aus): Rand-Effekte (Glühen, Lichtstrahl, Linie) und Flächen-Effekte (Aurora, Equalizer, Funken, Wellen), die nur auf den großen Bereichen laufen – mit Stärke und „Beim Abspielen lebendiger“. Hauptschalter aus = keine Animation.</li><li><b>Anzeige</b>: „Abstand zur Kamera-Aussparung“ (Querformat) und <b>Anzeige prüfen &amp; korrigieren</b>.</li><li><b>Anpassen</b>: Akzentfarbe, Transparenz, Unschärfe, Rundung (eckig bis extra rund).</li><li><b>Fenster untereinander</b>: Editor, Drums, Vocal und Mixer als einklappbare Fenster – oder klassisch als Reiter.</li></ul>
       ${tip('Ruckelt es auf einem älteren Gerät: Glas-Effekte und Effekte ausschalten. Das spart Akku und Rechenleistung.')}${show('Zeig es mir', 'design')}` },
+    { id: 'update', icon: 'download', title: 'Updates &amp; Datensicherung', sum: 'Neue Version installieren, ohne Projekte zu verlieren', body: `
+      <h4>Update</h4><ul><li><b>Optionen → Updates &amp; Datensicherung → Nach Updates suchen</b> vergleicht deine <b>Build-Nummer</b> mit der neuesten veröffentlichten Version.</li><li>Gibt es eine neuere, erscheint <b>Update herunterladen</b> (und auf der Startseite ein Hinweis). Datei öffnen und <b>Installieren</b> wählen – die App wird <b>aktualisiert</b>, Projekte und Einstellungen bleiben.</li><li>Beim Start wird höchstens alle 12 Stunden still geprüft (abschaltbar).</li></ul>
+      <h4>Datensicherung</h4><ul><li><b>Alles sichern</b> packt alle Projekte, den letzten Autosave und deine Einstellungen in eine ZIP-Datei (Download-Ordner bzw. Teilen-Dialog).</li><li><b>Wiederherstellen</b> liest so eine ZIP wieder ein: gleiche Projekte werden überschrieben, andere bleiben. Danach lädt die App neu. Auch für ein neues Handy.</li><li>„Auch große Zusatzdaten“ nimmt SoundFonts und Zwischenspeicher mit (kann sehr groß werden).</li></ul>
+      <h4>Gerätespeicher</h4><p><b>Speicher dauerhaft schützen</b> bittet Android, die App-Daten bei Platzmangel nicht zu löschen.</p>
+      ${warn('Updates klappen nur, wenn die installierte App und die neue APK mit demselben Schlüssel gebaut wurden (feste Signatur). Beim allerersten Wechsel darauf ist einmal Deinstallieren nötig – vorher <b>Alles sichern</b> bzw. exportieren, soweit die alte Version das kann.')}
+      ${tip('Vor jedem größeren Update kurz <b>Alles sichern</b> – dauert bei kleinen Projekten Sekunden.')}` },
     { id: 'hilfe', icon: 'help', title: 'Hilfe bei Problemen', sum: 'Kein Ton, Speicher, offline, Zurück-Taste', body: `
       <h4>Kein Ton</h4><ul><li>Ist die Spur auf <b>M</b> (stumm) oder ist ein anderer Kanal auf <b>S</b> (Solo)?</li><li>Lautstärke der Spur, des Masters und des Handys prüfen.</li><li>Ist die Spur <b>Aktiv</b>?</li></ul>
       <h4>Es ruckelt</h4><ul><li>Optionen → <b>Effekte</b> und <b>Glas-Effekte</b> ausschalten.</li><li>Andere Apps schließen; sehr viele Spuren mit vielen FX belasten das Gerät.</li></ul>
       <h4>Speichern geht nicht</h4><ul><li>Der Gerätespeicher oder die Browser-Quote ist voll: alte Projekte löschen, Stems als ZIP exportieren.</li></ul>
+      <h4>Inhalt ist seitlich verschoben / es gibt einen Rand</h4><ul><li><b>Optionen → Anzeige → Anzeige prüfen &amp; korrigieren</b> stellt die Ausrichtung sofort wieder her und zeigt Messwerte (gern als Screenshot schicken).</li><li>Der Schalter „Abstand zur Kamera-Aussparung“ sollte aus sein, wenn du den ganzen Bildschirm nutzen willst.</li></ul>
       <h4>Offline</h4><ul><li>Die App läuft ohne Internet. Nur Online-Assistent, Modell-Download und Spracherkennung brauchen Netz.</li></ul>
       <h4>Zurück-Taste (Android)</h4><ul><li>Schließt zuerst Dialoge und Menüs, dann führt sie zur Startseite, danach geht die App in den Hintergrund.</li></ul>
       ${tip('Nichts gefunden? Nutze die Suche oben im Handbuch – sie durchsucht alle Kapitel.')}` }
@@ -11941,6 +12191,8 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
         <label class="flex items-start gap-3 py-2 cursor-pointer"><input type="checkbox" data-dockwin ${window.DockWin && DockWin.mode === 'windows' ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Fenster untereinander (einklappbar)</span><span class="block text-[11px] text-slate-400">Editor, Drums, Vocal und Mixer als eigene Fenster mit Klapp-Pfeil. Aus = Reiter wie bisher.</span></span></label>
       </div>
       <div id="fx-sec"></div>
+      <div id="ly-sec"></div>
+      <div id="up-sec"></div>
       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Anpassen</div>
       <div class="rounded-xl border border-slate-800 p-3 space-y-3.5">
         <div>
