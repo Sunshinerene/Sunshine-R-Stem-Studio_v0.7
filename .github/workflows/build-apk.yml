@@ -28,13 +28,21 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build-Nummer und Repo in die App schreiben
+      - name: Build-Nummer, Repo und Live-Update-Daten in die App schreiben
         run: |
           found=0
           for f in www/index.html dist/index.html public/index.html index.html; do
             if [ -f "$f" ] && grep -q "__BUILD_N__" "$f"; then
-              sed -i "s#__BUILD_N__#${{ github.run_number }}#g; s#__BUILD_REPO__#${{ github.repository }}#g; s#__BUILD_TIME__#$(date -u +%F)#g" "$f"
-              echo "Build ${{ github.run_number }} eingetragen in $f"; found=1
+              WEB=$(dirname "$f")
+              # Prüfsumme der unveränderten Oberfläche (für das Live-Update) – VOR dem Ersetzen der Platzhalter
+              LIVE_H=$(sha256sum "$f" | cut -d' ' -f1)
+              LIVE_V=$(grep -o "SUNSHINE_BUILD={[^}]*}" "$f" | grep -o "v:'[^']*'" | head -1 | cut -d"'" -f2)
+              # „App-Hülle“: Wenn sich diese Dateien ändern, reicht ein Live-Update nicht – dann braucht es eine neue APK
+              NAT=$( { cat scripts/patch-android.cjs package.json capacitor.config.* 2>/dev/null; if [ "$WEB" != "." ]; then find "$WEB" -type f ! -name index.html ! -name build.json ! -name sw.js -print0 | sort -z | xargs -0 -r sha256sum; fi; } | sha256sum | cut -c1-12 )
+              sed -i "s#__BUILD_N__#${{ github.run_number }}#g; s#__BUILD_REPO__#${{ github.repository }}#g; s#__BUILD_TIME__#$(date -u +%F)#g; s#__BUILD_NATIVE__#${NAT}#g" "$f"
+              printf '{"n":"%s","nat":"%s","repo":"%s"}' "${{ github.run_number }}" "$NAT" "${{ github.repository }}" > "$WEB/build.json"
+              echo "LIVE_H=$LIVE_H" >> "$GITHUB_ENV"; echo "LIVE_V=$LIVE_V" >> "$GITHUB_ENV"; echo "LIVE_PATH=$f" >> "$GITHUB_ENV"; echo "LIVE_NAT=$NAT" >> "$GITHUB_ENV"
+              echo "Build ${{ github.run_number }} (Version $LIVE_V, Hülle $NAT) eingetragen in $f"; found=1
             fi
           done
           if [ "$found" = "0" ]; then echo "::warning::Kein index.html mit Build-Platzhalter gefunden – die Update-Prüfung in der App bleibt aus."; fi
@@ -101,11 +109,21 @@ jobs:
           name: Sunshine-R-Stem-DAW-apk
           path: release/*.apk
 
+      - name: Release-Text aus CHANGELOG.md erzeugen
+        run: |
+          mkdir -p release
+          # oberster Abschnitt von CHANGELOG.md (ohne Überschrift) = „Was ist neu“
+          if [ -f CHANGELOG.md ]; then awk '/^## /{c++; if(c==1) next} c==1' CHANGELOG.md > release/notes.md; fi
+          if [ ! -s release/notes.md ]; then echo "- Automatischer Build ${{ github.run_number }}" > release/notes.md; fi
+          # maschinenlesbare Zeile für das Live-Update der Oberfläche (unsichtbar auf GitHub)
+          if [ -n "$LIVE_V" ]; then echo "<!-- sunshine:{\"v\":\"$LIVE_V\",\"sha\":\"${{ github.sha }}\",\"path\":\"$LIVE_PATH\",\"h\":\"$LIVE_H\",\"nat\":\"$LIVE_NAT\"} -->" >> release/notes.md; fi
+          cat release/notes.md
+
       - name: Release veröffentlichen (daraus lädt die App ihre Updates)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "build-${{ github.run_number }}" release/*.apk \
-            --title "Sunshine@R Build ${{ github.run_number }}" \
-            --notes "Automatischer Build ${{ github.run_number }} (Commit ${{ github.sha }}). In der App: Optionen → Updates & Datensicherung → Nach Updates suchen." \
+            --title "Sunshine@R Build ${{ github.run_number }}${LIVE_V:+ · Version $LIVE_V}" \
+            --notes-file release/notes.md \
             --target "${{ github.sha }}" --latest
