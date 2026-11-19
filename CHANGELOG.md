@@ -2,6 +2,11 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.20 · 2026-11-19 · Start-Intro
+- Neu: Beim Öffnen der App läuft jetzt dein Intro-Video (10 Sekunden, mit Ton). „Überspringen“ oder die Zurück-Taste beendet es sofort, der Lautsprecher-Knopf schaltet den Ton um. Es läuft einmal pro App-Start, nicht bei jedem Zurückkehren in die App.
+- Neu: Optionen → Design & Aussehen → „Start-Intro“: beim Start abspielen ein/aus, mit oder ohne Ton und „Intro jetzt ansehen“ – das Video lässt sich also auch bei ausgeschaltetem Start jederzeit anschauen.
+- Hinweis: Das Video liegt als eigene Datei in `www/assets/` (intro.mp4 und intro-poster.jpg). Weil sich damit Dateien außerhalb der index.html ändern, braucht dieses Update eine neue APK. Startet der Ton nicht automatisch (Android-Sperre), läuft das Intro stumm und der Lautsprecher-Knopf schaltet ihn zu.
+
 ## 1.19 · 2026-11-19 · Player & Musik im Hintergrund
 - Neu: Die Musik läuft jetzt auch im Hintergrund und bei gesperrtem Bildschirm weiter – für den neuen Player und für die DAW-Wiedergabe. In der Benachrichtigungsleiste und auf dem Sperrbildschirm erscheint ein Player mit Titel, Cover im Farbton deines Designs und Tasten (Zurück, Play/Pause, Weiter bzw. Stopp). Das gibt es nur in der Android-App; es braucht einmalig eine neue APK.
 - Neu: Einfacher Player für reine Audiodateien – WAV, MP3, M4A, OGG, FLAC. Auch ganze ZIP-Dateien (z. B. der Suno-Download) lassen sich öffnen; die Titel darin erscheinen sortiert in der Liste und werden erst beim Abspielen entpackt. Mit Zufall, Wiederholen (aus/alle/ein Titel), Lautstärke und kleiner Leiste, wenn du den Player schließt. Erreichbar über ☰ → Player, die Startseite und die Optionen.
