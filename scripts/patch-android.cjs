@@ -346,6 +346,12 @@ public class PlaybackService extends Service {
     session.setActive(true);
   }
 
+  private static String mmss(long ms) {
+    long s = ms / 1000;
+    if (s < 0) s = 0;
+    return (s / 60) + ":" + ((s % 60) < 10 ? "0" : "") + (s % 60);
+  }
+
   private PendingIntent act(String action, int code) {
     Intent i = new Intent(this, PlaybackService.class);
     i.setAction(action);
@@ -361,7 +367,15 @@ public class PlaybackService extends Service {
     b.setContentTitle(S.title == null || S.title.length() == 0 ? "Sunshine@R" : S.title);
     b.setContentText(S.artist);
     if (S.art != null) b.setLargeIcon(S.art);
-    b.setShowWhen(false);
+    if (S.playing) {
+      // laufende Zeit (vom System gezaehlt, kein Aufwand fuer die App)
+      b.setShowWhen(true);
+      b.setUsesChronometer(true);
+      b.setWhen(System.currentTimeMillis() - S.positionMs);
+    } else {
+      b.setShowWhen(false);
+      if (S.positionMs > 0 || S.durationMs > 0) b.setSubText(mmss(S.positionMs) + (S.durationMs > 0 ? " / " + mmss(S.durationMs) : ""));
+    }
     b.setOnlyAlertOnce(true);
     b.setOngoing(S.playing);
     b.setColor(S.color);
@@ -423,19 +437,33 @@ public class PlaybackService extends Service {
 `;
 const JAVA_PLUGIN = `package __PKG__;
 // SUNSHINE_MEDIA - von scripts/patch-android.cjs erzeugt
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
 import android.util.Base64;
 import android.webkit.WebView;
+import androidx.activity.result.ActivityResult;
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 /** Bruecke Web-App <-> Musik-Benachrichtigung. Web -> update()/stop(); Tasten der Benachrichtigung -> Ereignis "sunshine-media" im Fenster. */
 @CapacitorPlugin(name = "SunshineMedia")
@@ -511,6 +539,154 @@ public class SunshineMediaPlugin extends Plugin {
   public void stop(PluginCall call) {
     try { PlaybackService.halt(getContext()); } catch (Throwable t) { }
     call.resolve();
+  }
+
+  // ---------------------------------------------------------------- Ordner-Dialog (Storage Access Framework)
+  /** Ordner waehlen; die Freigabe bleibt auch nach einem Neustart der App erhalten. */
+  @PluginMethod
+  public void pickFolder(PluginCall call) {
+    try {
+      Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+      i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+      startActivityForResult(call, i, "folderResult");
+    } catch (Throwable t) {
+      call.reject("Ordner-Dialog nicht verfuegbar");
+    }
+  }
+
+  @ActivityCallback
+  private void folderResult(PluginCall call, ActivityResult result) {
+    if (call == null) return;
+    try {
+      Intent d = result == null ? null : result.getData();
+      JSObject o = new JSObject();
+      if (result == null || result.getResultCode() != Activity.RESULT_OK || d == null || d.getData() == null) {
+        o.put("cancelled", true);
+        call.resolve(o);
+        return;
+      }
+      Uri u = d.getData();
+      ContentResolver cr = getContext().getContentResolver();
+      try { cr.takePersistableUriPermission(u, Intent.FLAG_GRANT_READ_URI_PERMISSION); } catch (Throwable t) { }
+      String nm = "Ordner";
+      try {
+        Uri doc = DocumentsContract.buildDocumentUriUsingTree(u, DocumentsContract.getTreeDocumentId(u));
+        Cursor c = cr.query(doc, new String[] { DocumentsContract.Document.COLUMN_DISPLAY_NAME }, null, null, null);
+        if (c != null) {
+          try { if (c.moveToFirst() && c.getString(0) != null) nm = c.getString(0); } finally { c.close(); }
+        }
+      } catch (Throwable t) { }
+      o.put("cancelled", false);
+      o.put("uri", u.toString());
+      o.put("name", nm);
+      call.resolve(o);
+    } catch (Throwable t) {
+      call.reject("Ordner konnte nicht gelesen werden");
+    }
+  }
+
+  private static boolean looksAudio(String name, String mime) {
+    if (mime != null && mime.startsWith("audio/")) return true;
+    String n = name == null ? "" : name.toLowerCase();
+    return n.endsWith(".mp3") || n.endsWith(".wav") || n.endsWith(".m4a") || n.endsWith(".aac") || n.endsWith(".ogg") || n.endsWith(".opus") || n.endsWith(".flac") || n.endsWith(".zip");
+  }
+
+  private void walk(ContentResolver cr, Uri tree, String docId, String rel, int depth, JSArray out) {
+    Uri kids = DocumentsContract.buildChildDocumentsUriUsingTree(tree, docId);
+    Cursor c = null;
+    try {
+      c = cr.query(kids, new String[] { DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.COLUMN_SIZE }, null, null, null);
+      if (c == null) return;
+      while (c.moveToNext()) {
+        if (out.length() >= 3000) break;
+        String id = c.getString(0);
+        String name = c.getString(1);
+        String mime = c.getString(2);
+        long size = c.isNull(3) ? 0L : c.getLong(3);
+        if (id == null || name == null || name.startsWith(".")) continue;
+        if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mime)) {
+          if (depth < 5) walk(cr, tree, id, rel + name + "/", depth + 1, out);
+        } else if (looksAudio(name, mime)) {
+          JSObject f = new JSObject();
+          f.put("name", rel + name);
+          f.put("uri", DocumentsContract.buildDocumentUriUsingTree(tree, id).toString());
+          f.put("size", size);
+          out.put(f);
+        }
+      }
+    } finally {
+      if (c != null) c.close();
+    }
+  }
+
+  /** Alle Audiodateien eines freigegebenen Ordners (mit Unterordnern). */
+  @PluginMethod
+  public void listFolder(PluginCall call) {
+    try {
+      Uri tree = Uri.parse(call.getString("uri", ""));
+      JSArray arr = new JSArray();
+      walk(getContext().getContentResolver(), tree, DocumentsContract.getTreeDocumentId(tree), "", 0, arr);
+      JSObject o = new JSObject();
+      o.put("files", arr);
+      call.resolve(o);
+    } catch (Throwable t) {
+      call.reject("Ordner nicht lesbar (Freigabe abgelaufen?)");
+    }
+  }
+
+  /** Ein Stueck einer Datei als Base64 (die Web-Seite setzt die Stuecke wieder zusammen). */
+  @PluginMethod
+  public void readChunk(PluginCall call) {
+    ParcelFileDescriptor pfd = null;
+    try {
+      Uri u = Uri.parse(call.getString("uri", ""));
+      long off = (long) call.getDouble("offset", 0.0).doubleValue();
+      int len = call.getInt("length", 1048576).intValue();
+      if (len < 1) len = 1;
+      if (len > 3145728) len = 3145728;
+      ContentResolver cr = getContext().getContentResolver();
+      byte[] buf = new byte[len];
+      int n = 0;
+      try {
+        pfd = cr.openFileDescriptor(u, "r");
+        if (pfd == null) throw new Exception("kein Zugriff");
+        FileChannel ch = new FileInputStream(pfd.getFileDescriptor()).getChannel();
+        ch.position(off);
+        ByteBuffer bb = ByteBuffer.wrap(buf);
+        while (bb.hasRemaining()) {
+          int r = ch.read(bb);
+          if (r < 0) break;
+          n += r;
+        }
+      } catch (Throwable seekFail) {
+        // Anbieter ohne Suchfunktion: ueber den Datenstrom lesen
+        n = 0;
+        InputStream in = cr.openInputStream(u);
+        try {
+          long left = off;
+          while (left > 0) {
+            long sk = in.skip(left);
+            if (sk <= 0) break;
+            left -= sk;
+          }
+          while (n < len) {
+            int r = in.read(buf, n, len - n);
+            if (r < 0) break;
+            n += r;
+          }
+        } finally {
+          in.close();
+        }
+      }
+      JSObject o = new JSObject();
+      o.put("b64", Base64.encodeToString(buf, 0, n, Base64.NO_WRAP));
+      o.put("n", n);
+      call.resolve(o);
+    } catch (Throwable t) {
+      call.reject("Datei nicht lesbar");
+    } finally {
+      try { if (pfd != null) pfd.close(); } catch (Throwable t) { }
+    }
   }
 }
 `;
