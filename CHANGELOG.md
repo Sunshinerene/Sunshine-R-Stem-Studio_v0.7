@@ -2,6 +2,14 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.27 · 2026-11-19 · Startbildschirm: Dockbar für Player und DAW, Cover mit Equalizer
+- Neu: Auf dem Startbildschirm erscheint unten die gleiche Dockbar wie im Player und in der DAW, sobald etwas läuft. Sie steuert genau das, was gerade spielt: beim Player Zufall, Zurück, Play/Pause, Weiter und Wiederholen – bei der DAW Loop, Anfang, Play/Pause, Stopp und Metronom. Die Zeitleiste lässt sich verschieben, ein Tipp auf den Titel öffnet den Player bzw. führt zurück ins Projekt, mit ✕ blendest du die Leiste aus.
+- Neu: Das Cover des gerade laufenden Titels (aus dem Player oder dem DAW-Projekt, sonst ein passend erzeugtes) sitzt jetzt mit Effekt und Equalizer verschmolzen über der Dockbar. Die alte Hintergrund-Animation ist entfernt.
+- Besser: Beim Öffnen der Startseite stoppt die DAW nicht mehr – die Musik läuft weiter und lässt sich dort steuern. Startet der Player, pausiert die DAW (und umgekehrt); die Leiste wechselt von selbst.
+- Besser: Der Leistenstil aus den Optionen (Glas, Flach, Leuchtend, Dezent) gilt jetzt auch für die Dockbar der Startseite – alle drei Leisten sehen in jedem Design gleich aus.
+- Besser: Der Equalizer im Player nimmt sich seine Anzeige jedes Mal beim Öffnen zurück, auch wenn die Startseite ihn zwischenzeitlich genutzt hat.
+- Hinweis: Nur `www/index.html`, `CHANGELOG.md` und `VORSCHAU.md` ändern sich gegenüber 1.26 – das Live-Update reicht. Die Android-Benachrichtigung mit Zurück/Weiter und der eigene Ordner-Dialog folgen in 1.28 (neue App nötig).
+
 ## 1.26 · 2026-11-19 · Player: Dockbar, Cover mit Equalizer, letzter Stand & Ordner-Verlauf
 - Neu: Der Player hat unten eine Dockbar im Stil der unteren Leiste der DAW: Zeitleiste, Zufall, Zurück, Play/Pause, Weiter und Wiederholen. Sie passt sich dem gewählten Design an (Aurora, Studio, Neon, Liquid, Klassik) und ist in Rundung und Farbe identisch mit der Leiste der DAW.
 - Neu: Der Equalizer sitzt jetzt oben und verschmilzt mit dem Cover samt Effekt – die Balken wachsen hinter und unter dem Cover heraus. Klang-Auswahl und Titelliste rücken nach oben.
