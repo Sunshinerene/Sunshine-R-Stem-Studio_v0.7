@@ -9,7 +9,7 @@
 - Neu: Update-Vorschau („Bald neu“) auf der Startseite und in „Was ist neu“: ein kurzer Ausblick auf das nächste Release. Der Text wird beim Start live aus der Datei VORSCHAU.md im Repo nachgeladen (ohne neue App-Version) und lässt sich wegklicken.
 - Besser: Optionen → Darstellung der Fenster: „Großansicht“ ist neu der Standard; die bisherigen Modi „Fenster“ (Ziehharmonika) und „Tabs“ bleiben wählbar. Wer bewusst Tabs gewählt hatte, behält sie.
 - Hinweis: Diese Version ändert nur die Oberfläche (index.html), keine Dateien der App – das Update kann deshalb über das Live-Update kommen, eine neue APK ist nicht nötig.
-- Hinweis: Das Feedback läuft ohne Server. Für „Per E-Mail“ muss im Bau-Kit eine Empfängeradresse eingetragen sein; sonst bieten Teilen, Datei und Kopieren denselben Inhalt.
+- Hinweis: Das Feedback läuft ohne Server: „Per E-Mail“ öffnet die Mail-App mit fertigem Text (Betreff „Feedback Sunshine@R DAW Studio“); Teilen, Datei und Kopieren liefern denselben Inhalt.
 
 ## 1.16 · 2026-11-19 · Speicher-Sparer, schlankere App
 - Neu: Speicher-Sparer (Optionen → Speicher-Sparer, standardmäßig aus): Spuren, die gerade nicht zu hören sind (stumm oder durch Solo ausgeblendet), werden aus dem Arbeitsspeicher entladen – bei einer 4½-Minuten-Stereo-Spur sind das rund 95 MB. Wellenform, Länge und Name bleiben sichtbar; beim Einschalten, Abspielen oder Exportieren lädt die App die Spur automatisch wieder, bit-genau. Einzelne Spuren lassen sich auch von Hand entladen und laden.

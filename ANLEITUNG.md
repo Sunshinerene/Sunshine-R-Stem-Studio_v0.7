@@ -23,7 +23,7 @@
 
 ## 2a. Vorschau & Feedback pflegen
 - **Vorschau:** `VORSCHAU.md` im Hauptordner bearbeiten (Titel = erste Überschrift nach „# Vorschau“, Stichpunkte mit `- `). Die App lädt sie beim Start live nach – ohne neues Update. Datei leeren = keine Vorschau. Das Repository muss öffentlich sein.
-- **Feedback-Adresse:** Beim Bauen wird die Empfänger-Adresse für „Per E-Mail“ in die Seite eingetragen. Ohne Adresse bleiben Teilen, Datei und Kopieren.
+- **Feedback:** „Per E-Mail“ geht an die beim Bauen eingetragene Adresse (Betreff „Feedback Sunshine@R DAW Studio"). Eine andere Adresse wird beim Erstellen der Seite eingetragen – dafür bei mir melden.
 
 ## 3. Einmalig aufräumen (von Hand auf GitHub löschen)
 - `signing/Test` – leere Test-Datei, wird nicht gebraucht.
