@@ -2,6 +2,14 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.19 · 2026-11-19 · Player & Musik im Hintergrund
+- Neu: Die Musik läuft jetzt auch im Hintergrund und bei gesperrtem Bildschirm weiter – für den neuen Player und für die DAW-Wiedergabe. In der Benachrichtigungsleiste und auf dem Sperrbildschirm erscheint ein Player mit Titel, Cover im Farbton deines Designs und Tasten (Zurück, Play/Pause, Weiter bzw. Stopp). Das gibt es nur in der Android-App; es braucht einmalig eine neue APK.
+- Neu: Einfacher Player für reine Audiodateien – WAV, MP3, M4A, OGG, FLAC. Auch ganze ZIP-Dateien (z. B. der Suno-Download) lassen sich öffnen; die Titel darin erscheinen sortiert in der Liste und werden erst beim Abspielen entpackt. Mit Zufall, Wiederholen (aus/alle/ein Titel), Lautstärke und kleiner Leiste, wenn du den Player schließt. Erreichbar über ☰ → Player, die Startseite und die Optionen.
+- Neu: Optionen → Klang → „Player & Hintergrund“: Hintergrund-Wiedergabe und Benachrichtigungs-Player lassen sich abschalten.
+- Besser: Der Taktgeber der DAW läuft in einem eigenen Arbeitsthread, damit Drums und MIDI auch bei gesperrtem Bildschirm nicht ins Stocken geraten.
+- Hinweis: Player und DAW spielen nie gleichzeitig – startest du das eine, hält das andere an. Die Titelliste des Players bleibt nur bis zum Schließen der App erhalten. Hält Android die App trotzdem nach längerer Zeit an, hilft in den Android-Einstellungen für die App „Akku → Nicht einschränken“.
+- Hinweis: Ändert die Datei scripts/patch-android.cjs – deshalb ist diesmal eine neue APK nötig (Live-Update allein reicht nicht). Beim ersten Start fragt Android auf neueren Versionen nach der Erlaubnis für Benachrichtigungen.
+
 ## 1.18 · 2026-11-19 · Übersichtliche Optionen
 - Neu: Die Optionen sind jetzt in sechs Kategorien geordnet – Design & Aussehen, Effekte & Anzeige, Klang, KI & Assistent, Leistung & Speicher, Updates & Datensicherung, Hilfe & Feedback. Beim Öffnen siehst du die Übersicht mit Kurzinfo; ein Tipp öffnet die Einstellungen der Kategorie.
 - Neu: Suchfeld in den Optionen – findet Einstellungen nach Stichwort („Farbe“, „Update“, „Speicher“ …).

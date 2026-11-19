@@ -10,7 +10,8 @@
 - Hat sich **nur `www/index.html`** geändert, bietet die App eine „neue Oberfläche“ an, die ohne Neuinstallation geladen wird (mit automatischem Rückfall, falls sie nicht startet).
 - Haben sich **andere Dateien** geändert (Logo/Icons in `www/assets/`, `scripts/`, `package.json`, `capacitor.config.json`), wird eine neue APK angeboten, die du installierst.
 - Version 1.17 hat `scripts/patch-android.cjs` geändert (Hintergrunddienst für Live-Updates) und brauchte eine neue APK.
-- Version 1.18 ändert nur `www/index.html` (und `CHANGELOG.md`/`VORSCHAU.md`) → das **Live-Update** reicht.
+- Version 1.18 änderte nur `www/index.html` (und `CHANGELOG.md`/`VORSCHAU.md`) → das **Live-Update** genügte.
+- **Version 1.19 ändert `scripts/patch-android.cjs`** (Musik-Dienst und Benachrichtigungs-Player) → es braucht **einmalig eine neue APK**. Lade `scripts/patch-android.cjs`, `www/index.html` und `CHANGELOG.md` zusammen hoch; der GitHub-Lauf baut dann die APK, die du wie gewohnt installierst. Beim ersten Start fragt Android nach der Erlaubnis für Benachrichtigungen.
 
 ## 2. Dateien dieser Lieferung
 | Datei | Ziel im Repo |
@@ -18,6 +19,7 @@
 | `index_ueberarbeitet.html` | `www/index.html` (**umbenennen auf `index.html`**, alte Datei ersetzen) |
 | `VORSCHAU.md` | Hauptordner (neu; Text der „Bald neu“-Vorschau) |
 | `CHANGELOG.md` | Hauptordner (ersetzen) |
+| `patch-android.cjs` | `scripts/patch-android.cjs` (ersetzen – **Pflicht ab 1.19**) |
 | `README.md`, `ANLEITUNG.md` | Hauptordner (ersetzen) |
 | `capacitor.config.json` | Hauptordner (ersetzen; `appId` bleibt gleich) |
 | `.gitignore` | Hauptordner (neu) |
