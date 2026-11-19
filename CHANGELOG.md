@@ -2,6 +2,15 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.26 · 2026-11-19 · Player: Dockbar, Cover mit Equalizer, letzter Stand & Ordner-Verlauf
+- Neu: Der Player hat unten eine Dockbar im Stil der unteren Leiste der DAW: Zeitleiste, Zufall, Zurück, Play/Pause, Weiter und Wiederholen. Sie passt sich dem gewählten Design an (Aurora, Studio, Neon, Liquid, Klassik) und ist in Rundung und Farbe identisch mit der Leiste der DAW.
+- Neu: Der Equalizer sitzt jetzt oben und verschmilzt mit dem Cover samt Effekt – die Balken wachsen hinter und unter dem Cover heraus. Klang-Auswahl und Titelliste rücken nach oben.
+- Neu: Leistenstile unter Optionen → Untere Leiste: „Wie das Design“, „Glas“, „Flach“, „Leuchtend“ und „Dezent“ – wirken auf die DAW-Leiste und die Dockbar des Players.
+- Neu: Der Player merkt sich den letzten Stand: Liste, zuletzt gehörter Titel (mit Tags und Cover) und Position. Nach dem Neustart ist alles sofort wieder da; ein Tipp verbindet den Ordner erneut und es geht an derselben Stelle weiter. Im Desktop-Browser merkt sich der Player den Ordner selbst und verbindet ihn ohne erneute Auswahl (der Browser fragt eventuell einmal nach der Freigabe).
+- Neu: „Zuletzt“ in der Player-Liste zeigt die letzten 8 Ordner zum erneuten Öffnen.
+- Besser: „Bald in der App“ bleibt nicht mehr auf alten Texten stehen. Die Datei im Repo gilt nur, wenn sie eine neuere Version nennt als die installierte App; sonst zeigt die App den beim Bauen eingebauten Text. Die Vorschau ist jetzt gegliedert in „Kommt“, „Zum Testen“ und „Idee“.
+- Hinweis: Nur `www/index.html` und `CHANGELOG.md` ändern sich gegenüber 1.25 – das Live-Update reicht. Auf Android bleibt der Ordner nach dem Neustart nicht von selbst verbunden (Grenze des Browser-Dialogs); der native Ordner-Dialog folgt mit einer späteren App-Version.
+
 ## 1.25 · 2026-11-19 · Player: Klang-Voreinstellungen, Equalizer, Cover, Tags & Ordner
 - Neu: Klang-Voreinstellungen im Player – Original, Mehr Bass, Techno, Klassik, Pop, Rock, Stimme, Hip-Hop, Weich und „Eigen“ mit fünf Reglern (Tiefbass, Bass, Mitten, Höhen, Brillanz). Ein Schutz-Limiter verhindert Übersteuern.
 - Neu: Animierter Equalizer im Player. Jede Voreinstellung hat ihre eigene Darstellung (dicke Bass-Balken, LED-Segmente für Techno, weiche Wellen für Klassik, Punkte für Pop, Zacken für Rock, gespiegelt für Stimme, Blöcke für Hip-Hop, Aura für Weich) samt Kurve des Klangreglers. Farben, Rundung und Leuchten folgen dem gewählten Design; ein- und ausblendbar (im Player und unter Optionen → Player & Hintergrund).
