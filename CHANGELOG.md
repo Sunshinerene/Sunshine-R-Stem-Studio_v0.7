@@ -2,6 +2,13 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.28 · 2026-11-19 · Android: eigener Ordner-Dialog und Zeit in der Benachrichtigung
+- Neu: Android-App: Der Player hat jetzt einen eigenen Ordner-Dialog. Die Freigabe bleibt auch nach einem Neustart erhalten – beim Start sind Ordner, Liste, letzter Titel und Position von selbst wieder da, ohne dass du den Ordner erneut wählen musst. Unterordner werden mitgelesen.
+- Neu: Der Verlauf „Zuletzt“ öffnet Ordner in der Android-App direkt, ohne Dialog.
+- Neu: Die Musik-Benachrichtigung zeigt die laufende Zeit (vom System gezählt); in der Pause steht dort „1:23 / 3:45“. Zurück/Weiter und die Zeitleiste auf dem Sperrbildschirm gab es schon – sie funktionieren jetzt mit Titeln aus dem Ordner.
+- Besser: Tags (Titel, Künstler, Album, Cover) werden bei Ordnern in der App nur aus dem Dateianfang gelesen – schnell, auch bei vielen großen Dateien. Die Länge steht, sobald ein Titel das erste Mal läuft.
+- Hinweis: Das braucht **einmalig eine neue APK**: `scripts/patch-android.cjs` hat sich geändert (zusammen mit `www/index.html`, `CHANGELOG.md` und `VORSCHAU.md` hochladen). Mit der alten App läuft die neue Oberfläche ganz normal weiter und nutzt wie bisher den Datei-Dialog. Ein animierter Mini-Equalizer in der Benachrichtigung ist nicht dabei: Android kann Benachrichtigungen nicht flüssig animieren.
+
 ## 1.27 · 2026-11-19 · Startbildschirm: Dockbar für Player und DAW, Cover mit Equalizer
 - Neu: Auf dem Startbildschirm erscheint unten die gleiche Dockbar wie im Player und in der DAW, sobald etwas läuft. Sie steuert genau das, was gerade spielt: beim Player Zufall, Zurück, Play/Pause, Weiter und Wiederholen – bei der DAW Loop, Anfang, Play/Pause, Stopp und Metronom. Die Zeitleiste lässt sich verschieben, ein Tipp auf den Titel öffnet den Player bzw. führt zurück ins Projekt, mit ✕ blendest du die Leiste aus.
 - Neu: Das Cover des gerade laufenden Titels (aus dem Player oder dem DAW-Projekt, sonst ein passend erzeugtes) sitzt jetzt mit Effekt und Equalizer verschmolzen über der Dockbar. Die alte Hintergrund-Animation ist entfernt.
