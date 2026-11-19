@@ -2,6 +2,13 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.21 · 2026-11-19 · Cover & Tags
+- Neu: Cover und Tags pro Projekt. Beim Anlegen (und später in den Projekt-Einstellungen) wählst du ein eigenes Bild oder lässt ein Cover aus Projektname und Künstler/Produzent erstellen – vier Stile, „Neu mischen“ für neue Varianten. Dazu Künstler/Produzent, Genre (mit Vorschlägen), Jahr, Album, Komponist, Copyright und Kommentar.
+- Neu: Das Cover steht oben rechts im Kopfbereich der DAW (Antippen = bearbeiten), in der Projektliste und in der Android-Benachrichtigung. Rund um das Bild laufen Balken im Takt der Musik oder es leuchtet mit dem Bass – das Bild selbst bleibt frei. In den Optionen (Design & Aussehen → Cover & Tags) wählbar: Ring, Leuchten, beides, aus, Cover ausblenden.
+- Neu: Beim Export werden Tags und Cover eingebettet – WAV (16/24 Bit) und Opus/OGG mit Titel, Künstler, Album, Genre, Jahr, Komponist, Copyright, Kommentar, BPM, Tonart und Bild; Stems-ZIP mit getaggten Dateien plus cover.jpg; MIDI mit Titel, Künstler und Copyright. Der Dateiname wird „Künstler - Projektname“. Abschaltbar im Export-Fenster; ohne Cover/Tags exportiert die App wie bisher.
+- Hinweis: MP3 ist in der App nicht enthalten (kein Encoder eingebaut). Manche Abspielprogramme zeigen Tags/Cover in WAV-Dateien nicht an, bei Opus/OGG meist schon.
+- Hinweis: Nur `www/index.html` und `CHANGELOG.md` ändern sich gegenüber 1.20 – das Live-Update reicht.
+
 ## 1.20 · 2026-11-19 · Start-Intro
 - Neu: Beim Öffnen der App läuft jetzt dein Intro-Video (10 Sekunden, mit Ton). „Überspringen“ oder die Zurück-Taste beendet es sofort, der Lautsprecher-Knopf schaltet den Ton um. Es läuft einmal pro App-Start, nicht bei jedem Zurückkehren in die App.
 - Neu: Optionen → Design & Aussehen → „Start-Intro“: beim Start abspielen ein/aus, mit oder ohne Ton und „Intro jetzt ansehen“ – das Video lässt sich also auch bei ausgeschaltetem Start jederzeit anschauen.
