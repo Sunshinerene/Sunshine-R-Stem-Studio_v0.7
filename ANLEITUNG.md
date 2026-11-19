@@ -11,6 +11,7 @@
 - Haben sich **andere Dateien** geändert (Logo/Icons in `www/assets/`, `scripts/`, `package.json`, `capacitor.config.json`), wird eine neue APK angeboten, die du installierst.
 - Version 1.17 hat `scripts/patch-android.cjs` geändert (Hintergrunddienst für Live-Updates) und brauchte eine neue APK.
 - Version 1.18 änderte nur `www/index.html` (und `CHANGELOG.md`/`VORSCHAU.md`) → das **Live-Update** genügte.
+- Version 1.24 (Cover-Effekte, Leiste im Design-Stil, Fensterbreiten) ändert ebenfalls nur `www/index.html` (und `CHANGELOG.md`/`VORSCHAU.md`) → **Live-Update** reicht.
 - Version 1.23 (Transport in der unteren Leiste) ändert ebenfalls nur `www/index.html` (und `CHANGELOG.md`/`VORSCHAU.md`) → **Live-Update** reicht.
 - Version 1.22 (Cover-Platz, Randeffekte, Design-Verknüpfung) ändert ebenfalls nur `www/index.html` (und `CHANGELOG.md`/`VORSCHAU.md`) → **Live-Update** reicht.
 - Version 1.21 (Cover & Tags) ändert nur `www/index.html` (und `CHANGELOG.md`/`VORSCHAU.md`) → das **Live-Update** reicht – sofern 1.19/1.20 schon als APK installiert sind.
