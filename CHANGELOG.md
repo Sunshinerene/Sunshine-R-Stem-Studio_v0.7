@@ -8,7 +8,8 @@
 - Neu: Feedback-Funktion für Tester (Menü, Startseite und Optionen): Fehler, Ideen, Anmerkungen, Lob oder Fragen schreiben, Bereich wird automatisch erkannt. Optional werden Geräte-/Versionsangaben und das technische Fehlerprotokoll (keine Audiodaten, keine Projektinhalte) angehängt. Du siehst vorher genau, was mitgeht, und schickst es per E-Mail, Teilen, Datei oder Kopieren selbst ab – es wird nichts automatisch gesendet.
 - Neu: Update-Vorschau („Bald neu“) auf der Startseite und in „Was ist neu“: ein kurzer Ausblick auf das nächste Release. Der Text wird beim Start live aus der Datei VORSCHAU.md im Repo nachgeladen (ohne neue App-Version) und lässt sich wegklicken.
 - Besser: Optionen → Darstellung der Fenster: „Großansicht“ ist neu der Standard; die bisherigen Modi „Fenster“ (Ziehharmonika) und „Tabs“ bleiben wählbar. Wer bewusst Tabs gewählt hatte, behält sie.
-- Hinweis: Diese Version ändert nur die Oberfläche (index.html), keine Dateien der App – das Update kann deshalb über das Live-Update kommen, eine neue APK ist nicht nötig.
+- Besser: Der Hintergrunddienst für Live-Updates startet jetzt in der Android-App (vorher meldete die App „Der Hintergrunddienst konnte nicht starten“). Seine Dateien kommen nun wie die Seite aus der App selbst.
+- Hinweis: Dieser Fix ändert die Android-Hülle – deshalb einmal die neue APK installieren. Danach können Oberflächen-Änderungen über das Live-Update kommen.
 - Hinweis: Das Feedback läuft ohne Server: „Per E-Mail“ öffnet die Mail-App mit fertigem Text (Betreff „Feedback Sunshine@R DAW Studio“); Teilen, Datei und Kopieren liefern denselben Inhalt.
 
 ## 1.16 · 2026-11-19 · Speicher-Sparer, schlankere App

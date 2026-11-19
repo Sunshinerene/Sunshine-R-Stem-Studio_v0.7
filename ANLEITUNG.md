@@ -9,7 +9,7 @@
 ### Wann reicht das Live-Update, wann braucht es eine neue APK?
 - Hat sich **nur `www/index.html`** geändert, bietet die App eine „neue Oberfläche“ an, die ohne Neuinstallation geladen wird (mit automatischem Rückfall, falls sie nicht startet).
 - Haben sich **andere Dateien** geändert (Logo/Icons in `www/assets/`, `scripts/`, `package.json`, `capacitor.config.json`), wird eine neue APK angeboten, die du installierst.
-- Die Version 1.17 ändert nur `www/index.html` → das **Live-Update** reicht (wer von 1.15 oder älter kommt, braucht wegen 1.16 einmal die neue APK).
+- Die Version 1.17 ändert auch `scripts/patch-android.cjs` (Hintergrunddienst für Live-Updates) → **einmal neue APK installieren**. Ab dann sollten reine Oberflächen-Änderungen per Live-Update kommen (auf einem echten Gerät noch nicht bestätigt).
 
 ## 2. Dateien dieser Lieferung
 | Datei | Ziel im Repo |
