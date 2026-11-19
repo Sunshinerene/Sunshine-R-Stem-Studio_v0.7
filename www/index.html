@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Sunshine@R Stem DAW Studio – Multi-Track &amp; MIDI Browser DAW</title>
+  <title>Sunshine@R DAW Studio – Multi-Track &amp; MIDI Browser DAW</title>
 
   <meta name="theme-color" content="#090c12" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2338bdf8%27/%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%238b5cf6%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2310b981%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2728%27%20fill%3D%27%23090c12%27/%3E%3Crect%20x%3D%277%27%20y%3D%277%27%20width%3D%27114%27%20height%3D%27114%27%20rx%3D%2724%27%20fill%3D%27url%28%23g%29%27/%3E%3Cpath%20d%3D%27M48%2088V34l48-10v53M48%2088c0%208-10%2014-22%2014S4%2096%204%2088s10-14%2022-14%2022%206%2022%2014zm48-11c0%208-10%2014-22%2014s-22-6-22-14%2010-14%2022-14%2022%206%2022%2014z%27%20transform%3D%27translate%2813%200%29%20scale%28.9%29%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
@@ -841,7 +841,7 @@ html[data-fx-pause="1"] .fx-edge::before,html[data-fx-pause="1"] .fx-edge::after
           </div>
           <div>
             <div class="flex items-center gap-1.5">
-              <span class="text-sm font-extrabold tracking-tight text-white">Sunshine@R Stem DAW Studio</span>
+              <span class="text-sm font-extrabold tracking-tight text-white">Sunshine@R DAW Studio</span>
               <span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">PRO</span>
             </div>
             <div id="status-subtitle" class="text-[10px] text-slate-400 truncate max-w-[170px]">Bereit – ZIP, Audio oder MIDI laden</div>
@@ -6855,7 +6855,7 @@ html[data-fx-pause="1"] .fx-edge::before,html[data-fx-pause="1"] .fx-edge::after
     });
   </script>
 <script>
-/* ===== Sunshine@R Stem DAW Studio: Import-Dialog, Undo, Reset ===== */
+/* ===== Sunshine@R DAW Studio: Import-Dialog, Undo, Reset ===== */
 (() => {
   let ready = false;
   window.addEventListener('load', () => { ready = true; });
@@ -8603,7 +8603,7 @@ html[data-fx-pause="1"] .fx-edge::before,html[data-fx-pause="1"] .fx-edge::after
   }
 
   /* ---------------------------------------------------------------- Prompt & Auswertung */
-  const SYSTEM = `Du steuerst die Musik-App "Sunshine@R Stem DAW Studio". Antworte NUR mit einem JSON-Objekt, ohne weiteren Text:
+  const SYSTEM = `Du steuerst die Musik-App "Sunshine@R DAW Studio". Antworte NUR mit einem JSON-Objekt, ohne weiteren Text:
 {"actions":[{"cmd":"..."}],"reply":"kurze deutsche Antwort"}
 Erlaubte cmd-Werte und Felder:
 play, stop, undo, redo, newtrack, save
@@ -11035,7 +11035,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   root.innerHTML = `<div class="hm-bg" aria-hidden="true"><i class="hm-blob b1"></i><i class="hm-blob b2"></i><i class="hm-blob b3"></i><canvas id="hm-eq"></canvas></div>
   <div class="hm-scroll"><div class="hm-wrap">
     <div class="hm-top"><button type="button" class="hm-pill" id="hm-back" hidden>← Zurück zum Projekt</button><button type="button" class="hm-pill" id="hm-help">❓ Anleitung</button></div>
-    <header class="hm-hero"><div class="hm-logo" id="hm-logo"><img src="${LOGO}" alt="Sunshine@R DAW Studio"><div class="hm-wm">${WM}<b>Sunshine@R</b><small>STEM DAW STUDIO</small></div></div>
+    <header class="hm-hero"><div class="hm-logo" id="hm-logo"><img src="${LOGO}" alt="Sunshine@R DAW Studio"><div class="hm-wm">${WM}<b>Sunshine@R</b><small>DAW STUDIO</small></div></div>
       <p class="hm-tag">Stems importieren · mischen · veredeln</p></header>
     <div id="hm-update"></div>
     <div id="hm-newbie"></div>
@@ -11617,7 +11617,11 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     if (!REPO) throw new Error('Diese Version kennt ihr GitHub-Repo nicht (Entwicklungsversion). Updates werden nur in der gebauten App geprüft.');
     if (navigator.onLine === false) throw new Error('Keine Internetverbindung.');
     const r = await fetch('https://api.github.com/repos/' + REPO + '/releases/latest', { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
-    if (r.status === 404) throw new Error('Noch keine Veröffentlichung gefunden (oder das Repository ist privat).');
+    if (r.status === 404) {   // genauer unterscheiden: Repo unsichtbar (privat/falscher Name) oder nur noch keine Release?
+      let repoOk = false; try { repoOk = (await fetch('https://api.github.com/repos/' + REPO, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' })).ok; } catch (_) {}
+      throw new Error(repoOk ? 'Das Repository ' + REPO + ' ist erreichbar, aber es gibt noch keine Release. Prüfe auf GitHub: Actions → letzter Lauf → Schritt „Release veröffentlichen“ (Fehler 403 → Settings → Actions → General → Workflow permissions: Read and write).'
+        : 'Das Repository ' + REPO + ' ist von der App aus nicht sichtbar – vermutlich ist es privat. Updates kannst du dann manuell unter Releases laden; für die automatische Suche muss es öffentlich sein.');
+    }
     if (!r.ok) throw new Error('GitHub antwortet mit Fehler ' + r.status + '.');
     const j = await r.json(), m = /(\d+)/.exec(j.tag_name || ''), apk = (j.assets || []).find(x => /\.apk$/i.test(x.name || ''));
     return { n: m ? +m[1] : 0, tag: j.tag_name || '', name: j.name || '', notes: String(j.body || '').slice(0, 600), published: j.published_at || '', url: apk ? apk.browser_download_url : j.html_url, page: j.html_url, size: apk ? apk.size : 0 };
@@ -11693,7 +11697,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     if (typeof indexedDB === 'undefined') throw new Error('IndexedDB ist nicht verfügbar.');
     const zip = new JSZip(), ctx = { n: 0, bytes: 0 };
     const names = (await listDbs()).filter(n => opts.all ? true : BASE.test(n));
-    const man = { format: 1, app: 'Sunshine@R Stem DAW Studio', build: BUILD, created: new Date().toISOString(), dbs: [], ls: {} };
+    const man = { format: 1, app: 'Sunshine@R DAW Studio', build: BUILD, created: new Date().toISOString(), dbs: [], ls: {} };
     let records = 0;
     for (let i = 0; i < names.length; i++) {
       const name = names[i]; prog('Datenbank ' + (i + 1) + '/' + names.length + ': ' + name);
@@ -12069,7 +12073,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
         <input class="hp-q" type="search" placeholder="Im Handbuch suchen …" aria-label="Im Handbuch suchen">
         <div class="hp-list">${CH.map(c => `<details data-id="${c.id}"><summary><span class="hp-ic">${ic(c.icon)}</span><span class="hp-st"><b>${c.title}</b><span class="s">${c.sum}</span></span></summary><div class="hp-body" data-o="">${c.body}</div></details>`).join('')}</div>
         <div class="hp-none" hidden>Dazu habe ich nichts gefunden. Versuche ein anderes Stichwort, z. B. „Export“, „Tempo“ oder „Mikrofon“.</div>
-        <div class="hp-foot">Sunshine@R Stem DAW Studio · Anleitung</div></div></div>`;
+        <div class="hp-foot">Sunshine@R DAW Studio · Anleitung</div></div></div>`;
     r.querySelectorAll('.hp-body').forEach(b => b.dataset.o = b.innerHTML);
     document.body.appendChild(r); MAN = r;
     r.addEventListener('click', e => {
@@ -12230,7 +12234,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Experimentell</div>
       <div class="rounded-xl border border-slate-800 px-3 py-1">${toggle('voice', '🎤 Sprachsteuerung (Test)', 'Blendet einen Mikrofon-Knopf ein: Befehle wie „Play“, „Tempo 120“, „Spur 2 stumm“ sprechen oder tippen. Löschen und Zurücksetzen sind gesperrt. Ob Sprechen geht, hängt vom Gerät ab – Tippen geht immer.', ui.voice)}</div>
       <button type="button" data-ai-settings class="mt-2 w-full py-3 rounded-xl border border-slate-700 bg-slate-900 text-sm font-bold text-slate-100">💬 Assistent einrichten (lokales Modell · Online) …</button>
-      <div class="flex items-center gap-3 mt-4 pt-3 border-t border-slate-800"><img src="assets/sunshine-r-app-icon.png" alt="" class="w-10 h-10 rounded-xl" onerror="this.remove()"><div class="min-w-0"><div class="text-sm font-bold">Sunshine@R Stem DAW Studio <span class="text-[10px] font-mono text-cyan-300">PRO</span></div><div class="text-[11px] text-slate-400">Design wird auf diesem Gerät gespeichert.</div></div><button type="button" data-close class="ml-auto px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-sm">Fertig</button></div>
+      <div class="flex items-center gap-3 mt-4 pt-3 border-t border-slate-800"><img src="assets/sunshine-r-app-icon.png" alt="" class="w-10 h-10 rounded-xl" onerror="this.remove()"><div class="min-w-0"><div class="text-sm font-bold">Sunshine@R DAW Studio <span class="text-[10px] font-mono text-cyan-300">PRO</span></div><div class="text-[11px] text-slate-400">Design wird auf diesem Gerät gespeichert.</div></div><button type="button" data-close class="ml-auto px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-sm">Fertig</button></div>
     </div>`;
     document.body.appendChild(ov);
     // KI-Modell-Status live anzeigen
