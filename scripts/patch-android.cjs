@@ -12,6 +12,7 @@
      5. Hintergrundfarbe der Fenster = App-Farbe (kein weißes Aufblitzen beim Start/Drehen)
      6. App-Name „Sunshine@R DAW Studio“ (strings.xml)
      7. Feste Signatur (signing/sunshine.p12) + hochzählende versionCode (BUILD_NUMBER) → Updates über die installierte App, Daten bleiben
+     8. Live-Update-Dienst: schreibt sw.js neben die index.html (damit die App neue Oberflächen ohne APK laden kann)
    Das Skript ist wiederholbar (erkennt, was schon gepatcht ist). */
 const fs = require('fs'), path = require('path');
 const root = process.argv[2] || process.cwd();
@@ -157,5 +158,14 @@ if (fs.existsSync(strP)) {
   let sx = fs.readFileSync(strP, 'utf8'); const NAME = 'Sunshine@R DAW Studio';
   const sx2 = sx.replace(/(<string\s+name="(?:app_name|title_activity_main)"[^>]*>)[^<]*(<\/string>)/g, '$1' + NAME + '$2');
   if (sx2 !== sx) { fs.writeFileSync(strP, sx2); log('strings.xml: App-Name = ' + NAME); } else log('strings.xml: Name schon gesetzt.');
+}
+// ---- Live-Update-Dienst (sw.js) in die Web-Dateien legen --------------------------------------------------------------
+//   Der Service Worker liefert beim Start eine per Live-Update geladene Oberfläche aus – nur wenn eine solche vorhanden und gültig ist.
+const SW_JS = "/* Sunshine@R · Live-Update-Dienst (Service Worker)\n   Liefert beim Start der App – falls vorhanden und passend – die per Live-Update geladene Oberfläche statt der eingebauten.\n   Sicherheitsnetze: gleiche App-Hülle (build.json), höchstens 2 Startversuche ohne Bestätigung, bei jedem Zweifel die eingebaute Seite. */\nconst C = 'sunshine-live';\nconst json = o => new Response(JSON.stringify(o), { headers: { 'Content-Type': 'application/json' } });\nself.addEventListener('install', () => self.skipWaiting());\nself.addEventListener('activate', e => e.waitUntil(self.clients.claim()));\nasync function livePage() {\n  const c = await caches.open(C);\n  const mr = await c.match('/__live/meta'); if (!mr) return null;\n  const meta = await mr.json();\n  const page = await c.match('/__live/page'); if (!page) return null;\n  if (meta.status === 'bad') return null;\n  let b = null;\n  try { const r = await fetch('/build.json', { cache: 'no-store' }); if (r.ok) b = await r.json(); } catch (_) {}\n  if (!b) return null;                                   // ohne Gegenprobe nie die Live-Seite zeigen\n  if (String(b.n) !== String(meta.n) || String(b.nat) !== String(meta.nat)) {   // neue APK installiert → Live-Kopie ist veraltet\n    await c.delete('/__live/page'); await c.delete('/__live/meta'); return null;\n  }\n  if (meta.status === 'pending') {\n    meta.boots = (meta.boots || 0) + 1;\n    if (meta.boots > 2) { meta.status = 'bad'; meta.why = 'start'; await c.put('/__live/meta', json(meta)); return null; }\n    await c.put('/__live/meta', json(meta));\n  }\n  return page;\n}\nself.addEventListener('fetch', e => {\n  const r = e.request;\n  if (r.method !== 'GET' || r.mode !== 'navigate') return;\n  const u = new URL(r.url);\n  if (u.origin !== self.location.origin || (u.pathname !== '/' && u.pathname !== '/index.html')) return;\n  e.respondWith(livePage().then(p => p || fetch(r)).catch(() => fetch(r)));\n});\n";
+{
+  let web = null;
+  for (const d of ['www', 'dist', 'public', '.']) { if (fs.existsSync(path.join(root, d, 'index.html'))) { web = d; break; } }
+  if (web) { fs.writeFileSync(path.join(root, web, 'sw.js'), SW_JS); log('sw.js nach ' + web + '/ geschrieben (Live-Update-Dienst).'); }
+  else log('Keine index.html in www/dist/public gefunden – sw.js übersprungen (Live-Updates bleiben aus).');
 }
 log('fertig.');
