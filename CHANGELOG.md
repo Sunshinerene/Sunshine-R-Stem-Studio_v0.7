@@ -2,6 +2,12 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.18 · 2026-11-19 · Übersichtliche Optionen
+- Neu: Die Optionen sind jetzt in sechs Kategorien geordnet – Design & Aussehen, Effekte & Anzeige, Klang, KI & Assistent, Leistung & Speicher, Updates & Datensicherung, Hilfe & Feedback. Beim Öffnen siehst du die Übersicht mit Kurzinfo; ein Tipp öffnet die Einstellungen der Kategorie.
+- Neu: Suchfeld in den Optionen – findet Einstellungen nach Stichwort („Farbe“, „Update“, „Speicher“ …).
+- Besser: Die Zurück-Leiste „‹ Optionen“ bleibt beim Scrollen oben stehen; Zurück-Taste und Esc führen erst zur Übersicht, dann schließen sie die Optionen. Nach einem Design-Wechsel bleibst du auf der Seite „Design“.
+- Hinweis: Alle bisherigen Einstellungen sind unverändert vorhanden – sie liegen nur an einer geordneten Stelle. Das Update kommt über das Live-Update (nur index.html geändert).
+
 ## 1.17 · 2026-11-19 · Aufgeräumte Großansicht, Feedback & Vorschau
 - Neu: Klavier/Piano Roll, Drum-Sequencer, Mixer und MIDI-Werkzeuge öffnen jetzt in einem eigenen Großansicht-Fenster, wenn du sie brauchst – das Hauptfenster bleibt übersichtlich (Spuren, Transport und Navigation bleiben immer erreichbar). Schließen mit ✕, Zurück-Taste oder Esc; ein zweiter Tipp auf den Knopf schließt ebenfalls.
 - Neu: Der MIDI-Editor ist in fünf Werkzeug-Gruppen aufgeteilt (Raster, Tonart, Generator, Audio→MIDI, Klang) – es ist immer nur die Gruppe sichtbar, die du gerade brauchst. Die Auswahl wird gemerkt.
