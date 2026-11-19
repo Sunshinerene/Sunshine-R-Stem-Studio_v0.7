@@ -651,7 +651,7 @@ div:has(>#mt-collapse){flex-wrap:wrap;row-gap:4px}
 </script>
 <script>try{if(localStorage.getItem('sunshine.home')!=='off'){document.documentElement.classList.add('home-pending');setTimeout(function(){document.documentElement.classList.remove('home-pending')},6000)}}catch(e){}</script>
 <style>html.home-pending body>*:not(#home-root){visibility:hidden}</style>
-<script>window.SUNSHINE_BUILD={n:'__BUILD_N__',repo:'__BUILD_REPO__',time:'__BUILD_TIME__',v:'1.14',nat:'__BUILD_NATIVE__'};window.__errs=[];window.addEventListener('error',function(e){try{__errs.push({t:Date.now(),m:String(e.message||''),s:String(e.filename||'').split('/').pop()+':'+e.lineno})}catch(x){}});window.addEventListener('unhandledrejection',function(e){try{__errs.push({t:Date.now(),m:'Promise: '+String(e.reason&&e.reason.message||e.reason)})}catch(x){}});try{if(localStorage.getItem('sunshine.perf')==='1')document.documentElement.setAttribute('data-perf','on')}catch(x){}</script>
+<script>window.SUNSHINE_BUILD={n:'__BUILD_N__',repo:'__BUILD_REPO__',time:'__BUILD_TIME__',v:'1.15',nat:'__BUILD_NATIVE__'};window.__errs=[];window.addEventListener('error',function(e){try{__errs.push({t:Date.now(),m:String(e.message||''),s:String(e.filename||'').split('/').pop()+':'+e.lineno})}catch(x){}});window.addEventListener('unhandledrejection',function(e){try{__errs.push({t:Date.now(),m:'Promise: '+String(e.reason&&e.reason.message||e.reason)})}catch(x){}});try{if(localStorage.getItem('sunshine.perf')==='1')document.documentElement.setAttribute('data-perf','on')}catch(x){}</script>
 <script>(function(){try{setTimeout(function(){if(window.__sunshineBoot||!window.caches)return;caches.open('sunshine-live').then(function(c){return c.match('/__live/meta').then(function(r){return r&&r.json().then(function(m){if(m&&m.status==='pending'){m.status='bad';m.why='boot';return c.put('/__live/meta',new Response(JSON.stringify(m))).then(function(){location.reload()})}})})}).catch(function(){})},15000)}catch(e){}})();</script>
 <script>try{if(window.Capacitor||/; wv\)/.test(navigator.userAgent))document.documentElement.classList.add('android-app')}catch(e){}</script>
 <script>try{var f=JSON.parse(localStorage.getItem('sunshine.fx')||'{}'),d=document.documentElement,E=['off','glow','beam','line'],F=['off','aurora','eq','sparks','waves'];d.setAttribute('data-fx',f.v===2&&f.on===true?'on':'off');d.setAttribute('data-fx-edge',E.indexOf(f.edge)<0?'glow':f.edge);d.setAttribute('data-fx-full',F.indexOf(f.full)<0?'aurora':f.full);d.style.setProperty('--fx-k',String(Math.max(10,Math.min(100,+f.k||50))/100))}catch(e){}</script>
@@ -4953,7 +4953,7 @@ html[data-perf="on"] .fx-edge::before{display:none!important}
 
       for (const item of audioItems) {
         try {
-          const decoded = await audioEngine.ctx.decodeAudioData(item.buffer.slice(0));
+          const decoded = await (window.__projectIO && window.__projectIO.decodeKeep ? window.__projectIO.decodeKeep(item.buffer, item.name) : audioEngine.ctx.decodeAudioData(item.buffer.slice(0)));
           const lower = item.name.toLowerCase();
           let slot = null;
 
@@ -6980,7 +6980,7 @@ html[data-perf="on"] .fx-edge::before{display:none!important}
         await audioEngine.ensureCtx();
         pushUndo();
         const raw = await f.arrayBuffer();
-        const decoded = await audioEngine.ctx.decodeAudioData(raw.slice(0));
+        const decoded = await (window.__projectIO && window.__projectIO.decodeKeep ? window.__projectIO.decodeKeep(raw, f.name) : audioEngine.ctx.decodeAudioData(raw.slice(0)));
         dawState.buffers[tr.id] = decoded; delete tr.clips;
         if (/^Audio Spur/i.test(tr.name)) {
           tr.name = f.name.replace(/.[^/.]+$/, '').slice(0, 28);
@@ -7342,7 +7342,7 @@ html[data-perf="on"] .fx-edge::before{display:none!important}
           continue;
         }
 
-        const decoded = await audioEngine.ctx.decodeAudioData(raw.slice(0));
+        const decoded = await (window.__projectIO && window.__projectIO.decodeKeep ? window.__projectIO.decodeKeep(raw, it.name) : audioEngine.ctx.decodeAudioData(raw.slice(0)));
         const cleanName = it.name.replace(/.[^/.]+$/, '').slice(0, 28);
         const looksLikeVocals = /vocal|vox|voice|acap|rap|sing/i.test(it.name);
 
@@ -7488,6 +7488,41 @@ html[data-perf="on"] .fx-edge::before{display:none!important}
     }));
   }
 
+  /* ---- Quellen-Merker: zu jedem aus einer Datei dekodierten Puffer die Original-Datei (Blob; liegt im Blob-Speicher des Browsers) ---- */
+  const SRC = new WeakMap();
+  function compactSource(ab) { const s = SRC.get(ab); if (!s || !s.blob) return null; const raw = ab.length * ab.numberOfChannels * 4; return s.blob.size <= raw * 0.9 ? s : null; }
+  const MIME = { wav: 'audio/wav', mp3: 'audio/mpeg', ogg: 'audio/ogg', flac: 'audio/flac', m4a: 'audio/mp4' };
+  /* Datei dekodieren UND merken (statt decodeAudioData(buf.slice(0)) direkt) */
+  async function decodeKeep(ab, name) {
+    const ext = (String(name || '').split('.').pop() || '').toLowerCase();
+    const blob = new Blob([ab], { type: MIME[ext] || 'application/octet-stream' });
+    const decoded = await audioEngine.ctx.decodeAudioData(ab.slice(0));
+    SRC.set(decoded, { blob, name: String(name || '') });
+    return decoded;
+  }
+  /* Gespeicherte Projekte mit Original-Dateien: erst dekodieren (nacheinander 2 gleichzeitig, damit der Speicher klein bleibt) */
+  const needsHydrate = p => !!p && !!p.buffers && Object.values(p.buffers).some(it => it && it.src && !it.audioBuffer);
+  async function hydratePayload(payload) {
+    const list = Object.entries(payload.buffers || {}).filter(([, it]) => it && it.src && !it.audioBuffer);
+    if (!list.length) return { ok: 0, failed: [] };
+    await audioEngine.ensureCtx();
+    if (list.length >= 4) { try { toast('Audio wird geladen … (' + list.length + ' Dateien)', 'info'); } catch (_) {} }
+    const failed = []; let next = 0, ok = 0;
+    const worker = async () => {
+      while (next < list.length) {
+        const [id, it] = list[next++];
+        try {
+          const ab = await it.src.arrayBuffer();
+          const decoded = await audioEngine.ctx.decodeAudioData(ab);
+          SRC.set(decoded, { blob: it.src, name: it.name || '' });
+          it.audioBuffer = decoded; ok++;
+        } catch (e) { console.warn('Audio konnte nicht dekodiert werden:', id, e); failed.push(id); it.src = null; }
+      }
+    };
+    await Promise.all([worker(), worker()]);
+    if (failed.length) { try { toast(failed.length + ' Audiodatei(en) konnten nicht gelesen werden.', 'error'); } catch (_) {} }
+    return { ok, failed };
+  }
   function makePayload(opts) {
     if (typeof syncActiveMidiTrackFromState === 'function') syncActiveMidiTrackFromState();
     const state = {};
@@ -7499,14 +7534,18 @@ html[data-perf="on"] .fx-edge::before{display:none!important}
     if (opts && opts.noBuffers) return { state, buffers, savedAt: Date.now(), formatVersion: 1 };
     Object.entries(dawState.buffers || {}).forEach(([id, audioBuffer]) => {
       if (!audioBuffer || !audioBuffer.numberOfChannels) return;
+      /* Importierte Dateien: die kleine Original-Datei speichern statt der entpackten Rohdaten (spart Speicher und Platz) */
+      const sb = compactSource(audioBuffer);
+      if (sb) { buffers[id] = { sampleRate: audioBuffer.sampleRate, length: audioBuffer.length, src: sb.blob, name: sb.name || '' }; return; }
+      /* Sonst die Rohdaten – ohne zusätzliche Kopie (die Datenbank kopiert beim Schreiben selbst) */
       const channels = [];
-      for (let c = 0; c < audioBuffer.numberOfChannels; c++) channels.push(audioBuffer.getChannelData(c).slice());
+      for (let c = 0; c < audioBuffer.numberOfChannels; c++) channels.push(audioBuffer.getChannelData(c));
       buffers[id] = { sampleRate: audioBuffer.sampleRate, length: audioBuffer.length, channels };
     });
     return { state, buffers, savedAt: Date.now(), formatVersion: 1 };
   }
 
-  function restorePayload(payload) {
+  function restoreCore(payload) {
     if (!payload || !payload.state) throw new Error('Das Projekt enthält keine gültigen DAW-Daten.');
     const volatile = new Set(['buffers','isPlaying','playheadSec','isRecordingMic','micRecStartTime','recordingMicTrackId','pendingAudioTargetTrackId','lastDuckTime','lastDuckDb']);
     Object.entries(payload.state).forEach(([key, value]) => {
@@ -7523,6 +7562,8 @@ html[data-perf="on"] .fx-edge::before{display:none!important}
     if (ctx && typeof ctx.createBuffer === 'function') {
       Object.entries(payload.buffers || {}).forEach(([id, item]) => {
         try {
+          if (item && item.audioBuffer) { dawState.buffers[id] = item.audioBuffer; return; }
+          if (!item || !item.channels) return;
           const audioBuffer = ctx.createBuffer(item.channels.length, item.length, item.sampleRate);
           item.channels.forEach((channel, index) => audioBuffer.copyToChannel(new Float32Array(channel), index));
           dawState.buffers[id] = audioBuffer;
@@ -7622,7 +7663,7 @@ html[data-perf="on"] .fx-edge::before{display:none!important}
         try {
           await audioEngine.ensureCtx();
           if (dawState.isPlaying) audioEngine.stop(true);
-          restorePayload(record.payload);
+          await restorePayload(record.payload);
           $('status-subtitle').textContent = `Projekt: ${record.name}`;
           $('status-subtitle').dataset.projectName = record.name;
           ov.remove();
@@ -7645,7 +7686,12 @@ html[data-perf="on"] .fx-edge::before{display:none!important}
     return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
 
-  window.__projectIO = { makePayload, restorePayload };
+  /* Öffentlich: bei Projekten mit Original-Dateien ein Promise (erst dekodieren), sonst wie bisher sofort */
+  function restorePayload(payload) {
+    if (needsHydrate(payload)) return hydratePayload(payload).then(() => restoreCore(payload));
+    return restoreCore(payload);
+  }
+  window.__projectIO = { makePayload, restorePayload, hydratePayload, decodeKeep, srcOf: ab => SRC.get(ab) || null, compactOf: compactSource };
   window.addEventListener('DOMContentLoaded', () => {
     $('btn-save-project')?.addEventListener('click', () => (window.Home && window.Home.save) ? window.Home.save() : saveNamedProject());
     $('btn-open-projects')?.addEventListener('click', () => (window.Home && window.Home.open) ? window.Home.open() : openProjectLibrary());
@@ -10310,12 +10356,13 @@ body.ce-open #toast-container>:not(:last-child){display:none!important}
       let partial = false, toWrite = changed;
       if (changed.length) {
         let free = Infinity; try { const e = await navigator.storage.estimate(); if (e && e.quota) free = (e.quota - (e.usage || 0)) * 0.85; } catch (_) {}
-        const need = changed.reduce((s, [, b]) => s + b.length * b.numberOfChannels * 4, 0);
+        const need = changed.reduce((s, [, b]) => { const c = window.__projectIO.compactOf && window.__projectIO.compactOf(b); return s + (c ? c.blob.size : b.length * b.numberOfChannels * 4); }, 0);
         if (need > free) { partial = true; toWrite = []; stats.skipped++; if (!warnedSize) { warnedSize = true; try { toast('Autosave: Für das Audio reicht der Browser-Speicher nicht – gesichert werden nur Einstellungen, Noten und Clips. „Projekt speichern“ bleibt möglich.', 'warn'); } catch (_) {} } }
       }
       for (const [id, b] of toWrite) {                       /* Audio: eine Datei je Transaktion, damit der Speicherbedarf klein bleibt */
-        const ch = []; for (let c = 0; c < b.numberOfChannels; c++) ch.push(b.getChannelData(c));
-        await tx('buf', 'readwrite', s => s.put({ sampleRate: b.sampleRate, length: b.length, channels: ch }, id));
+        const cs = window.__projectIO.compactOf && window.__projectIO.compactOf(b);   // Original-Datei statt Rohdaten, wenn kleiner
+        if (cs) await tx('buf', 'readwrite', s => s.put({ sampleRate: b.sampleRate, length: b.length, src: cs.blob, name: cs.name || '' }, id));
+        else { const ch = []; for (let c = 0; c < b.numberOfChannels; c++) ch.push(b.getChannelData(c)); await tx('buf', 'readwrite', s => s.put({ sampleRate: b.sampleRate, length: b.length, channels: ch }, id)); }
         savedBuf.set(id, b); stats.bufWrites++;
       }
       const keep = partial ? [...savedBuf.keys()] : bufs.map(([i]) => i);
@@ -10347,7 +10394,7 @@ body.ce-open #toast-container>:not(:last-child){display:none!important}
     for (const id of meta.bufferIds || []) {
       const rec = await tx('buf', 'readonly', s => s.get(id)); if (rec) buffers[id] = rec;
     }
-    window.__projectIO.restorePayload({ state: meta.state, buffers });
+    await window.__projectIO.restorePayload({ state: meta.state, buffers });
     Object.entries(buffers).forEach(([id]) => { if (dawState.buffers[id]) savedBuf.set(id, dawState.buffers[id]); });
     const st = $('status-subtitle'); if (st && meta.name) { st.textContent = 'Projekt: ' + meta.name; st.dataset.projectName = meta.name; }
     baseline = null; lastJson = stateJson();
@@ -10393,7 +10440,7 @@ body.ce-open #toast-container>:not(:last-child){display:none!important}
   document.addEventListener('change', e => { const t = e.target; if (t && t.dataset && 'autosave' in t.dataset) setEnabled(t.checked); });
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', start); else start();
 
-  window.Autosave = { resume, enabled: () => enabled, setEnabled, saveNow, clear, statusText, stats, _peek: readSaved, _info: () => lastInfo, _offer: () => offer };
+  window.Autosave = { resume, enabled: () => enabled, setEnabled, saveNow, clear, statusText, stats, _peek: readSaved, _restore: restore, _info: () => lastInfo, _offer: () => offer };
 })();
 
 </script>
@@ -10920,7 +10967,7 @@ body.ce-open #toast-container>:not(:last-child){display:none!important}
   async function openProject(id) {
     const rec = await rq(mainDb, 'projects', 'readonly', s => s.get(id)); if (!rec || !rec.payload) { say('Projekt nicht gefunden.', 'error'); return false; }
     await prepareSwitch();
-    try { window.__projectIO.restorePayload(rec.payload); } catch (e) { console.error(e); say('Projekt konnte nicht geöffnet werden: ' + e.message, 'error'); return false; }
+    try { await window.__projectIO.restorePayload(rec.payload); } catch (e) { console.error(e); say('Projekt konnte nicht geöffnet werden: ' + e.message, 'error'); return false; }
     if (!dawState.project || dawState.project.id !== rec.id) dawState.project = { id: rec.id, name: rec.name, created: rec.updatedAt, notes: '' };
     dawState.project.name = rec.name; clearHistory(); syncControls(); setSubtitle(); savedSig = sig(); pendingSession = null; close(); say(`Projekt „${rec.name}“ geöffnet.`, 'success'); return true;
   }
@@ -11626,7 +11673,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
    in Optionen → Updates & Datensicherung lässt sich das Protokoll jederzeit öffnen. */
 (function () {
   'use strict';
-  const LOG = [{"v": "1.14", "date": "2026-11-19", "title": "Updates, Sicherung & Stabilität", "items": ["Neu: „Was ist neu“ – dieses Änderungsprotokoll steckt jetzt in der App (Optionen → Updates) und erscheint nach einem Update einmal auf der Startseite.", "Neu: Beim Update-Hinweis steht jetzt, was die neue Version bringt (aus dem GitHub-Release-Text).", "Neu: Wöchentliche Sicherung – automatisch in „Dokumente/SunshineDAW/Sicherung“ (die letzten 4 bleiben), bei großen Datenmengen als Erinnerung zum Speichern.", "Neu: Live-Update der Oberfläche – kleine Änderungen kommen ohne neue APK, mit automatischem Rückfall auf die eingebaute Version, falls etwas nicht startet.", "Neu: Optionen → Stabilität & Leistung: Speicher-Anzeige mit Warnung, Fehlerprotokoll zum Kopieren, Sparmodus für schwächere Handys, Anzeige-Test.", "Der Name der App ist jetzt überall „Sunshine@R DAW Studio“."]}, {"v": "1.13", "date": "", "title": "Updates & Datensicherung", "items": ["Neu: Feste App-Signatur und hochzählende Versionsnummer – neue APKs lassen sich über die installierte App einspielen, Projekte bleiben erhalten.", "Neu: „Nach Updates suchen“ in den Optionen (GitHub-Releases) mit Hinweis auf der Startseite.", "Neu: „Alles sichern“ und „Wiederherstellen“ – alle Projekte, Autosave und Einstellungen als eine ZIP-Datei.", "Neu: Gerätespeicher dauerhaft schützen."]}, {"v": "1.12", "date": "", "title": "Anzeige & Effekte", "items": ["Effekte sind standardmäßig aus und wirken nur noch auf große Flächen und Ränder (kein Vollbild-Overlay mehr).", "Layout-Wächter gegen seitliche Ränder, Kamera-Abstand optional, „Anzeige prüfen“ in den Optionen."]}, {"v": "1.11", "date": "", "title": "Anleitung", "items": ["Neu: Interaktiver Rundgang und Handbuch in der App (Optionen oder Startseite → Hilfe)."]}, {"v": "1.10", "date": "", "title": "Android-Feinschliff", "items": ["Zurück-Taste schließt Fenster und führt zur Startseite, Vollbild und Querformat randlos.", "Icons je Design vereinheitlicht, Transportleiste und Werkzeugleiste ans Design angepasst."]}, {"v": "1.9", "date": "", "title": "Kreativ-Werkzeuge", "items": ["Beat-Slicer, Tonart-Erkennung mit Transponieren, Stem-Import-Assistent, Strukturmarker."]}, {"v": "1.8", "date": "", "title": "Mix & Export", "items": ["Automation, LUFS-Messung mit Limiter, Spektrum.", "Export als Stems-ZIP, Loop-Bereich, komprimiert oder MIDI."]}, {"v": "1.7", "date": "", "title": "Clip-Bearbeitung", "items": ["Teilen, zuschneiden, kopieren, einfügen, verschieben; Fades und Überblendungen; Mehrfachauswahl; Lücke schließen.", "Großansicht je Spur, Autosave mit Wiederherstellung."]}, {"v": "1.6", "date": "", "title": "Fenster-Modus", "items": ["Editor, Drums, Vocal, Mixer und Spuren als einzeln ein- und ausklappbare Fenster.", "Einheitliche Transport-Buttons, klarere Zurück/Vor-Symbole."]}, {"v": "1.5", "date": "", "title": "KI & Sprache", "items": ["KI-Assistent mit Sprachsteuerung.", "Audio-zu-MIDI per Basic-Pitch-KI."]}, {"v": "1.4", "date": "", "title": "Design-Optionen", "items": ["Farbe, Transparenz, Unschärfe und Rundung einstellbar; „Vor“-Button (Redo)."]}, {"v": "1.3", "date": "", "title": "Neues Design", "items": ["Theme „Liquid Matt“, schwebende Navigation unten, kompaktere Spurkarten, aufgeräumtes Datei-Menü."]}, {"v": "1.2", "date": "", "title": "SoundFonts", "items": ["SpessaSynth-Integration: SoundFonts laden und als Instrument nutzen."]}, {"v": "1.1", "date": "", "title": "Mixer & Editor", "items": ["Mixer, Piano-Roll, Drum-Pattern und Vocal-Ansicht für Suno-Stems."]}, {"v": "1.0", "date": "", "title": "Erste Fassung", "items": ["Suno-Stems laden, abspielen, mischen und exportieren."]}];
+  const LOG = [{"v": "1.15", "date": "2026-11-19", "title": "Kompaktere Projekte & sparsameres Speichern", "items": ["Neu: Importierte Stems (WAV, MP3, …) werden im Projekt als Original-Datei gespeichert statt als entpackte Rohdaten. Projekte, Autosave und Sicherungen werden dadurch kleiner (16-Bit-WAV etwa die Hälfte, MP3 rund ein Zehntel).", "Besser: Beim Speichern werden die Audiodaten nicht mehr zusätzlich kopiert – das senkt die Speicherspitze, die bei vielen Spuren zum Absturz führen konnte.", "Hinweis: Aufnahmen, erzeugte oder bearbeitete Spuren und 32-Bit-Float-Dateien bleiben wie bisher als Rohdaten. Ältere Projekte bleiben lesbar und werden erst dann kompakt, wenn die Stems neu importiert werden.", "Hinweis: Beim Öffnen werden die Original-Dateien neu dekodiert – bei vielen Spuren dauert das einige Sekunden."]}, {"v": "1.14", "date": "2026-11-19", "title": "Updates, Sicherung & Stabilität", "items": ["Neu: „Was ist neu“ – dieses Änderungsprotokoll steckt jetzt in der App (Optionen → Updates) und erscheint nach einem Update einmal auf der Startseite.", "Neu: Beim Update-Hinweis steht jetzt, was die neue Version bringt (aus dem GitHub-Release-Text).", "Neu: Wöchentliche Sicherung – automatisch in „Dokumente/SunshineDAW/Sicherung“ (die letzten 4 bleiben), bei großen Datenmengen als Erinnerung zum Speichern.", "Neu: Live-Update der Oberfläche – kleine Änderungen kommen ohne neue APK, mit automatischem Rückfall auf die eingebaute Version, falls etwas nicht startet.", "Neu: Optionen → Stabilität & Leistung: Speicher-Anzeige mit Warnung, Fehlerprotokoll zum Kopieren, Sparmodus für schwächere Handys, Anzeige-Test.", "Der Name der App ist jetzt überall „Sunshine@R DAW Studio“."]}, {"v": "1.13", "date": "", "title": "Updates & Datensicherung", "items": ["Neu: Feste App-Signatur und hochzählende Versionsnummer – neue APKs lassen sich über die installierte App einspielen, Projekte bleiben erhalten.", "Neu: „Nach Updates suchen“ in den Optionen (GitHub-Releases) mit Hinweis auf der Startseite.", "Neu: „Alles sichern“ und „Wiederherstellen“ – alle Projekte, Autosave und Einstellungen als eine ZIP-Datei.", "Neu: Gerätespeicher dauerhaft schützen."]}, {"v": "1.12", "date": "", "title": "Anzeige & Effekte", "items": ["Effekte sind standardmäßig aus und wirken nur noch auf große Flächen und Ränder (kein Vollbild-Overlay mehr).", "Layout-Wächter gegen seitliche Ränder, Kamera-Abstand optional, „Anzeige prüfen“ in den Optionen."]}, {"v": "1.11", "date": "", "title": "Anleitung", "items": ["Neu: Interaktiver Rundgang und Handbuch in der App (Optionen oder Startseite → Hilfe)."]}, {"v": "1.10", "date": "", "title": "Android-Feinschliff", "items": ["Zurück-Taste schließt Fenster und führt zur Startseite, Vollbild und Querformat randlos.", "Icons je Design vereinheitlicht, Transportleiste und Werkzeugleiste ans Design angepasst."]}, {"v": "1.9", "date": "", "title": "Kreativ-Werkzeuge", "items": ["Beat-Slicer, Tonart-Erkennung mit Transponieren, Stem-Import-Assistent, Strukturmarker."]}, {"v": "1.8", "date": "", "title": "Mix & Export", "items": ["Automation, LUFS-Messung mit Limiter, Spektrum.", "Export als Stems-ZIP, Loop-Bereich, komprimiert oder MIDI."]}, {"v": "1.7", "date": "", "title": "Clip-Bearbeitung", "items": ["Teilen, zuschneiden, kopieren, einfügen, verschieben; Fades und Überblendungen; Mehrfachauswahl; Lücke schließen.", "Großansicht je Spur, Autosave mit Wiederherstellung."]}, {"v": "1.6", "date": "", "title": "Fenster-Modus", "items": ["Editor, Drums, Vocal, Mixer und Spuren als einzeln ein- und ausklappbare Fenster.", "Einheitliche Transport-Buttons, klarere Zurück/Vor-Symbole."]}, {"v": "1.5", "date": "", "title": "KI & Sprache", "items": ["KI-Assistent mit Sprachsteuerung.", "Audio-zu-MIDI per Basic-Pitch-KI."]}, {"v": "1.4", "date": "", "title": "Design-Optionen", "items": ["Farbe, Transparenz, Unschärfe und Rundung einstellbar; „Vor“-Button (Redo)."]}, {"v": "1.3", "date": "", "title": "Neues Design", "items": ["Theme „Liquid Matt“, schwebende Navigation unten, kompaktere Spurkarten, aufgeräumtes Datei-Menü."]}, {"v": "1.2", "date": "", "title": "SoundFonts", "items": ["SpessaSynth-Integration: SoundFonts laden und als Instrument nutzen."]}, {"v": "1.1", "date": "", "title": "Mixer & Editor", "items": ["Mixer, Piano-Roll, Drum-Pattern und Vocal-Ansicht für Suno-Stems."]}, {"v": "1.0", "date": "", "title": "Erste Fassung", "items": ["Suno-Stems laden, abspielen, mischen und exportieren."]}];
   const $ = id => document.getElementById(id);
   const B = window.SUNSHINE_BUILD || {};
   const V = String(B.v || (LOG[0] && LOG[0].v) || '');
@@ -12480,6 +12527,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     { id: 'stabil', icon: 'gear', title: 'Stabilität &amp; Leistung', sum: 'Speicher, Sparmodus, Fehlerprotokoll', body: `
       <h4>Arbeitsspeicher</h4><ul><li><b>Optionen → Stabilität &amp; Leistung</b> zeigt, wie viel Audio die App gerade im Arbeitsspeicher hält. Geladene Spuren liegen unkomprimiert im Speicher: <b>ca. 95 MB pro Stereo-Spur von 4½ Minuten</b>.</li><li>Wird es viel, blendet die App einen Hinweis ein – bevor Android die App beendet.</li></ul>
       <h4>Sparmodus</h4><ul><li>Schaltet Unschärfe, Schatten und Animationen ab. Das entlastet die Grafik auf schwächeren Handys. Der Klang bleibt gleich.</li><li><b>Anzeige-Test</b> misst zwei Sekunden lang die Bilder pro Sekunde und rät zum Sparmodus, wenn es ruckelt.</li></ul>
+      <h4>Projektgröße</h4><ul><li>Importierte Stems werden im Projekt als <b>Original-Datei</b> gespeichert (WAV etwa halb so groß wie die entpackten Daten, MP3 rund ein Zehntel). Beim Öffnen werden sie neu dekodiert – bei vielen Spuren dauert das einige Sekunden.</li><li>Aufnahmen und bearbeitete Spuren bleiben Rohdaten. Ältere Projekte werden kompakt, wenn du die Stems neu importierst.</li></ul>
       <h4>Fehlerprotokoll</h4><ul><li>Die App merkt sich Fehler (und ein vermutlich unerwartetes Ende des letzten Starts). <b>Kopieren</b> oder <b>Als Datei</b> erzeugt einen Bericht, den du mir schicken kannst.</li></ul>
       <h4>Tipps für flüssiges Arbeiten</h4><ul><li>Nicht benötigte Spuren löschen oder mehrere Stems zu einer Spur zusammenfassen.</li><li>Effekte und Glas-Effekte aus, bei langen Sitzungen die App zwischendurch neu starten.</li><li>Regelmäßig sichern (Autosave + wöchentliche Sicherung laufen mit).</li></ul>
       ${tip('Die Warnung ist eine Schätzung für das Audio. Zusätzlich brauchen App, Effekte und Anzeige Speicher.')}` },
