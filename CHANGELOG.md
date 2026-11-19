@@ -2,6 +2,36 @@
 <!-- Pflege: Ganz oben einen neuen Abschnitt „## Version · Datum · Titel“ anlegen, darunter die Neuerungen als Stichpunkte.
      Der oberste Abschnitt wird (1) in die App eingebaut („Was ist neu“) und (2) bei GitHub als Release-Text veröffentlicht. -->
 
+## 1.25 · 2026-11-19 · Player: Klang-Voreinstellungen, Equalizer, Cover, Tags & Ordner
+- Neu: Klang-Voreinstellungen im Player – Original, Mehr Bass, Techno, Klassik, Pop, Rock, Stimme, Hip-Hop, Weich und „Eigen“ mit fünf Reglern (Tiefbass, Bass, Mitten, Höhen, Brillanz). Ein Schutz-Limiter verhindert Übersteuern.
+- Neu: Animierter Equalizer im Player. Jede Voreinstellung hat ihre eigene Darstellung (dicke Bass-Balken, LED-Segmente für Techno, weiche Wellen für Klassik, Punkte für Pop, Zacken für Rock, gespiegelt für Stimme, Blöcke für Hip-Hop, Aura für Weich) samt Kurve des Klangreglers. Farben, Rundung und Leuchten folgen dem gewählten Design; ein- und ausblendbar (im Player und unter Optionen → Player & Hintergrund).
+- Neu: Cover im Player mit demselben Rahmen und denselben Musik-Effekten wie in der DAW. Das Bild kommt aus der Datei; fehlt es, entsteht ein passendes Cover aus Titel und Künstler.
+- Neu: Tags aus den Audiodateien (Titel, Künstler, Album, Genre, Jahr, Titelnummer, Cover) – MP3, M4A, FLAC, OGG/Opus und WAV. Anzeige in Liste, Titelkarte, Mini-Leiste, Sperrbildschirm-Steuerung des Systems und Benachrichtigung.
+- Neu: Button „Ordner“ im Player. Dateien werden direkt vom Gerät abgespielt, ohne sie erst in die App zu laden (Desktop-Browser: echter Ordner-Dialog mit Unterordnern; Android: Dateiauswahl, ein eigener Ordner-Dialog folgt mit dem nächsten App-Update).
+- Besser: Die Mini-Leiste zeigt beim Abspielen einen kleinen Equalizer und den Künstler.
+- Hinweis: Nur `www/index.html` und `CHANGELOG.md` ändern sich gegenüber 1.24 – das Live-Update reicht. Tasten Zurück/Weiter, Zeitanzeige und Mini-Equalizer in der Benachrichtigung selbst folgen in 1.26 (neue App nötig).
+
+## 1.24 · 2026-11-19 · Cover-Effekte, Leiste im Design-Stil & Fensterbreiten
+- Neu: Fünf weitere Rand-Effekte fürs Cover: Flackerlinien (Linien blitzen im Takt), Lauflinien (Striche laufen um das Bild), Blur-Rand (weicher Lichtsaum, der mit dem Bass atmet), Lichtkranz (wandernde Lichtflecke) und Aura (weiche Schichten, die nach außen schwingen). Insgesamt 14 Effekte zur Auswahl.
+- Neu: Regler für Größe des Effekts, Helligkeit und Transparenz (Optionen → Design & Aussehen → Cover & Tags), mit Live-Vorschau und „Zurücksetzen“.
+- Neu: „Neues Projekt“ zeigt Cover & Tags jetzt direkt unter dem Projektnamen, aufgeklappt – Bild wählen oder aus Titel und Künstler erstellen gleich beim Anlegen.
+- Besser: Die untere Leiste (Transport · Spuren · Editor · Drums · Vocal · Mixer) passt sich dem gewählten Design an: Rand, Rundung, Glühen, Glas bzw. Metall-Look und Akzentfarbe von Aurora, Studio, Neon, Liquid und Klassik.
+- Besser: Die Großfenster Vocal und Mixer füllen jetzt die ganze Breite (vorher blieb rechts eine Lücke); Spuren, Editor und Drums wurden mitgeprüft.
+- Hinweis: Nur `www/index.html` und `CHANGELOG.md` ändern sich gegenüber 1.23 – das Live-Update reicht.
+
+## 1.23 · 2026-11-19 · Transport in der unteren Leiste
+- Neu: Am Handy liegen Play, Stopp, Loop und Klick jetzt in der unteren Leiste. Mit einem Wisch nach links (oder dem kleinen Pfeil) kommst du zu Spuren · Editor · Drums · Vocal · Mixer, mit einem Wisch zurück wieder zum Transport. Läuft die Musik, leuchtet der Pfeil auf der Bereichs-Seite.
+- Besser: Oben fällt die Transport-Zeile weg – Zeitanzeige, Werkzeugleiste und alle Spuren rutschen nach oben, und das Cover bekommt mehr Platz (größere Stufen für klein / mittel / groß).
+- Neu: In den Optionen (Design & Aussehen → Untere Leiste) lässt sich das abschalten; dann bleibt der Transport oben wie bisher. In Querformat und auf größeren Bildschirmen ändert sich nichts.
+- Besser: Das Cover-Layout rechnete bei manchen Anordnungen im Leerlauf ständig neu (unnötige Last) – behoben.
+- Hinweis: Nur `www/index.html` und `CHANGELOG.md` ändern sich gegenüber 1.22 – das Live-Update reicht.
+
+## 1.22 · 2026-11-19 · Cover: Platz, Randeffekte & Design
+- Besser: Das Cover sitzt jetzt passend in Hoch- und Querformat (oben rechts, ohne Knöpfe oder Texte zu überdecken). Die Größe passt sich dem Gerät an und lässt sich in den Optionen auf klein / mittel / groß stellen.
+- Neu: Neun Randeffekte zur Auswahl (Optionen → Design & Aussehen → Cover & Tags): Pegel-Ring, Punkte, Welle, Puls, Lauflicht, Rahmen, Leuchten, Ring + Leuchten und Aus – mit Live-Vorschau und Stärke (sanft / normal / kräftig). Das Bild bleibt immer frei.
+- Neu: Das Cover-Symbol folgt dem gewählten Design: Rahmen, Rundung, Leuchten und Effektfarben passen zu Aurora, Studio, Neon, Liquid und Klassik sowie zur Akzentfarbe; auch erzeugte Cover und der Platzhalter nutzen die Designfarben.
+- Hinweis: Nur `www/index.html` und `CHANGELOG.md` ändern sich gegenüber 1.21 – das Live-Update reicht.
+
 ## 1.21 · 2026-11-19 · Cover & Tags
 - Neu: Cover und Tags pro Projekt. Beim Anlegen (und später in den Projekt-Einstellungen) wählst du ein eigenes Bild oder lässt ein Cover aus Projektname und Künstler/Produzent erstellen – vier Stile, „Neu mischen“ für neue Varianten. Dazu Künstler/Produzent, Genre (mit Vorschlägen), Jahr, Album, Komponist, Copyright und Kommentar.
 - Neu: Das Cover steht oben rechts im Kopfbereich der DAW (Antippen = bearbeiten), in der Projektliste und in der Android-Benachrichtigung. Rund um das Bild laufen Balken im Takt der Musik oder es leuchtet mit dem Bass – das Bild selbst bleibt frei. In den Optionen (Design & Aussehen → Cover & Tags) wählbar: Ring, Leuchten, beides, aus, Cover ausblenden.
