@@ -651,7 +651,8 @@ div:has(>#mt-collapse){flex-wrap:wrap;row-gap:4px}
 </script>
 <script>try{if(localStorage.getItem('sunshine.home')!=='off'){document.documentElement.classList.add('home-pending');setTimeout(function(){document.documentElement.classList.remove('home-pending')},6000)}}catch(e){}</script>
 <style>html.home-pending body>*:not(#home-root){visibility:hidden}</style>
-<script>window.SUNSHINE_BUILD={n:'__BUILD_N__',repo:'__BUILD_REPO__',time:'__BUILD_TIME__'};</script>
+<script>window.SUNSHINE_BUILD={n:'__BUILD_N__',repo:'__BUILD_REPO__',time:'__BUILD_TIME__',v:'1.14',nat:'__BUILD_NATIVE__'};window.__errs=[];window.addEventListener('error',function(e){try{__errs.push({t:Date.now(),m:String(e.message||''),s:String(e.filename||'').split('/').pop()+':'+e.lineno})}catch(x){}});window.addEventListener('unhandledrejection',function(e){try{__errs.push({t:Date.now(),m:'Promise: '+String(e.reason&&e.reason.message||e.reason)})}catch(x){}});try{if(localStorage.getItem('sunshine.perf')==='1')document.documentElement.setAttribute('data-perf','on')}catch(x){}</script>
+<script>(function(){try{setTimeout(function(){if(window.__sunshineBoot||!window.caches)return;caches.open('sunshine-live').then(function(c){return c.match('/__live/meta').then(function(r){return r&&r.json().then(function(m){if(m&&m.status==='pending'){m.status='bad';m.why='boot';return c.put('/__live/meta',new Response(JSON.stringify(m))).then(function(){location.reload()})}})})}).catch(function(){})},15000)}catch(e){}})();</script>
 <script>try{if(window.Capacitor||/; wv\)/.test(navigator.userAgent))document.documentElement.classList.add('android-app')}catch(e){}</script>
 <script>try{var f=JSON.parse(localStorage.getItem('sunshine.fx')||'{}'),d=document.documentElement,E=['off','glow','beam','line'],F=['off','aurora','eq','sparks','waves'];d.setAttribute('data-fx',f.v===2&&f.on===true?'on':'off');d.setAttribute('data-fx-edge',E.indexOf(f.edge)<0?'glow':f.edge);d.setAttribute('data-fx-full',F.indexOf(f.full)<0?'aurora':f.full);d.style.setProperty('--fx-k',String(Math.max(10,Math.min(100,+f.k||50))/100))}catch(e){}</script>
 <style id="sunshine-polish">
@@ -812,6 +813,33 @@ html[data-fx-pause="1"] .fx-edge::before,html[data-fx-pause="1"] .fx-edge::after
 :is(#hm-newbie,#hm-update) .hp-new button{min-height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--hm-line,rgba(255,255,255,.2));background:var(--hm-a,#ff8a1a);color:#1b0f00;font-weight:800;font-size:13px}
 :is(#hm-newbie,#hm-update) .hp-new .no{background:transparent;color:inherit;font-weight:600;opacity:.7;padding:0 8px}
 @media (prefers-reduced-motion:reduce){#hp-tour .hp-ring{animation:none}#hp-tour .hp-b,#hp-tour .hp-ring{transition:none}}
+
+/* ===== Sunshine@R · „Was ist neu“ ===== */
+#nw-root{position:fixed;inset:0;z-index:155;display:flex;flex-direction:column;background:rgba(8,10,26,.985);color:#eef1ff;padding-left:var(--sal,0px);padding-right:var(--sar,0px)}
+#nw-root .nw-top{display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 14px 8px;border-bottom:1px solid rgba(255,255,255,.14)}
+#nw-root h2{margin:0;font-size:18px;font-weight:900}
+#nw-root .nw-sub{flex:1;font-size:12px;color:#a9b0d0;font-family:ui-monospace,monospace}
+#nw-root .nw-x{min-width:44px;min-height:44px;padding:0 14px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:inherit;font-weight:700;font-size:13px}
+#nw-root .nw-body{flex:1;overflow:auto;padding:12px 14px max(24px,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+#nw-root .nw-e{margin:0 0 14px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+#nw-root .nw-e.cur{border-color:rgb(var(--fx-rgb,var(--daw-accent))/.6);background:rgb(var(--fx-rgb,var(--daw-accent))/.08)}
+#nw-root h3{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;font-size:15px;font-weight:800}
+#nw-root .nw-now{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:8px;background:rgb(var(--fx-rgb,var(--daw-accent)));color:#1b0f00}
+#nw-root .nw-d{margin-left:auto;font-size:11px;font-weight:600;color:#a9b0d0}
+#nw-root .nw-t{margin:2px 0 6px;font-size:13px;color:#cfd5f5}
+#nw-root ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.5;color:#dfe4ff}
+#nw-root li{margin:3px 0}
+#nw-root .nw-tag{display:inline-block;font-size:10px;font-weight:800;padding:1px 6px;border-radius:7px;margin-right:2px;background:rgba(255,255,255,.14)}
+#nw-root .nw-neu{background:rgba(52,211,153,.25);color:#a7f3d0}
+#nw-root .nw-behoben{background:rgba(96,165,250,.25);color:#bfdbfe}
+#nw-root .nw-besser{background:rgba(251,191,36,.22);color:#fde68a}
+#nw-root .nw-none{color:#a9b0d0}
+.up-notes{margin:6px 0 4px;padding-left:18px;list-style:disc;font-size:12px;line-height:1.5;color:#cbd5e1}
+.up-notes li{margin:2px 0}
+
+/* ===== Sunshine@R · Sparmodus (Stabilität & Leistung) ===== */
+html[data-perf="on"] *,html[data-perf="on"] *::before,html[data-perf="on"] *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important;text-shadow:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+html[data-perf="on"] .fx-edge::before{display:none!important}
 
 </style>
 </head>
@@ -11392,7 +11420,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
    false = nichts mehr zu schließen → die App geht in den Hintergrund. Im Browser ohne Wirkung. */
 (function () {
   'use strict';
-  const OVERLAYS = '#settings-modal,#sf-picker-modal,#pattern-studio-modal,#chat-modal,#assistant-settings,#assistant-modal,#as-offer,.hm-sheet-bg,#lm-root,#ex-root,#kt-root,#bs-root,#mk-root,#ia-root,#ce-root,#hp-tour,#hp-man,#file-menu';
+  const OVERLAYS = '#settings-modal,#sf-picker-modal,#pattern-studio-modal,#chat-modal,#assistant-settings,#assistant-modal,#as-offer,.hm-sheet-bg,#lm-root,#ex-root,#kt-root,#bs-root,#mk-root,#ia-root,#ce-root,#nw-root,#hp-tour,#hp-man,#file-menu';
   const shown = e => { if (!e || e.hidden || !e.isConnected) return false; const r = e.getBoundingClientRect(), c = getComputedStyle(e); return r.width > 0 && r.height > 0 && c.visibility !== 'hidden' && c.display !== 'none'; };
   const zOf = e => { let z = 0; for (let n = e; n && n !== document.body; n = n.parentElement) { const v = parseInt(getComputedStyle(n).zIndex, 10); if (!isNaN(v)) z = Math.max(z, v); } return z; };
   function topOverlay() {
@@ -11593,6 +11621,52 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
 
 </script>
 <script>
+/* ===== Sunshine@R · „Was ist neu“ (Änderungsprotokoll) =====
+   Die Daten stammen aus CHANGELOG.md (wird beim Bauen eingebettet). Nach einem Update erscheint auf der Startseite einmal eine Karte;
+   in Optionen → Updates & Datensicherung lässt sich das Protokoll jederzeit öffnen. */
+(function () {
+  'use strict';
+  const LOG = [{"v": "1.14", "date": "2026-11-19", "title": "Updates, Sicherung & Stabilität", "items": ["Neu: „Was ist neu“ – dieses Änderungsprotokoll steckt jetzt in der App (Optionen → Updates) und erscheint nach einem Update einmal auf der Startseite.", "Neu: Beim Update-Hinweis steht jetzt, was die neue Version bringt (aus dem GitHub-Release-Text).", "Neu: Wöchentliche Sicherung – automatisch in „Dokumente/SunshineDAW/Sicherung“ (die letzten 4 bleiben), bei großen Datenmengen als Erinnerung zum Speichern.", "Neu: Live-Update der Oberfläche – kleine Änderungen kommen ohne neue APK, mit automatischem Rückfall auf die eingebaute Version, falls etwas nicht startet.", "Neu: Optionen → Stabilität & Leistung: Speicher-Anzeige mit Warnung, Fehlerprotokoll zum Kopieren, Sparmodus für schwächere Handys, Anzeige-Test.", "Der Name der App ist jetzt überall „Sunshine@R DAW Studio“."]}, {"v": "1.13", "date": "", "title": "Updates & Datensicherung", "items": ["Neu: Feste App-Signatur und hochzählende Versionsnummer – neue APKs lassen sich über die installierte App einspielen, Projekte bleiben erhalten.", "Neu: „Nach Updates suchen“ in den Optionen (GitHub-Releases) mit Hinweis auf der Startseite.", "Neu: „Alles sichern“ und „Wiederherstellen“ – alle Projekte, Autosave und Einstellungen als eine ZIP-Datei.", "Neu: Gerätespeicher dauerhaft schützen."]}, {"v": "1.12", "date": "", "title": "Anzeige & Effekte", "items": ["Effekte sind standardmäßig aus und wirken nur noch auf große Flächen und Ränder (kein Vollbild-Overlay mehr).", "Layout-Wächter gegen seitliche Ränder, Kamera-Abstand optional, „Anzeige prüfen“ in den Optionen."]}, {"v": "1.11", "date": "", "title": "Anleitung", "items": ["Neu: Interaktiver Rundgang und Handbuch in der App (Optionen oder Startseite → Hilfe)."]}, {"v": "1.10", "date": "", "title": "Android-Feinschliff", "items": ["Zurück-Taste schließt Fenster und führt zur Startseite, Vollbild und Querformat randlos.", "Icons je Design vereinheitlicht, Transportleiste und Werkzeugleiste ans Design angepasst."]}, {"v": "1.9", "date": "", "title": "Kreativ-Werkzeuge", "items": ["Beat-Slicer, Tonart-Erkennung mit Transponieren, Stem-Import-Assistent, Strukturmarker."]}, {"v": "1.8", "date": "", "title": "Mix & Export", "items": ["Automation, LUFS-Messung mit Limiter, Spektrum.", "Export als Stems-ZIP, Loop-Bereich, komprimiert oder MIDI."]}, {"v": "1.7", "date": "", "title": "Clip-Bearbeitung", "items": ["Teilen, zuschneiden, kopieren, einfügen, verschieben; Fades und Überblendungen; Mehrfachauswahl; Lücke schließen.", "Großansicht je Spur, Autosave mit Wiederherstellung."]}, {"v": "1.6", "date": "", "title": "Fenster-Modus", "items": ["Editor, Drums, Vocal, Mixer und Spuren als einzeln ein- und ausklappbare Fenster.", "Einheitliche Transport-Buttons, klarere Zurück/Vor-Symbole."]}, {"v": "1.5", "date": "", "title": "KI & Sprache", "items": ["KI-Assistent mit Sprachsteuerung.", "Audio-zu-MIDI per Basic-Pitch-KI."]}, {"v": "1.4", "date": "", "title": "Design-Optionen", "items": ["Farbe, Transparenz, Unschärfe und Rundung einstellbar; „Vor“-Button (Redo)."]}, {"v": "1.3", "date": "", "title": "Neues Design", "items": ["Theme „Liquid Matt“, schwebende Navigation unten, kompaktere Spurkarten, aufgeräumtes Datei-Menü."]}, {"v": "1.2", "date": "", "title": "SoundFonts", "items": ["SpessaSynth-Integration: SoundFonts laden und als Instrument nutzen."]}, {"v": "1.1", "date": "", "title": "Mixer & Editor", "items": ["Mixer, Piano-Roll, Drum-Pattern und Vocal-Ansicht für Suno-Stems."]}, {"v": "1.0", "date": "", "title": "Erste Fassung", "items": ["Suno-Stems laden, abspielen, mischen und exportieren."]}];
+  const $ = id => document.getElementById(id);
+  const B = window.SUNSHINE_BUILD || {};
+  const V = String(B.v || (LOG[0] && LOG[0].v) || '');
+  const KEY = 'sunshine.news';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const cmp = (a, b) => { const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d < 0 ? -1 : 1; } return 0; };
+  let S = { seen: null }; try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (_) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (_) {} };
+  if (S.seen === null) {   // erste Nutzung dieses Merkers: Bestandsnutzer (haben schon sunshine.*-Einstellungen) sehen die Neuerungen, frische Installationen nicht
+    let had = false; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^sunshine\./.test(k) && k !== KEY) { had = true; break; } } } catch (_) {}
+    S.seen = had ? '0' : V; save();
+  }
+  const dateDe = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? m[3] + '.' + m[2] + '.' + m[1] : ''; };
+  const unseen = () => LOG.filter(e => cmp(e.v, S.seen || '0') > 0 && cmp(e.v, V || '9999') <= 0).slice(0, 3);
+  function item(t) { const m = /^(Neu|Behoben|Besser|Hinweis)\s*:\s*(.*)$/.exec(t); return m ? '<li><span class="nw-tag nw-' + m[1].toLowerCase() + '">' + m[1] + '</span> ' + esc(m[2]) + '</li>' : '<li>' + esc(t) + '</li>'; }
+  function entryHtml(e, cur) { return '<section class="nw-e' + (cur ? ' cur' : '') + '"><h3><span class="nw-v">Version ' + esc(e.v) + '</span>' + (cur ? '<span class="nw-now">installiert</span>' : '') + (e.date ? '<span class="nw-d">' + dateDe(e.date) + '</span>' : '') + '</h3>' + (e.title ? '<div class="nw-t">' + esc(e.title) + '</div>' : '') + '<ul>' + (e.items || []).map(item).join('') + '</ul></section>'; }
+  function close() { const r = $('nw-root'); if (r) r.remove(); document.removeEventListener('keydown', onKey, true); }
+  function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
+  function markSeen() { if (V && cmp(V, S.seen || '0') > 0) { S.seen = V; save(); } }
+  function open(o) {
+    o = o || {}; close(); markSeen();
+    const list = o.onlyNew ? unseenAll() : LOG;
+    const r = document.createElement('div'); r.id = 'nw-root'; r.setAttribute('role', 'dialog'); r.setAttribute('aria-label', 'Was ist neu');
+    r.innerHTML = '<div class="nw-top"><h2>Was ist neu</h2><span class="nw-sub">' + (V ? 'Version ' + esc(V) : '') + '</span><button type="button" class="nw-x" data-nw-x aria-label="Schließen">Schließen</button></div><div class="nw-body">' + (list.length ? list.map(e => entryHtml(e, e.v === V)).join('') : '<p class="nw-none">Kein Änderungsprotokoll in dieser Version.</p>') + '</div>';
+    r.addEventListener('click', e => { if (e.target.closest('[data-nw-x]')) close(); });
+    document.body.appendChild(r); document.addEventListener('keydown', onKey, true);
+    return true;
+  }
+  const unseenAll = () => LOG;
+  function onHomeCard() {   // HTML-Schnipsel für die Startseite (leer, wenn nichts Neues)
+    const u = unseen(); if (!u.length || !V) return '';
+    const e = u[0];
+    return '<div class="hp-new" data-nw-card><span class="tx"><b>Neu in Version ' + esc(e.v) + '</b><span class="s">' + esc(e.title || 'Das hat sich geändert') + '</span></span><button type="button" data-nw="open">Ansehen</button><button type="button" class="no" data-nw="ok">OK</button></div>';
+  }
+  function handle(act) { if (act === 'open') { open(); return true; } if (act === 'ok') { markSeen(); return true; } return false; }
+  window.News = { list: () => LOG.slice(), current: () => LOG.find(e => e.v === V) || LOG[0] || null, version: () => V, open, close, unseen, markSeen, card: onHomeCard, handle, hasUnseen: () => unseen().length > 0, _cmp: cmp, _state: () => Object.assign({}, S), _reset: v => { S.seen = v == null ? '0' : v; save(); } };
+})();
+
+</script>
+<script>
 /* ===== Sunshine@R · Updates & Datensicherung =====
    Update: fragt bei GitHub nach der neuesten veröffentlichten APK ("Build N"), vergleicht mit der installierten Build-Nummer
            und öffnet den Download. Installiert wird über die bestehende App → Projekte & Einstellungen bleiben erhalten
@@ -11604,7 +11678,9 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   const $ = id => document.getElementById(id);
   const say = (m, k) => { try { if (typeof toast === 'function') toast(m, k || 'info'); } catch (_) {} };
   const LS = 'sunshine.update';
-  let U = { auto: true, checked: 0, latest: null, dismissed: 0 }; try { Object.assign(U, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (_) {}
+  let U = { auto: true, checked: 0, latest: null, dismissed: 0, dismissedLive: '', weekly: null }; try { Object.assign(U, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (_) {}
+  U.weekly = Object.assign({ on: true, last: 0, snooze: 0, pending: false, res: null }, U.weekly || {});
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const saveU = () => { try { localStorage.setItem(LS, JSON.stringify(U)); } catch (_) {} };
 
   /* ================================================================ Update */
@@ -11624,7 +11700,8 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     }
     if (!r.ok) throw new Error('GitHub antwortet mit Fehler ' + r.status + '.');
     const j = await r.json(), m = /(\d+)/.exec(j.tag_name || ''), apk = (j.assets || []).find(x => /\.apk$/i.test(x.name || ''));
-    return { n: m ? +m[1] : 0, tag: j.tag_name || '', name: j.name || '', notes: String(j.body || '').slice(0, 600), published: j.published_at || '', url: apk ? apk.browser_download_url : j.html_url, page: j.html_url, size: apk ? apk.size : 0 };
+    const body = String(j.body || ''); let live = null; const mk = /<!--\s*sunshine:(\{[\s\S]*?\})\s*-->/.exec(body); if (mk) { try { live = JSON.parse(mk[1]); } catch (_) {} }
+    return { n: m ? +m[1] : 0, tag: j.tag_name || '', name: j.name || '', live, notes: body.replace(/<!--[\s\S]*?-->/g, '').trim().slice(0, 2000), published: j.published_at || '', url: apk ? apk.browser_download_url : j.html_url, page: j.html_url, size: apk ? apk.size : 0 };
   }
   async function check(opts) {
     opts = opts || {};
@@ -11639,12 +11716,34 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     try { if (typeof openExternalUrl === 'function') openExternalUrl(l.url); else window.open(l.url, '_blank', 'noopener'); } catch (_) { try { location.href = l.url; } catch (__) {} }
     return true;
   }
+  const noteLines = t => String(t || '').split(/\r?\n/).map(x => x.trim()).filter(x => x && !/^#/.test(x)).map(x => x.replace(/^[-*]\s+/, ''));
+  const notesHtml = (t, max) => { const L = noteLines(t); if (!L.length) return ''; const sh = max ? L.slice(0, max) : L; return '<ul class="up-notes">' + sh.map(x => '<li>' + esc(x) + '</li>').join('') + (max && L.length > max ? '<li>… und mehr unter „Was ist neu“</li>' : '') + '</ul>'; };
+  const liveOffer = () => { try { return (window.Live && U.latest) ? Live.offer(U.latest) : { kind: 'none' }; } catch (_) { return { kind: 'none' }; } };
+  function weeklyCard() {
+    const w = U.weekly; if (!w.on || !w.pending || Date.now() < (w.snooze || 0)) return '';
+    const d = w.last ? Math.floor((Date.now() - w.last) / 864e5) : null;
+    return '<div class="hp-new" data-card="wk"><span class="tx"><b>Wöchentliche Sicherung fällig</b><span class="s">' + (d == null ? 'Noch keine Sicherung.' : 'Die letzte ist ' + d + ' Tage alt.') + ' Alle Projekte in eine ZIP-Datei.</span></span><button type="button" data-wk="now">Sichern</button><button type="button" class="no" data-wk="later">Morgen</button></div>';
+  }
   function onHome(el) {
-    if (!el) return; el.innerHTML = '';
-    if (!isNew() || U.dismissed === U.latest.n) return;
-    const l = U.latest;
-    el.innerHTML = `<div class="hp-new"><span class="tx"><b>Update verfügbar · Build ${l.n}</b><span class="s">Installiert ist Build ${BUILD || '–'}. Deine Projekte bleiben erhalten.</span></span><button type="button" data-up="dl">Laden</button><button type="button" class="no" data-up="no">Später</button></div>`;
-    el.onclick = e => { const b = e.target.closest('[data-up]'); if (!b) return; if (b.dataset.up === 'dl') download(); else { U.dismissed = l.n; saveU(); el.innerHTML = ''; } };
+    if (!el) return; const l = U.latest, lo = liveOffer(); let h = '';
+    if (lo.kind === 'ready') h += '<div class="hp-new" data-card="ready"><span class="tx"><b>Oberfläche ' + esc(lo.v) + ' geladen</b><span class="s">Neu starten, um sie zu nutzen.</span></span><button type="button" data-lv="go">Neu starten</button><button type="button" class="no" data-lv="later">Später</button></div>';
+    else if (lo.kind === 'live' && U.dismissedLive !== lo.v) h += '<div class="hp-new" data-card="live"><span class="tx"><b>Neue Oberfläche ' + esc(lo.v) + ' bereit</b><span class="s">Ohne Neuinstallation – deine Projekte bleiben. ' + esc(noteLines(l.notes)[0] || '') + '</span></span><button type="button" data-up="live">Laden</button><button type="button" class="no" data-up="nolive">Später</button></div>';
+    else if (isNew() && U.dismissed !== l.n) h += '<div class="hp-new"><span class="tx"><b>Update verfügbar · Build ' + l.n + '</b><span class="s">Installiert ist Build ' + (BUILD || '–') + '. Deine Projekte bleiben erhalten.' + (noteLines(l.notes)[0] ? ' ' + esc(noteLines(l.notes)[0]) : '') + '</span></span><button type="button" data-up="dl">Laden</button><button type="button" class="no" data-up="no">Später</button></div>';
+    h += weeklyCard(); try { if (window.News) h += News.card(); } catch (_) {}
+    el.innerHTML = h;
+    el.onclick = async e => {
+      const b = e.target.closest('[data-up],[data-wk],[data-nw],[data-lv]'); if (!b) return;
+      const d = b.dataset;
+      if (d.up === 'dl') download();
+      else if (d.up === 'no') { U.dismissed = l.n; saveU(); onHome(el); }
+      else if (d.up === 'nolive') { U.dismissedLive = lo.v; saveU(); onHome(el); }
+      else if (d.up === 'live') { b.disabled = true; b.textContent = 'Lade …'; try { await Live.download(U.latest, {}); } catch (err) { say(err && err.message || String(err), 'warn'); } onHome(el); }
+      else if (d.lv === 'go') Live.restart();
+      else if (d.lv === 'later') { U.dismissedLive = lo.v; saveU(); onHome(el); }
+      else if (d.nw) { try { News.handle(d.nw); } catch (_) {} onHome(el); }
+      else if (d.wk === 'now') { b.disabled = true; try { const r = await exportBackup({}); say(r.how === 'cancelled' ? 'Sicherung abgebrochen.' : 'Sicherung gespeichert (' + r.records + ' Datensätze).', r.how === 'cancelled' ? 'info' : 'success'); } catch (err) { say('Sicherung fehlgeschlagen: ' + (err && err.message || err), 'warn'); } onHome(el); }
+      else if (d.wk === 'later') { U.weekly.snooze = Date.now() + 864e5; saveU(); onHome(el); }
+    };
   }
 
   /* ================================================================ Sicherung */
@@ -11729,6 +11828,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   async function exportBackup(opts) {
     const r = await make(opts);
     let how = 'downloaded'; try { if (typeof saveOrShareBlob === 'function') how = await saveOrShareBlob(r.blob, r.name); else { const u = URL.createObjectURL(r.blob), a = document.createElement('a'); a.href = u; a.download = r.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000); } } catch (e) { throw new Error('Speichern fehlgeschlagen: ' + (e && e.message || e)); }
+    if (how !== 'cancelled') { U.weekly.last = Date.now(); U.weekly.pending = false; saveU(); }
     return Object.assign({ how }, r);
   }
   async function ensureStore(name, d) {
@@ -11774,19 +11874,56 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   async function persist() { try { if (navigator.storage && navigator.storage.persist) return await navigator.storage.persist(); } catch (_) {} return false; }
   const mb = b => b == null ? '–' : (b / 1048576 >= 1024 ? (b / 1073741824).toFixed(1) + ' GB' : Math.round(b / 1048576) + ' MB');
 
+  /* ================================================================ Wöchentliche Sicherung */
+  const WEEK = 7 * 864e5, SILENT_MAX = 100 * 1048576, DIR = 'SunshineDAW/Sicherung';
+  const toB64 = blob => new Promise((res, rej) => { const f = new FileReader(); f.onload = () => res(String(f.result).split(',')[1] || ''); f.onerror = () => rej(f.error || new Error('Lesefehler')); f.readAsDataURL(blob); });
+  async function hasData() {
+    try {
+      if (!indexedDB.databases) return true;
+      for (const n of (await listDbs()).filter(x => BASE.test(x))) { const db = await idbp(indexedDB.open(n)); try { for (const sn of Array.from(db.objectStoreNames)) { if ((await idbp(db.transaction(sn, 'readonly').objectStore(sn).count())) > 0) return true; } } finally { db.close(); } }
+    } catch (_) { return true; }
+    return false;
+  }
+  const weeklyDue = () => U.weekly.on && Date.now() - (U.weekly.last || 0) > WEEK;
+  async function silentSave() {   // still in „Dokumente/SunshineDAW/Sicherung“ ablegen (nur Android-App mit Dateizugriff)
+    const cap = window.Capacitor, FS = cap && cap.Plugins && cap.Plugins.Filesystem;
+    if (!FS) return { ok: false, why: 'kein Dateizugriff' };
+    try { if (typeof dawState !== 'undefined' && dawState.isPlaying) return { ok: false, why: 'busy', quiet: true }; } catch (_) {}
+    const st = await storageInfo(); if (st.usage && st.usage > 1.5 * SILENT_MAX) return { ok: false, why: 'zu groß für die stille Sicherung' };
+    const r = await make({}); if (r.bytes > SILENT_MAX) return { ok: false, why: 'zu groß für die stille Sicherung' };
+    await FS.writeFile({ path: DIR + '/' + r.name, data: await toB64(r.blob), directory: 'DOCUMENTS', recursive: true });
+    try {   // nur die letzten 4 behalten
+      const d = await FS.readdir({ path: DIR, directory: 'DOCUMENTS' });
+      const names = (d.files || []).map(f => typeof f === 'string' ? f : f.name).filter(n => /^Sunshine-Sicherung-.*\.zip$/.test(n)).sort();
+      while (names.length > 4) await FS.deleteFile({ path: DIR + '/' + names.shift(), directory: 'DOCUMENTS' });
+    } catch (_) {}
+    return { ok: true, name: r.name, bytes: r.bytes, records: r.records };
+  }
+  async function weeklyTick() {
+    const w = U.weekly; if (!w.on || !weeklyDue()) return { ran: false };
+    if (!(await hasData())) { w.last = Date.now(); w.pending = false; saveU(); return { ran: false, why: 'keine Daten' }; }
+    let r; try { r = await silentSave(); } catch (e) { r = { ok: false, why: String(e && e.message || e).slice(0, 80) }; }
+    if (r.ok) { w.last = Date.now(); w.pending = false; w.res = { ok: true, name: r.name, bytes: r.bytes, at: Date.now() }; saveU(); say('Wöchentliche Sicherung gespeichert: Dokumente/' + DIR + ' (' + mb(r.bytes) + ')', 'success'); }
+    else if (!r.quiet) { w.pending = true; w.res = { ok: false, why: r.why, at: Date.now() }; saveU(); say('Wöchentliche Sicherung ist fällig – siehe Startseite.', 'info'); }
+    try { const h = $('hm-update'); if (h && window.Home && Home.isOpen()) onHome(h); } catch (_) {}
+    return { ran: true, result: r };
+  }
+
   /* ================================================================ Optionen */
   function section(ph) {
     const ver = BUILD ? 'Build ' + BUILD : 'Entwicklungsversion (Browser)';
     ph.innerHTML = `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Updates &amp; Datensicherung</div>
       <div class="rounded-xl border border-slate-800 p-3 space-y-3">
         <div><div class="flex justify-between items-baseline"><span class="text-sm font-semibold">Installierte Version</span><span class="text-xs font-mono text-slate-300" data-up-ver>${ver}</span></div>
-          <button type="button" data-up-check class="mt-2 w-full py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Nach Updates suchen</button>
+          <div class="mt-2 grid grid-cols-2 gap-2"><button type="button" data-up-check class="py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Nach Updates suchen</button><button type="button" data-nw-open class="py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Was ist neu?</button></div>
           <div data-up-res class="hidden mt-2 text-[12px] leading-5 text-slate-300"></div></div>
         <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-up-auto ${U.auto ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Beim Start nach Updates suchen</span><span class="block text-[11px] text-slate-400">Höchstens alle 12 Stunden, nur bei Internet. Es wird nichts ohne dein Zutun installiert.</span></span></label>
+        <div data-lv-box class="border-t border-slate-800 pt-3"></div>
         <div class="border-t border-slate-800 pt-3"><div class="text-sm font-semibold">Datensicherung</div><div class="text-[11px] text-slate-400 mb-2">Alle Projekte, der letzte Autosave und deine Einstellungen als eine ZIP-Datei. Mach vorher eine Sicherung, wenn du die App neu installierst.</div>
           <div class="grid grid-cols-2 gap-2"><button type="button" data-bk-make class="py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Alles sichern</button><button type="button" data-bk-restore class="py-2.5 text-sm font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Wiederherstellen</button></div>
           <input type="file" data-bk-file accept=".zip,application/zip" class="hidden">
           <label class="flex items-center gap-2 mt-2 text-[12px] text-slate-300 cursor-pointer"><input type="checkbox" data-bk-all class="w-4 h-4"> Auch große Zusatzdaten (SoundFonts, Zwischenspeicher)</label>
+          <label class="flex items-start gap-3 mt-3 cursor-pointer"><input type="checkbox" data-wk-on ${U.weekly.on ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Wöchentliche Sicherung</span><span class="block text-[11px] text-slate-400" data-wk-info></span></span></label>
           <div data-bk-out class="hidden mt-2 text-[12px] leading-5 text-slate-300 whitespace-pre-wrap"></div></div>
         <div class="border-t border-slate-800 pt-3"><div class="flex justify-between items-baseline"><span class="text-sm font-semibold">Gerätespeicher</span><span class="text-xs font-mono text-slate-300" data-st-info>…</span></div><div class="text-[11px] text-slate-400">Android darf Browser-Daten bei Platzmangel löschen. „Dauerhaft“ schützt davor.</div>
           <button type="button" data-st-persist class="mt-2 w-full py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Speicher dauerhaft schützen</button></div>
@@ -11795,21 +11932,30 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     const showRes = h => { res.innerHTML = h; res.classList.remove('hidden'); }, showOut = t => { out.textContent = t; out.classList.remove('hidden'); };
     const refreshSt = async () => { const s = await storageInfo(); info.textContent = (s.persisted === null ? '' : (s.persisted ? 'dauerhaft · ' : 'nicht geschützt · ')) + mb(s.usage) + ' von ' + mb(s.quota); };
     refreshSt();
+    const wkInfo = () => { const w = U.weekly, e = ph.querySelector('[data-wk-info]'); if (!e) return; const cap = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem; e.textContent = 'Letzte Sicherung: ' + (w.last ? dateDe(w.last) : 'noch keine') + (w.pending ? ' · fällig (siehe Startseite)' : '') + '. ' + (cap ? 'Läuft still im Hintergrund nach Documents/' + DIR + ' (die letzten 4 bleiben). Bei sehr großen Projekten erinnert dich die App stattdessen.' : 'Hier (Browser) erinnert dich die App einmal pro Woche.'); };
+    wkInfo();
+    try { const box = ph.querySelector('[data-lv-box]'); if (window.Live) Live.mount(box); else box.remove(); } catch (_) {}
     const paintUpdate = r => {
-      if (!r.ok) { showRes('<span class="text-amber-300">' + r.error + '</span>'); return; }
-      if (r.available) showRes(`<b class="text-emerald-300">Update verfügbar: Build ${r.latest.n}</b>${r.latest.published ? ' · ' + dateDe(r.latest.published) : ''}${r.latest.size ? ' · ' + mb(r.latest.size) : ''}<br>Tipp: erst „Alles sichern“. Nach dem Download die Datei öffnen und „Installieren“ wählen – die App wird <b>aktualisiert</b>, deine Projekte bleiben.<br><button type="button" data-up-dl class="mt-2 w-full py-2.5 text-sm font-bold rounded-xl bg-amber-400 text-slate-900">Update herunterladen</button>`);
+      if (!r.ok) { showRes('<span class="text-amber-300">' + esc(r.error) + '</span>'); return; }
+      const lo = liveOffer(), nt = notesHtml(r.latest.notes, 6), apkBtn = (txt) => `<button type="button" data-up-dl class="mt-2 w-full py-2.5 text-sm font-bold rounded-xl ${txt ? 'border border-slate-700 bg-slate-900 text-slate-200' : 'bg-amber-400 text-slate-900'}">${txt || 'Update herunterladen'}</button>`;
+      if (lo.kind === 'ready') showRes(`<b class="text-emerald-300">Oberfläche ${esc(lo.v)} ist geladen.</b> Sie wird beim nächsten Start der App aktiv.${nt}<button type="button" data-lv-go class="mt-2 w-full py-2.5 text-sm font-bold rounded-xl bg-amber-400 text-slate-900">Jetzt neu starten</button>`);
+      else if (lo.kind === 'live') showRes(`<b class="text-emerald-300">Neue Oberfläche ${esc(lo.v)} verfügbar</b> – ohne Neuinstallation, Projekte bleiben.${nt}<button type="button" data-lv-dl class="mt-2 w-full py-2.5 text-sm font-bold rounded-xl bg-amber-400 text-slate-900">Oberfläche laden</button>${r.available ? apkBtn('Stattdessen komplette APK laden') : ''}`);
+      else if (r.available) showRes(`<b class="text-emerald-300">Update verfügbar: Build ${r.latest.n}</b>${r.latest.published ? ' · ' + dateDe(r.latest.published) : ''}${r.latest.size ? ' · ' + mb(r.latest.size) : ''}${nt}Tipp: erst „Alles sichern“. Nach dem Download die Datei öffnen und „Installieren“ wählen – die App wird <b>aktualisiert</b>, deine Projekte bleiben.${apkBtn()}`);
       else showRes('Du hast die neueste Version (Build ' + BUILD + '; veröffentlicht: Build ' + r.latest.n + ').');
     };
-    if (isNew()) paintUpdate({ ok: true, available: true, latest: U.latest });
+    if (isNew() || liveOffer().kind === 'live' || liveOffer().kind === 'ready') paintUpdate({ ok: true, available: isNew(), latest: U.latest });
     ph.addEventListener('click', async e => {
       const t = e.target.closest('button'); if (!t) return;
       if (t.matches('[data-up-check]')) { t.disabled = true; showRes('Suche …'); paintUpdate(await check()); t.disabled = false; }
       else if (t.matches('[data-up-dl]')) { download(); }
+      else if (t.matches('[data-nw-open]')) { try { News.open(); } catch (_) {} }
+      else if (t.matches('[data-lv-go]')) { Live.restart(); }
+      else if (t.matches('[data-lv-dl]')) { t.disabled = true; showRes('Lade …'); try { const r = await Live.download(U.latest, { onProgress: m => showRes(esc(m)) }); showRes(`<b class="text-emerald-300">Oberfläche ${esc(r.v)} geladen (${mb(r.size)}).</b> Sie wird beim nächsten Start aktiv.<button type="button" data-lv-go class="mt-2 w-full py-2.5 text-sm font-bold rounded-xl bg-amber-400 text-slate-900">Jetzt neu starten</button>`); try { const h = $('hm-update'); if (h) onHome(h); } catch (_) {} } catch (err) { showRes('<span class="text-amber-300">' + esc(err && err.message || err) + '</span>'); t.disabled = false; } }
       else if (t.matches('[data-bk-make]')) {
         t.disabled = true; showOut('Sicherung wird erstellt …');
         try { const r = await exportBackup({ all: ph.querySelector('[data-bk-all]').checked, onProgress: showOut }); showOut(r.how === 'cancelled' ? 'Abgebrochen.' : '✓ Gesichert: ' + r.records + ' Datensätze aus ' + r.dbs + ' Datenbanken (' + mb(r.bytes) + ')\n' + r.name + (r.how === 'downloaded' ? '\nDie Datei liegt im Download-Ordner.' : '')); }
         catch (err) { showOut('Fehler: ' + (err && err.message || err)); }
-        t.disabled = false; refreshSt();
+        t.disabled = false; refreshSt(); wkInfo();
       }
       else if (t.matches('[data-bk-restore]')) ph.querySelector('[data-bk-file]').click();
       else if (t.matches('[data-st-persist]')) { const ok = await persist(); say(ok ? 'Speicher ist jetzt dauerhaft geschützt.' : 'Android hat den Schutz nicht gewährt (er wird oft erst nach häufigerer Nutzung erteilt).', ok ? 'success' : 'info'); refreshSt(); }
@@ -11817,6 +11963,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     ph.addEventListener('change', async e => {
       const t = e.target;
       if (t.matches('[data-up-auto]')) { U.auto = t.checked; saveU(); }
+      else if (t.matches('[data-wk-on]')) { U.weekly.on = t.checked; if (t.checked && !U.weekly.last) U.weekly.last = Date.now(); if (!t.checked) U.weekly.pending = false; saveU(); wkInfo(); }
       else if (t.matches('[data-bk-file]') && t.files && t.files[0]) {
         const f = t.files[0]; t.value = '';
         try {
@@ -11832,11 +11979,287 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
   new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; const ph = n.id === 'up-sec' ? n : (n.querySelector && n.querySelector('#up-sec')); if (ph && !ph.dataset.done) { ph.dataset.done = '1'; section(ph); } }); }).observe(document.body || document.documentElement, { childList: true, subtree: true });
 
   function boot() {
+    if (!U.weekly.last) { U.weekly.last = Date.now(); saveU(); }   // erste Sicherung frühestens in 7 Tagen
+    setTimeout(weeklyTick, 12000);
     persist();   // stilles Anfordern des dauerhaften Speichers (Android erteilt es oft erst später)
     if (REPO && U.auto && navigator.onLine !== false && Date.now() - (U.checked || 0) > 12 * 3600e3) setTimeout(async () => { const r = await check(); if (r.ok && r.available) { say('Update verfügbar: Build ' + r.latest.n + ' – Optionen → Updates & Datensicherung.', 'info'); try { const h = $('hm-update'); if (h && window.Home && Home.isOpen()) onHome(h); } catch (_) {} } }, 6000);
   }
-  window.Update = { build: () => BUILD, repo: () => REPO, check, download, onHome, isNew, _state: () => Object.assign({}, U) };
+  window.Update = { build: () => BUILD, repo: () => REPO, check, download, onHome, isNew, weeklyTick, silentSave, weeklyDue, _state: () => Object.assign({}, U), _setWeekly: o => { Object.assign(U.weekly, o); saveU(); }, _notes: notesHtml };
   window.Backup = { make, export: exportBackup, restore, inspect, storageInfo, persist, _enc: enc, _dec: dec };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+</script>
+<script>
+/* ===== Sunshine@R · Live-Update der Oberfläche =====
+   Lädt eine neue Version der Web-Oberfläche (index.html) direkt von GitHub und speichert sie im Cache-Speicher der App.
+   Der Service Worker (sw.js, vom Build in die App gelegt) liefert sie beim nächsten Start aus. Kein neues APK nötig.
+   Gilt nur, wenn die App-Hülle unverändert ist (Prüfsumme „nat“); sonst bleibt es beim normalen APK-Update.
+   Sicherheitsnetze: Prüfsumme der geladenen Datei, „pending → ok“-Bestätigung nach erfolgreichem Start, Rückfall auf die eingebaute Version. */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const say = (m, k) => { try { if (typeof toast === 'function') toast(m, k || 'info'); } catch (_) {} };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const B = window.SUNSHINE_BUILD || {};
+  const NAT = /^[0-9a-f]{6,}$/.test(String(B.nat || '')) ? String(B.nat) : '';
+  const VER = String(B.v || '');
+  const C = 'sunshine-live', KEY = 'sunshine.live';
+  const TOK = n => '__BUILD_' + n + '__';   // absichtlich zusammengesetzt: der Build ersetzt die Platzhalter im ganzen Text – dieser Code darf sie nicht als Ganzes enthalten
+  let L = { on: true, bad: null }; try { Object.assign(L, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (_) {}
+  const saveL = () => { try { localStorage.setItem(KEY, JSON.stringify(L)); } catch (_) {} };
+  const U = () => window.Update;
+  const cmp = (a, b) => { try { return window.News._cmp(a, b); } catch (_) { return String(a) === String(b) ? 0 : 1; } };
+  const dateDe = ts => { try { return new Date(ts).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (_) { return ''; } };
+
+  function why() {   // warum Live-Updates auf diesem Gerät nicht gehen (leer = möglich)
+    if (!NAT || !U() || !U().repo()) return 'Entwicklungsversion – Live-Updates gibt es nur in der gebauten App.';
+    if (!(window.isSecureContext && /^https?:$/.test(location.protocol))) return 'Diese Umgebung erlaubt keinen Hintergrunddienst.';
+    if (!('serviceWorker' in navigator) || !window.caches) return 'Dieses Gerät unterstützt keinen Hintergrunddienst (Service Worker).';
+    if (!(window.crypto && crypto.subtle)) return 'Prüfsummen-Funktion fehlt.';
+    if (L.swFail) return 'Der Hintergrunddienst läuft in dieser App nicht (' + L.swFail + ').';
+    if (swErr) return 'Der Hintergrunddienst konnte nicht starten (' + swErr + ').';
+    return '';
+  }
+  const supported = () => !why();
+  async function cache() { return caches.open(C); }
+  async function readMeta() { try { const r = await (await cache()).match('/__live/meta'); return r ? await r.json() : null; } catch (_) { return null; } }
+  async function writeMeta(m) { const c = await cache(); await c.put('/__live/meta', new Response(JSON.stringify(m), { headers: { 'Content-Type': 'application/json' } })); }
+  async function clear() { try { const c = await cache(); await c.delete('/__live/page'); await c.delete('/__live/meta'); } catch (_) {} }
+  let regP = null, swErr = '';
+  function ensureSW() {
+    if (regP) return regP;
+    regP = (async () => {
+      const t = new Promise((_, rej) => setTimeout(() => rej(new Error('Der Hintergrunddienst startet nicht.')), 6000));
+      const go = (async () => { let reg = await navigator.serviceWorker.getRegistration(); if (!reg) reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready; return reg; })();
+      return Promise.race([go, t]);
+    })().catch(e => { regP = null; throw e; });
+    return regP;
+  }
+
+  /* Gibt es für diese Release ein passendes Live-Update? */
+  function offer(l) {
+    if (!l) return { kind: 'none' };
+    const lv = l.live; if (!lv || !lv.v || !lv.sha || !lv.path) return { kind: 'none', why: 'kein Live-Paket in dieser Release' };
+    if (!L.on) return { kind: 'none', why: 'aus' };
+    const w = why(); if (w) return { kind: 'none', why: w };
+    if (String(lv.nat) !== NAT) return { kind: 'apk', why: 'Die App-Hülle hat sich geändert – dafür wird eine neue APK gebraucht.', v: lv.v };
+    if (L.bad && L.bad.v === lv.v) return { kind: 'none', why: 'Diese Version ließ sich auf diesem Gerät nicht starten und wird übersprungen.' };
+    if (cmp(lv.v, VER) <= 0) return { kind: 'none', why: 'aktuell' };
+    if (L.ready === lv.v) return { kind: 'ready', v: lv.v };
+    return { kind: 'live', v: lv.v, live: lv };
+  }
+
+  async function download(l, o) {
+    o = o || {}; const prog = o.onProgress || (() => {});
+    const of = offer(l); if (of.kind !== 'live' && of.kind !== 'ready') throw new Error(of.why || 'Kein Live-Update verfügbar.');
+    const lv = l.live, repo = U().repo();
+    prog('Hintergrunddienst prüfen …'); await ensureSW();
+    prog('Lade Oberfläche ' + lv.v + ' …');
+    const url = 'https://raw.githubusercontent.com/' + repo + '/' + encodeURIComponent(lv.sha) + '/' + lv.path.split('/').map(encodeURIComponent).join('/');
+    let r; try { r = await fetch(url, { cache: 'no-store' }); } catch (e) { throw new Error('Keine Verbindung zu GitHub.'); }
+    if (!r.ok) throw new Error('Download fehlgeschlagen (Fehler ' + r.status + '). Das Repository muss öffentlich sein.');
+    const buf = await r.arrayBuffer();
+    prog('Prüfe Datei …');
+    if (lv.h) { const d = new Uint8Array(await crypto.subtle.digest('SHA-256', buf)); const hex = Array.from(d, b => b.toString(16).padStart(2, '0')).join(''); if (hex !== String(lv.h).toLowerCase()) throw new Error('Prüfsumme stimmt nicht – die Datei wurde verworfen.'); }
+    let txt = new TextDecoder('utf-8').decode(buf);
+    if (!/<html[\s>]/i.test(txt) || !/<\/html>\s*$/i.test(txt) || txt.indexOf('SUNSHINE_BUILD') < 0 || txt.indexOf(TOK('N')) < 0) throw new Error('Die Datei sieht nicht wie die App-Oberfläche aus – verworfen.');
+    const mv = /SUNSHINE_BUILD\s*=\s*\{[^}]*\bv\s*:\s*'([^']*)'/.exec(txt); if (!mv || mv[1] !== lv.v) throw new Error('Versionsangabe in der Datei passt nicht zur Release – verworfen.');
+    const rep = (s, k, v) => s.split(k).join(String(v));
+    txt = rep(txt, TOK('N'), B.n); txt = rep(txt, TOK('REPO'), B.repo); txt = rep(txt, TOK('TIME'), (l.published || '').slice(0, 10) || B.time || ''); txt = rep(txt, TOK('NATIVE'), NAT);
+    prog('Speichern …');
+    const c = await cache();
+    await c.delete('/__live/meta');
+    await c.put('/__live/page', new Response(txt, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
+    await writeMeta({ v: lv.v, n: String(B.n), nat: NAT, sha: lv.sha, h: lv.h || '', ts: Date.now(), status: 'pending', boots: 0, miss: 0, size: buf.byteLength });
+    L.bad = null; L.ready = lv.v; saveL();
+    return { ok: true, v: lv.v, size: buf.byteLength };
+  }
+  const restart = () => { try { location.reload(); } catch (_) {} };
+  async function reset(o) { await clear(); L.bad = null; L.ready = null; saveL(); if (!o || o.reload !== false) restart(); return true; }
+  function setOn(on) { L.on = !!on; saveL(); if (!on) clear(); }
+
+  /* Beim Start: war es die Live-Seite? Dann prüfen und bestätigen – sonst zurück auf die eingebaute Version. */
+  async function health() {
+    try {
+      if (!supported()) { window.__sunshineBoot = 1; return; }
+      const m = await readMeta(); if (!m) { if (L.ready) { L.ready = null; saveL(); } window.__sunshineBoot = 1; return; }
+      if (m.status === 'pending') {
+        if (String(m.v) !== VER) {   // Service Worker hat die Live-Seite nicht ausgeliefert
+          m.miss = (m.miss || 0) + 1;
+          if (m.miss >= 2) { await clear(); L.ready = null; L.bad = { v: m.v, why: 'sw' }; L.swFail = 'er liefert die neue Oberfläche nicht aus'; saveL(); say('Live-Update geht auf diesem Gerät nicht – die App bleibt bei der eingebauten Version.', 'warn'); }
+          else await writeMeta(m);
+          window.__sunshineBoot = 1; return;
+        }
+        const ready = typeof dawState !== 'undefined' && typeof audioEngine !== 'undefined' && !!window.Home && !!$('btn-menu');
+        const wv = /; wv\)/.test(navigator.userAgent), bridge = !wv || !!window.Capacitor;
+        if (ready && bridge) { m.status = 'ok'; m.boots = 0; L.ready = null; saveL(); await writeMeta(m); window.__sunshineBoot = 1; say('Oberfläche aktualisiert: Version ' + m.v, 'success'); }
+        else { m.status = 'bad'; m.why = ready ? 'bridge' : 'start'; await writeMeta(m); L.bad = { v: m.v, why: m.why }; L.ready = null; saveL(); window.__sunshineBoot = 1; restart(); }
+        return;
+      }
+      window.__sunshineBoot = 1;
+    } catch (_) { window.__sunshineBoot = 1; }
+  }
+  async function info() {
+    const m = supported() ? await readMeta() : null;
+    return { supported: supported(), why: why(), on: L.on, version: VER, meta: m, bad: L.bad, live: !!(m && m.status === 'ok' && String(m.v) === VER) };
+  }
+  function mount(ph) {
+    ph.innerHTML = `<div class="flex justify-between items-baseline"><span class="text-sm font-semibold">Oberfläche</span><span class="text-xs font-mono text-slate-300" data-lv-ver>…</span></div>
+      <label class="flex items-start gap-3 mt-2 cursor-pointer"><input type="checkbox" data-lv-on ${L.on ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Live-Updates der Oberfläche</span><span class="block text-[11px] text-slate-400">Kleine Änderungen ohne neue APK. Du wirst gefragt, bevor etwas geladen wird. Startet eine neue Oberfläche nicht, springt die App selbst auf die eingebaute Version zurück.</span></span></label>
+      <div data-lv-note class="hidden mt-1 text-[11px] text-amber-300"></div>
+      <button type="button" data-lv-reset class="hidden mt-2 w-full py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Auf eingebaute Version zurücksetzen</button>`;
+    const paint = async () => {
+      const i = await info(), ver = ph.querySelector('[data-lv-ver]'), note = ph.querySelector('[data-lv-note]'), rs = ph.querySelector('[data-lv-reset]');
+      ver.textContent = (VER ? 'Version ' + VER : '–') + (i.live ? ' · Live (' + dateDe(i.meta.ts) + ')' : ' · eingebaut');
+      const msg = !i.supported ? i.why : (i.meta && i.meta.status === 'pending' ? 'Version ' + i.meta.v + ' ist geladen und startet beim nächsten Öffnen der App.' : (i.bad ? 'Version ' + i.bad.v + ' wurde übersprungen (' + ({ sw: 'Hintergrunddienst', bridge: 'Android-Brücke fehlt', start: 'Start fehlgeschlagen', boot: 'Start fehlgeschlagen' }[i.bad.why] || i.bad.why) + ').' : ''));
+      note.textContent = msg; note.classList.toggle('hidden', !msg);
+      rs.classList.toggle('hidden', !(i.meta || i.bad));
+    };
+    paint();
+    ph.addEventListener('change', e => { if (e.target.matches('[data-lv-on]')) { setOn(e.target.checked); paint(); } });
+    ph.addEventListener('click', async e => { if (e.target.closest('[data-lv-reset]')) { await reset(); } });
+    return paint;
+  }
+  async function boot() {
+    if (L.on && supported()) { try { await ensureSW(); } catch (e) { swErr = String(e && e.message || e).slice(0, 60); } }
+    setTimeout(health, 2500);
+  }
+  window.Live = { supported, why, offer, download, restart, reset, setOn, info, mount, health, _state: () => Object.assign({}, L), _readMeta: readMeta, _writeMeta: writeMeta, _clear: clear };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+</script>
+<script>
+/* ===== Sunshine@R · Stabilität & Leistung =====
+   Fehlerprotokoll (zum Kopieren/Teilen), Speicher-Anzeige mit Warnung (Audio im Arbeitsspeicher), Sparmodus (weniger Rechenaufwand
+   in der Darstellung), Anzeige-Test (Bilder pro Sekunde), Hinweis auf unerwartetes Ende des letzten Starts. */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const say = (m, k) => { try { if (typeof toast === 'function') toast(m, k || 'info'); } catch (_) {} };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const K_E = 'sunshine.errlog', K_P = 'sunshine.perf', K_A = 'sunshine.alive', MAXE = 40;
+  const mbf = b => Math.round(b / 1048576);
+  const dt = ts => { try { const d = new Date(ts), p = n => String(n).padStart(2, '0'); return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '. ' + p(d.getHours()) + ':' + p(d.getMinutes()); } catch (_) { return ''; } };
+
+  /* ---------- Fehlerprotokoll ---------- */
+  let E = []; try { E = JSON.parse(localStorage.getItem(K_E) || '[]'); if (!Array.isArray(E)) E = []; } catch (_) { E = []; }
+  const saveE = () => { try { localStorage.setItem(K_E, JSON.stringify(E.slice(-MAXE))); } catch (_) {} };
+  const IGN = /ResizeObserver loop|^Script error\.?$|AbortError|The user aborted|NotAllowedError.*play\(\)/i;
+  function addErr(e) {
+    try {
+      const m = String(e.m || '').slice(0, 240); if (!m || IGN.test(m)) return;
+      const last = E[E.length - 1];
+      if (last && last.m === m && last.s === (e.s || '')) { last.c = (last.c || 1) + 1; last.t = e.t || Date.now(); }
+      else E.push({ t: e.t || Date.now(), m, s: e.s || '', c: 1 });
+      if (E.length > MAXE) E = E.slice(-MAXE); saveE();
+    } catch (_) {}
+  }
+  const early = Array.isArray(window.__errs) ? window.__errs.splice(0) : [];
+  early.forEach(addErr);
+  if (Array.isArray(window.__errs)) window.__errs.push = e => { addErr(e); return 0; };   // ab jetzt direkt ins Protokoll
+  else {
+    window.addEventListener('error', ev => addErr({ t: Date.now(), m: ev.message, s: String(ev.filename || '').split('/').pop() + ':' + ev.lineno }));
+    window.addEventListener('unhandledrejection', ev => addErr({ t: Date.now(), m: 'Promise: ' + String(ev.reason && ev.reason.message || ev.reason) }));
+  }
+  const logMsg = (m, s) => addErr({ t: Date.now(), m: String(m), s: s || 'app' });
+
+  /* ---------- Speicher ---------- */
+  function trackName(id) { try { const t = (dawState.tracks || []).find(x => String(x.id) === String(id)); return t ? (t.name || t.label || ('Spur ' + id)) : String(id); } catch (_) { return String(id); } }
+  function memory() {
+    let bytes = 0, n = 0, secs = 0; const top = [];
+    try { Object.keys(dawState.buffers || {}).forEach(id => { const b = dawState.buffers[id]; if (b && b.length && b.numberOfChannels) { const by = b.length * b.numberOfChannels * 4; bytes += by; n++; secs += b.duration || 0; top.push({ id, name: trackName(id), bytes: by, sec: b.duration || 0 }); } }); } catch (_) {}
+    top.sort((a, b) => b.bytes - a.bytes);
+    const pm = performance && performance.memory ? performance.memory : null, dm = navigator.deviceMemory || 0;
+    const lim = dm && dm <= 3 ? [300, 550] : [500, 900];
+    const mb = bytes / 1048576, level = mb >= lim[1] ? 'high' : mb >= lim[0] ? 'warn' : 'ok';
+    return { bytes, mb: Math.round(mb), tracks: n, seconds: Math.round(secs), top: top.slice(0, 4), heapUsed: pm ? pm.usedJSHeapSize : null, heapLimit: pm ? pm.jsHeapSizeLimit : null, deviceGB: dm || null, level, limits: lim };
+  }
+  const TIP = 'Tipp: Nicht benötigte Spuren löschen oder mehrere Stems zu einer Spur zusammenfassen, dann die App neu starten – das gibt Speicher frei.';
+  let lastLevel = 'ok';
+  function watch() {
+    if (document.hidden) return;
+    const m = memory(); try { const a = JSON.parse(localStorage.getItem(K_A) || '{}'); if (a.alive) { a.mb = m.mb; localStorage.setItem(K_A, JSON.stringify(a)); } } catch (_) {}
+    const rank = { ok: 0, warn: 1, high: 2 };
+    if (rank[m.level] > rank[lastLevel]) say(m.level === 'high' ? 'Sehr viel Audio im Arbeitsspeicher (≈ ' + m.mb + ' MB). Die App kann abstürzen. ' + TIP : 'Viel Audio im Arbeitsspeicher (≈ ' + m.mb + ' MB). ' + TIP, 'warn');
+    lastLevel = m.level;
+  }
+
+  /* ---------- Sparmodus ---------- */
+  const perfOn = () => { try { return localStorage.getItem(K_P) === '1'; } catch (_) { return false; } };
+  function setPerf(on) { try { localStorage.setItem(K_P, on ? '1' : '0'); } catch (_) {} if (on) document.documentElement.setAttribute('data-perf', 'on'); else document.documentElement.removeAttribute('data-perf'); }
+  if (perfOn()) document.documentElement.setAttribute('data-perf', 'on');
+
+  /* ---------- Ende des letzten Starts ---------- */
+  let prevCrash = null;
+  try { const a = JSON.parse(localStorage.getItem(K_A) || 'null'); if (a && a.alive) { prevCrash = { t: a.t, mb: a.mb || 0 }; logMsg('Der letzte Start endete vermutlich unerwartet' + (a.mb ? ' (Audio im Speicher ≈ ' + a.mb + ' MB)' : '') + '.', 'start'); } } catch (_) {}
+  const mark = alive => { try { localStorage.setItem(K_A, JSON.stringify({ alive, t: Date.now(), mb: alive ? memory().mb : 0 })); } catch (_) {} };
+  mark(true);
+  document.addEventListener('visibilitychange', () => mark(!document.hidden));
+  window.addEventListener('pagehide', () => mark(false));
+
+  /* ---------- Anzeige-Test ---------- */
+  function fpsTest(ms) {
+    ms = ms || 2000;
+    return new Promise(res => { let n = 0, t0 = 0, last = 0, worst = 0; const f = t => { if (!t0) { t0 = t; last = t; } n++; worst = Math.max(worst, t - last); last = t; if (t - t0 < ms) requestAnimationFrame(f); else res({ fps: Math.round((n - 1) * 1000 / (t - t0)), worst: Math.round(worst) }); }; requestAnimationFrame(f); });
+  }
+
+  /* ---------- Bericht ---------- */
+  function report() {
+    const B = window.SUNSHINE_BUILD || {}, m = memory(), L = [];
+    L.push('Sunshine@R DAW Studio · Fehlerbericht');
+    L.push('Version ' + (B.v || '?') + ' · Build ' + (/^\d+$/.test(String(B.n)) ? B.n : 'Entwicklung') + ' · ' + new Date().toLocaleString('de-DE'));
+    L.push('Gerät: ' + navigator.userAgent);
+    L.push('Bildschirm: ' + innerWidth + '×' + innerHeight + ' @' + (devicePixelRatio || 1) + ' · Gerätespeicher: ' + (m.deviceGB ? '≈ ' + m.deviceGB + ' GB' : 'unbekannt'));
+    L.push('Audio im Speicher: ≈ ' + m.mb + ' MB in ' + m.tracks + ' Puffern (' + m.seconds + ' s)' + (m.heapUsed ? ' · JS-Heap ' + mbf(m.heapUsed) + ' / ' + mbf(m.heapLimit) + ' MB' : ''));
+    L.push('Sparmodus: ' + (perfOn() ? 'an' : 'aus'));
+    L.push(''); L.push('Fehler (' + E.length + '):');
+    E.slice().reverse().forEach(e => L.push(dt(e.t) + (e.c > 1 ? ' ×' + e.c : '') + ' · ' + e.m + (e.s ? ' (' + e.s + ')' : '')));
+    if (!E.length) L.push('– keine –');
+    return L.join('\n');
+  }
+  async function copyText(t) {
+    try { await navigator.clipboard.writeText(t); return true; } catch (_) {}
+    try { const a = document.createElement('textarea'); a.value = t; a.style.cssText = 'position:fixed;left:-999px;top:0'; document.body.appendChild(a); a.select(); const ok = document.execCommand('copy'); a.remove(); return ok; } catch (_) { return false; }
+  }
+
+  /* ---------- Optionen ---------- */
+  function section(ph) {
+    ph.innerHTML = `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Stabilität &amp; Leistung</div>
+      <div class="rounded-xl border border-slate-800 p-3 space-y-3">
+        <div><div class="flex justify-between items-baseline"><span class="text-sm font-semibold">Arbeitsspeicher</span><span class="text-xs font-mono text-slate-300" data-hl-mem>…</span></div>
+          <div class="text-[11px] text-slate-400" data-hl-memtxt></div></div>
+        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" data-hl-perf ${perfOn() ? 'checked' : ''} class="mt-1 w-5 h-5 shrink-0"><span class="min-w-0"><span class="block text-sm font-semibold">Sparmodus (flüssiger auf schwächeren Handys)</span><span class="block text-[11px] text-slate-400">Schaltet Unschärfe, Schatten und Animationen in der Darstellung ab. Der Klang bleibt unverändert.</span></span></label>
+        <div><button type="button" data-hl-fps class="w-full py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Anzeige-Test (2 Sekunden)</button><div class="hidden mt-2 text-[12px] leading-5 text-slate-300" data-hl-fpsres></div></div>
+        <div class="border-t border-slate-800 pt-3"><div class="flex justify-between items-baseline"><span class="text-sm font-semibold">Fehlerprotokoll</span><span class="text-xs font-mono text-slate-300" data-hl-n></span></div>
+          <div class="text-[11px] text-slate-400" data-hl-start></div>
+          <div class="grid grid-cols-3 gap-2 mt-2"><button type="button" data-hl-copy class="py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Kopieren</button><button type="button" data-hl-file class="py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Als Datei</button><button type="button" data-hl-clear class="py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-900 text-slate-200">Leeren</button></div>
+          <div class="hidden mt-2 text-[11px] leading-4 text-slate-400 font-mono break-words" data-hl-last></div></div>
+      </div>`;
+    const q = s => ph.querySelector(s);
+    const paint = () => {
+      if (!ph.isConnected) { clearInterval(iv); return; }
+      const m = memory(), c = { ok: 'text-emerald-300', warn: 'text-amber-300', high: 'text-rose-300' }[m.level];
+      const el = q('[data-hl-mem]'); el.className = 'text-xs font-mono ' + c; el.textContent = '≈ ' + m.mb + ' MB' + (m.deviceGB ? ' · Gerät ≈ ' + m.deviceGB + ' GB' : '');
+      q('[data-hl-memtxt]').innerHTML = m.tracks ? 'Audio im Speicher: ' + m.tracks + ' Puffer, ' + m.seconds + ' s' + (m.top.length ? ' · größte: ' + m.top.slice(0, 3).map(x => esc(x.name) + ' ' + mbf(x.bytes) + ' MB').join(', ') : '') + (m.level !== 'ok' ? '<br><span class="' + c + '">' + esc(TIP) + '</span>' : '') : 'Noch kein Audio geladen.';
+      q('[data-hl-n]').textContent = E.length ? E.length + ' Einträge' : 'leer';
+      q('[data-hl-start]').textContent = prevCrash ? 'Der vorige Start endete vermutlich unerwartet (' + dt(prevCrash.t) + ').' : 'Der vorige Start wurde sauber beendet.';
+      const last = q('[data-hl-last]'); if (E.length) { last.classList.remove('hidden'); last.innerHTML = E.slice(-3).reverse().map(e => esc(dt(e.t) + (e.c > 1 ? ' ×' + e.c : '') + ' · ' + e.m)).join('<br>'); } else last.classList.add('hidden');
+    };
+    const iv = setInterval(paint, 4000); paint();
+    ph.addEventListener('change', e => { if (e.target.matches('[data-hl-perf]')) { setPerf(e.target.checked); say(e.target.checked ? 'Sparmodus an.' : 'Sparmodus aus.', 'info'); } });
+    ph.addEventListener('click', async e => {
+      const t = e.target.closest('button'); if (!t) return;
+      if (t.matches('[data-hl-copy]')) say((await copyText(report())) ? 'Bericht kopiert.' : 'Kopieren nicht möglich – nutze „Als Datei“.', 'info');
+      else if (t.matches('[data-hl-file]')) { try { const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, ''); const b = new Blob([report()], { type: 'text/plain' }); if (typeof saveOrShareBlob === 'function') await saveOrShareBlob(b, 'Sunshine-Fehlerbericht-' + stamp + '.txt'); } catch (err) { say('Speichern fehlgeschlagen: ' + (err && err.message || err), 'warn'); } }
+      else if (t.matches('[data-hl-clear]')) { E = []; saveE(); paint(); }
+      else if (t.matches('[data-hl-fps]')) { t.disabled = true; const r = q('[data-hl-fpsres]'); r.classList.remove('hidden'); r.textContent = 'Messe …'; const x = await fpsTest(2000); t.disabled = false; const v = x.fps >= 55 ? 'flüssig' : x.fps >= 40 ? 'in Ordnung' : 'ruckelig'; r.innerHTML = '<b>' + x.fps + ' Bilder/s</b> (' + v + '; längste Lücke ' + x.worst + ' ms)' + (x.fps < 45 && !perfOn() ? '<br>Tipp: Sparmodus einschalten.' : ''); }
+    });
+  }
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; const ph = n.id === 'hl-sec' ? n : (n.querySelector && n.querySelector('#hl-sec')); if (ph && !ph.dataset.done) { ph.dataset.done = '1'; section(ph); } }); }).observe(document.body || document.documentElement, { childList: true, subtree: true });
+  function boot() { setInterval(watch, 20000); setTimeout(watch, 4000); }
+  window.Health = { memory, report, errors: () => E.slice(), log: logMsg, clear: () => { E = []; saveE(); }, setPerf, perfOn, fpsTest, previousCrash: () => prevCrash, watch, _tip: TIP };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 
@@ -12046,15 +12469,23 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
     { id: 'design', icon: 'gear', title: 'Design, Icons &amp; Effekte', sum: 'Optionen: Aussehen anpassen', body: `
       <ul><li><b>Design</b>: Aurora Glass, Studio Matt, Neon Spektrum, Liquid Matt, Klassisch.</li><li><b>Darstellung</b>: Glas-Effekte, Leuchteffekte, große Bedienelemente, <b>einheitliche Linien-Icons</b> (oder Emoji).</li><li><b>Effekte</b> (standardmäßig aus): Rand-Effekte (Glühen, Lichtstrahl, Linie) und Flächen-Effekte (Aurora, Equalizer, Funken, Wellen), die nur auf den großen Bereichen laufen – mit Stärke und „Beim Abspielen lebendiger“. Hauptschalter aus = keine Animation.</li><li><b>Anzeige</b>: „Abstand zur Kamera-Aussparung“ (Querformat) und <b>Anzeige prüfen &amp; korrigieren</b>.</li><li><b>Anpassen</b>: Akzentfarbe, Transparenz, Unschärfe, Rundung (eckig bis extra rund).</li><li><b>Fenster untereinander</b>: Editor, Drums, Vocal und Mixer als einklappbare Fenster – oder klassisch als Reiter.</li></ul>
       ${tip('Ruckelt es auf einem älteren Gerät: Glas-Effekte und Effekte ausschalten. Das spart Akku und Rechenleistung.')}${show('Zeig es mir', 'design')}` },
-    { id: 'update', icon: 'download', title: 'Updates &amp; Datensicherung', sum: 'Neue Version installieren, ohne Projekte zu verlieren', body: `
-      <h4>Update</h4><ul><li><b>Optionen → Updates &amp; Datensicherung → Nach Updates suchen</b> vergleicht deine <b>Build-Nummer</b> mit der neuesten veröffentlichten Version.</li><li>Gibt es eine neuere, erscheint <b>Update herunterladen</b> (und auf der Startseite ein Hinweis). Datei öffnen und <b>Installieren</b> wählen – die App wird <b>aktualisiert</b>, Projekte und Einstellungen bleiben.</li><li>Beim Start wird höchstens alle 12 Stunden still geprüft (abschaltbar).</li></ul>
-      <h4>Datensicherung</h4><ul><li><b>Alles sichern</b> packt alle Projekte, den letzten Autosave und deine Einstellungen in eine ZIP-Datei (Download-Ordner bzw. Teilen-Dialog).</li><li><b>Wiederherstellen</b> liest so eine ZIP wieder ein: gleiche Projekte werden überschrieben, andere bleiben. Danach lädt die App neu. Auch für ein neues Handy.</li><li>„Auch große Zusatzdaten“ nimmt SoundFonts und Zwischenspeicher mit (kann sehr groß werden).</li></ul>
+    { id: 'update', icon: 'download', title: 'Updates &amp; Datensicherung', sum: 'Neue Version, „Was ist neu“, Live-Update, Sicherung', body: `
+      <h4>Update (neue APK)</h4><ul><li><b>Optionen → Updates &amp; Datensicherung → Nach Updates suchen</b> vergleicht deine <b>Build-Nummer</b> mit der neuesten veröffentlichten Version.</li><li>Gibt es eine neuere, erscheint <b>Update herunterladen</b> (und auf der Startseite ein Hinweis) – mit einer Kurzfassung, was neu ist. Datei öffnen und <b>Installieren</b> wählen: die App wird <b>aktualisiert</b>, Projekte und Einstellungen bleiben.</li><li>Die App prüft beim Start höchstens alle 12 Stunden selbst (abschaltbar) und installiert nie etwas ohne dich.</li></ul>
+      <h4>Was ist neu</h4><ul><li><b>Optionen → Updates → Was ist neu?</b> zeigt das Änderungsprotokoll aller Versionen.</li><li>Nach einem Update erscheint auf der Startseite <b>einmal</b> die Karte „Neu in Version …“.</li></ul>
+      <h4>Live-Update der Oberfläche</h4><ul><li>Kleine Änderungen kommen <b>ohne neue APK</b>: Die Startseite meldet „Neue Oberfläche … bereit“ → <b>Laden</b> → <b>Neu starten</b>. Du wirst immer vorher gefragt.</li><li>Die geladene Datei wird per Prüfsumme kontrolliert. Startet eine neue Oberfläche nicht richtig, springt die App <b>von selbst auf die eingebaute Version zurück</b> und merkt sich, diese Version zu überspringen.</li><li><b>Optionen → Updates → Auf eingebaute Version zurücksetzen</b> wirft eine geladene Oberfläche jederzeit weg. Mit dem Schalter „Live-Updates der Oberfläche“ kannst du die Funktion ganz ausschalten.</li><li>Änderungen an der Android-Hülle (z. B. Berechtigungen) brauchen weiterhin eine neue APK – dann bietet die App die APK an.</li></ul>
+      <h4>Datensicherung</h4><ul><li><b>Alles sichern</b> packt alle Projekte, den letzten Autosave und deine Einstellungen in eine ZIP-Datei (Download-Ordner bzw. Teilen-Dialog).</li><li><b>Wiederherstellen</b> liest so eine ZIP wieder ein: gleiche Projekte werden überschrieben, andere bleiben. Danach lädt die App neu. Auch für ein neues Handy.</li><li><b>Wöchentliche Sicherung</b> (Standard: an): In der Android-App legt die App einmal pro Woche still eine ZIP unter <b>Dokumente/SunshineDAW/Sicherung</b> ab (die letzten 4 bleiben). Bei sehr großen Projekten oder im Browser erscheint stattdessen auf der Startseite eine Erinnerung mit <b>Sichern</b>.</li><li>„Auch große Zusatzdaten“ nimmt SoundFonts und Zwischenspeicher mit.</li></ul>
       <h4>Gerätespeicher</h4><p><b>Speicher dauerhaft schützen</b> bittet Android, die App-Daten bei Platzmangel nicht zu löschen.</p>
-      ${warn('Updates klappen nur, wenn die installierte App und die neue APK mit demselben Schlüssel gebaut wurden (feste Signatur). Beim allerersten Wechsel darauf ist einmal Deinstallieren nötig – vorher <b>Alles sichern</b> bzw. exportieren, soweit die alte Version das kann.')}
+      ${warn('Updates über die installierte App klappen nur, wenn alle APKs mit demselben Schlüssel gebaut wurden (feste Signatur). Beim allerersten Wechsel darauf ist einmal Deinstallieren nötig – vorher <b>Alles sichern</b> bzw. exportieren, soweit die alte Version das kann.')}
       ${tip('Vor jedem größeren Update kurz <b>Alles sichern</b> – dauert bei kleinen Projekten Sekunden.')}` },
+    { id: 'stabil', icon: 'gear', title: 'Stabilität &amp; Leistung', sum: 'Speicher, Sparmodus, Fehlerprotokoll', body: `
+      <h4>Arbeitsspeicher</h4><ul><li><b>Optionen → Stabilität &amp; Leistung</b> zeigt, wie viel Audio die App gerade im Arbeitsspeicher hält. Geladene Spuren liegen unkomprimiert im Speicher: <b>ca. 95 MB pro Stereo-Spur von 4½ Minuten</b>.</li><li>Wird es viel, blendet die App einen Hinweis ein – bevor Android die App beendet.</li></ul>
+      <h4>Sparmodus</h4><ul><li>Schaltet Unschärfe, Schatten und Animationen ab. Das entlastet die Grafik auf schwächeren Handys. Der Klang bleibt gleich.</li><li><b>Anzeige-Test</b> misst zwei Sekunden lang die Bilder pro Sekunde und rät zum Sparmodus, wenn es ruckelt.</li></ul>
+      <h4>Fehlerprotokoll</h4><ul><li>Die App merkt sich Fehler (und ein vermutlich unerwartetes Ende des letzten Starts). <b>Kopieren</b> oder <b>Als Datei</b> erzeugt einen Bericht, den du mir schicken kannst.</li></ul>
+      <h4>Tipps für flüssiges Arbeiten</h4><ul><li>Nicht benötigte Spuren löschen oder mehrere Stems zu einer Spur zusammenfassen.</li><li>Effekte und Glas-Effekte aus, bei langen Sitzungen die App zwischendurch neu starten.</li><li>Regelmäßig sichern (Autosave + wöchentliche Sicherung laufen mit).</li></ul>
+      ${tip('Die Warnung ist eine Schätzung für das Audio. Zusätzlich brauchen App, Effekte und Anzeige Speicher.')}` },
     { id: 'hilfe', icon: 'help', title: 'Hilfe bei Problemen', sum: 'Kein Ton, Speicher, offline, Zurück-Taste', body: `
       <h4>Kein Ton</h4><ul><li>Ist die Spur auf <b>M</b> (stumm) oder ist ein anderer Kanal auf <b>S</b> (Solo)?</li><li>Lautstärke der Spur, des Masters und des Handys prüfen.</li><li>Ist die Spur <b>Aktiv</b>?</li></ul>
-      <h4>Es ruckelt</h4><ul><li>Optionen → <b>Effekte</b> und <b>Glas-Effekte</b> ausschalten.</li><li>Andere Apps schließen; sehr viele Spuren mit vielen FX belasten das Gerät.</li></ul>
+      <h4>Es ruckelt</h4><ul><li>Optionen → <b>Stabilität &amp; Leistung → Sparmodus</b> einschalten (Anzeige-Test hilft bei der Entscheidung).</li><li>Optionen → <b>Effekte</b> und <b>Glas-Effekte</b> ausschalten.</li><li>Andere Apps schließen; sehr viele Spuren mit vielen FX belasten das Gerät.</li></ul>
       <h4>Speichern geht nicht</h4><ul><li>Der Gerätespeicher oder die Browser-Quote ist voll: alte Projekte löschen, Stems als ZIP exportieren.</li></ul>
       <h4>Inhalt ist seitlich verschoben / es gibt einen Rand</h4><ul><li><b>Optionen → Anzeige → Anzeige prüfen &amp; korrigieren</b> stellt die Ausrichtung sofort wieder her und zeigt Messwerte (gern als Screenshot schicken).</li><li>Der Schalter „Abstand zur Kamera-Aussparung“ sollte aus sein, wenn du den ganzen Bildschirm nutzen willst.</li></ul>
       <h4>Offline</h4><ul><li>Die App läuft ohne Internet. Nur Online-Assistent, Modell-Download und Spracherkennung brauchen Netz.</li></ul>
@@ -12197,6 +12628,7 @@ html[data-theme=studio] .hm-blob,html[data-theme=classic] .hm-blob{opacity:.16}
       <div id="fx-sec"></div>
       <div id="ly-sec"></div>
       <div id="up-sec"></div>
+      <div id="hl-sec"></div>
       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-4 mb-1">Anpassen</div>
       <div class="rounded-xl border border-slate-800 p-3 space-y-3.5">
         <div>
