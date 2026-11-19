@@ -20,6 +20,7 @@ Die jetzt installierte App wurde mit einem Zufallsschlüssel signiert, den es ni
    | `sunshine.p12` | `signing/sunshine.p12` (neuer Ordner) |
    | `patch-android.cjs` | `scripts/patch-android.cjs` (ersetzen) |
    | `build-apk.yml` | `.github/workflows/build-apk.yml` (ersetzen) |
+   | `CHANGELOG.md` | **Hauptordner** des Repos (neu – siehe „Änderungsprotokoll“) |
 3. Commit → GitHub-Lauf abwarten (Actions). Im Log steht bei „Signatur anzeigen“ der Fingerabdruck – er muss in jedem Lauf gleich sein.
 4. APK aus **Releases** (rechts auf der Repo-Startseite, „Build N“) laden, alte App deinstallieren (falls gleiche appId), neue installieren.
 
@@ -30,6 +31,30 @@ Die jetzt installierte App wurde mit einem Zufallsschlüssel signiert, den es ni
 4. Fertig – Projekte, Autosave und Einstellungen sind noch da.
 
 Vor größeren Änderungen: **Optionen → Alles sichern** erzeugt eine ZIP mit allen Projekten; **Wiederherstellen** spielt sie zurück (auch auf einem neuen Handy).
+
+## Änderungsprotokoll („Was ist neu“)
+- Die Datei **`CHANGELOG.md`** (Hauptordner des Repos) ist die einzige Quelle. Ganz oben steht der neueste Abschnitt:
+  ```
+  ## 1.15 · 2026-12-01 · Titel der Version
+  - Neu: Was jetzt möglich ist
+  - Behoben: Was nicht mehr hakt
+  ```
+- Dieser oberste Abschnitt wird (1) in die App eingebaut (Optionen → Updates → **Was ist neu?**, nach einem Update einmal als Karte auf der Startseite) und (2) vom GitHub-Lauf als **Release-Text** veröffentlicht – deshalb steht beim Update-Hinweis in der App, was die Version bringt.
+- Bei jeder Lieferung von mir kommt ein neuer Abschnitt dazu. Ändert ihr die `index.html` selbst, bitte `CHANGELOG.md` mit committen (beides gehört zusammen).
+
+## Live-Update der Oberfläche (ohne neue APK)
+Voraussetzungen: **öffentliches Repository** und eine APK, die schon die Live-Update-Funktion enthält (Version 1.14 oder neuer – diese eine APK muss einmal normal installiert werden).
+1. Nur `index.html` (und `CHANGELOG.md`) ändern und committen. Der Lauf baut wie immer eine APK und legt eine Release an. In den Release-Text schreibt er eine unsichtbare Zeile mit Version, Commit und Prüfsumme der neuen Oberfläche.
+2. In der App meldet die Startseite **„Neue Oberfläche … bereit“** → **Laden** (kommt direkt von GitHub, wird per Prüfsumme geprüft) → **Neu starten**.
+3. Startet die neue Oberfläche nicht, springt die App nach spätestens 15 Sekunden von selbst auf die eingebaute Version zurück und überspringt diese Version künftig. Manuell: Optionen → Updates → **Auf eingebaute Version zurücksetzen**.
+4. **Wann trotzdem eine APK nötig ist:** wenn sich `scripts/patch-android.cjs`, `package.json`, `capacitor.config.*` oder andere Dateien neben der `index.html` (z. B. unter `www/assets/`) ändern. Der Lauf erkennt das über eine Prüfsumme der „App-Hülle“ und die App bietet dann automatisch die APK an.
+- Eine neu installierte APK verwirft geladene Oberflächen (die eingebaute ist dann ohnehin so neu oder neuer).
+- Ehrliche Grenze: Das Live-Update stützt sich auf einen Service Worker in der Android-WebView. Im Browser-Test funktioniert alles (Laden, Prüfen, Rückfall), auf einem echten Gerät konnte ich es nicht ausprobieren. Meldet die App „Live-Update geht auf diesem Gerät nicht“, bleibt sie einfach bei der eingebauten Version und das normale APK-Update funktioniert weiter. Mit dem Schalter in den Optionen lässt es sich komplett ausschalten.
+
+## Wöchentliche Sicherung
+- Standardmäßig an (Optionen → Updates & Datensicherung → „Wöchentliche Sicherung“). Die erste kommt 7 Tage nach dem ersten Start.
+- In der Android-App wird still eine ZIP nach **Dokumente/SunshineDAW/Sicherung** geschrieben (die letzten 4 bleiben). Ist das Projekt sehr groß (über ca. 100 MB) oder gibt es keinen Dateizugriff, erscheint stattdessen auf der Startseite eine Erinnerung mit **Sichern**.
+- Die ZIP lässt sich mit **Wiederherstellen** zurückspielen (auch auf einem neuen Handy).
 
 ## Wichtig
 - **`sunshine.p12` gut aufbewahren** (zusätzlich zur Kopie im Repo: auf dem PC/Cloud). Geht der Schlüssel verloren oder wird ein anderer genutzt, ist wieder eine Neuinstallation nötig.
@@ -51,3 +76,6 @@ Vor größeren Änderungen: **Optionen → Alles sichern** erzeugt eine ZIP mit 
 | Workflow-Fehler „signing/sunshine.p12 fehlt“ | Datei nicht im Repo oder Ordner falsch |
 | Release-Schritt 403 | Repo → Settings → Actions → General → Workflow permissions: „Read and write“ |
 | In der App „Entwicklungsversion“ | `index.html` im Repo enthält den Platzhalter nicht (alte Datei?) |
+| Beim Update-Hinweis fehlt der „Was ist neu“-Text | `CHANGELOG.md` fehlt im Hauptordner des Repos |
+| „Live-Updates … nur in der gebauten App“ / „Hintergrunddienst startet nicht“ | Entwicklungsversion bzw. Gerät/WebView unterstützt keinen Service Worker → normales APK-Update nutzen |
+| „Download fehlgeschlagen (Fehler 404)“ beim Live-Update | Repo ist privat oder der Commit wurde entfernt |
