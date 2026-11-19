@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Nötig, damit der Lauf eine "Release" mit der APK veröffentlichen darf (daraus holt sich die App ihre Updates)
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -23,6 +27,17 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Build-Nummer und Repo in die App schreiben
+        run: |
+          found=0
+          for f in www/index.html dist/index.html public/index.html index.html; do
+            if [ -f "$f" ] && grep -q "__BUILD_N__" "$f"; then
+              sed -i "s#__BUILD_N__#${{ github.run_number }}#g; s#__BUILD_REPO__#${{ github.repository }}#g; s#__BUILD_TIME__#$(date -u +%F)#g" "$f"
+              echo "Build ${{ github.run_number }} eingetragen in $f"; found=1
+            fi
+          done
+          if [ "$found" = "0" ]; then echo "::warning::Kein index.html mit Build-Platzhalter gefunden – die Update-Prüfung in der App bleibt aus."; fi
 
       - name: Abhängigkeiten installieren & Android-Projekt erzeugen
         run: |
@@ -44,18 +59,53 @@ jobs:
             fs.writeFileSync(p, xml);
           '
 
-      - name: Android-Feinschliff (Vollbild im Querformat, Zurück-Taste)
+      - name: Signatur-Schlüssel bereitstellen
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          mkdir -p signing
+          # Optional: eigener Schlüssel aus den Repo-Secrets (überschreibt die Datei im Repo)
+          if [ -n "$KS_B64" ]; then echo "$KS_B64" | base64 -d > signing/sunshine.p12; echo "Schlüssel aus Secret ANDROID_KEYSTORE_B64 verwendet."; fi
+          if [ ! -f signing/sunshine.p12 ]; then
+            echo "::error::signing/sunshine.p12 fehlt. Ohne feste Signatur kann die App nicht über die installierte Version aktualisiert werden (Daten gingen verloren)."
+            exit 1
+          fi
+
+      - name: Android-Feinschliff (Vollbild, Zurück-Taste, feste Signatur, Versionsnummer)
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+          SUNSHINE_KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          SUNSHINE_KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: node scripts/patch-android.cjs
 
-      - name: Web-Assets synchronisieren & Debug-APK bauen
+      - name: Web-Assets synchronisieren & APK bauen
         run: |
           npx cap sync android
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
+      - name: Signatur anzeigen (muss bei jedem Build gleich sein)
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -n "$APKSIGNER" ]; then "$APKSIGNER" verify --print-certs android/app/build/outputs/apk/debug/app-debug.apk | head -4 || true; else echo "apksigner nicht gefunden – übersprungen."; fi
+
+      - name: APK benennen
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/debug/app-debug.apk "release/Sunshine-R-DAW-v${{ github.run_number }}.apk"
+
       - name: APK als Download-Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: Sunshine-R-Stem-DAW-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Sunshine-R-Stem-DAW-apk
+          path: release/*.apk
+
+      - name: Release veröffentlichen (daraus lädt die App ihre Updates)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "build-${{ github.run_number }}" release/*.apk \
+            --title "Sunshine@R Build ${{ github.run_number }}" \
+            --notes "Automatischer Build ${{ github.run_number }} (Commit ${{ github.sha }}). In der App: Optionen → Updates & Datensicherung → Nach Updates suchen." \
+            --target "${{ github.sha }}" --latest
